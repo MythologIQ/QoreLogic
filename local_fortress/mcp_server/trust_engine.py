@@ -22,6 +22,15 @@ class TrustContext(Enum):
     LOW_RISK = auto()   # L1/L2 Tasks (Docs, Routine Code)
     HIGH_RISK = auto()  # L3 Tasks (Security, Crypto, PII)
 
+class TrustStage(Enum):
+    """
+    Lewicki-Bunker Trust Stages (Spec §5.3.6).
+    Research: [TRUST-002]
+    """
+    CBT = auto() # Calculus-Based (0.0 - 0.5): Probationary
+    KBT = auto() # Knowledge-Based (0.5 - 0.8): Standard
+    IBT = auto() # Identification-Based (> 0.8): Trusted
+
 class TrustEngine:
     def get_lambda(self, context: TrustContext) -> float:
         """
@@ -85,6 +94,56 @@ class TrustEngine:
         
         return current_score
     
+        
+        return current_score
+    
+    # --- A3: Lewicki-Bunker Stages (Spec §5.3.6) ---
+    
+    def get_trust_stage(self, score: float) -> TrustStage:
+        """
+        Maps numerical trust score to behavioral stage.
+        Spec §5.3.6: CBT(0-0.5), KBT(0.5-0.8), IBT(>0.8).
+        """
+        if score > 0.8:
+            return TrustStage.IBT
+        elif score > 0.5:
+            return TrustStage.KBT
+        return TrustStage.CBT
+
+    def calculate_violation_penalty(self, current_score: float) -> float:
+        """
+        Calculates new score after a violation, enforcing strict stage demotion.
+        Spec §5.3.6: "Any trust violation demotes by at least one stage."
+        
+        Logic:
+        - IBT -> Drop to KBT range (max 0.8)
+        - KBT -> Drop to CBT range (max 0.5)
+        - CBT -> Standard penalty (or severe drop if needed)
+        """
+        current_stage = self.get_trust_stage(current_score)
+        target_score = current_score
+        
+        # Determine ceiling of the NEXT LOWER stage
+        if current_stage == TrustStage.IBT:
+            # Demote to KBT: Ceiling is 0.8.
+            target_score = 0.8
+        elif current_stage == TrustStage.KBT:
+            # Demote to CBT: Ceiling is 0.5.
+            target_score = 0.5
+        elif current_stage == TrustStage.CBT:
+            # Already at bottom stage. Apply massive penalty to reset probation?
+            # Or just let normal EWMA handle it (which will be a drop).
+            # Spec implies demotion, but you can't demote below bottom.
+            pass
+            
+        # Ensure the score is definitely lowered from current if it was at boundary
+        if target_score >= current_score:
+            # This happens if we were exactly 0.8 or 0.5 or in CBT.
+            # Apply a fallback drop (e.g. -0.1) to ensure penalty is felt.
+            target_score = max(0.0, current_score - 0.1)
+            
+        return target_score
+
     # --- A2: Transitive Trust Stubs (for Phase 8.5 Track A integration) ---
     
     def calculate_transitive_trust(self, trust_path: List[float]) -> float:
