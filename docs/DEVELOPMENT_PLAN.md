@@ -1,9 +1,10 @@
 # Q-DNA Development Roadmap
 
-**Version:** 2.0
+**Version:** 3.0
 **Goal:** Establish the "Sovereign Fortress" with empirically validated governance
 **Last Updated:** December 17, 2025
-**Specification:** v2.3 (Empirically Validated)
+**Specification:** v2.4 (Fully Integrated)
+**Repository:** https://github.com/MythologIQ/Q-DNA
 **Research Foundation:** See [Research Library](./research/INDEX.md)
 
 ---
@@ -26,84 +27,178 @@
 
 ## Phase Summary
 
-| Phase | Focus                    |     Status      | Compliance |
-| :---- | :----------------------- | :-------------: | :--------: |
-| 1-4   | Foundation               |   ✅ Complete   |     -      |
-| 5     | P0: Critical Security    |   ✅ Complete   |     -      |
-| 6     | P1: Citation & Fallback  |   ✅ Complete   |     -      |
-| 7     | P2: Advanced Features    |   ✅ Complete   |     -      |
-| 8     | **Research Integration** | ✅ **Complete** |    98%     |
-| 9     | P3: ML-Dependent         |    🔬 Future    |     -      |
-| 10    | Production Hardening     |   📋 Planned    |     -      |
+| Phase   | Focus                             |    Status     | Compliance |
+| :------ | :-------------------------------- | :-----------: | :--------: |
+| 1-4     | Foundation                        |  ✅ Complete  |     -      |
+| 5       | P0: Critical Security             |  ✅ Complete  |     -      |
+| 6       | P1: Citation & Fallback           |  ✅ Complete  |     -      |
+| 7       | P2: Advanced Features             |  ✅ Complete  |     -      |
+| 8       | Research Integration              |  ✅ Complete  |    98%     |
+| **8.5** | **Trust Dynamics & Verification** | 🚧 **Active** |     -      |
+| 9       | P3: ML-Dependent                  |   🔬 Future   |     -      |
+| 10      | Production Hardening              | ✅ Initiated  |     -      |
 
 ---
 
-## Phase 1-4: Foundation ✅ COMPLETE
+## Phase 8.5: Trust Dynamics & Verification 🚧 ACTIVE
 
-Core infrastructure, Sentinel engine, ruleset, and bootstrapping.
+This phase bridges the gap between research specification (v2.4) and implementation.
 
-**Delivered:**
+### Task Dependency Graph
 
-- MCP Server architecture
-- Basic Sentinel verification
-- SQLite persistence
-- Agent registration
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                     PHASE 8.5                           │
+                    └─────────────────────────────────────────────────────────┘
+                                              │
+              ┌───────────────────────────────┼───────────────────────────────┐
+              │                               │                               │
+              ▼                               ▼                               ▼
+    ┌─────────────────┐            ┌─────────────────┐            ┌─────────────────┐
+    │  TRACK A        │            │  TRACK B        │            │  TRACK C        │
+    │  Trust Engine   │            │  Verification   │            │  Infrastructure │
+    │  (Sequential)   │            │  (Sequential)   │            │  (Parallel)     │
+    └────────┬────────┘            └────────┬────────┘            └────────┬────────┘
+             │                              │                              │
+    ┌────────▼────────┐            ┌────────▼────────┐            ┌────────▼────────┐
+    │ A1: λ-Decay     │            │ B1: Tier 1      │            │ C1: Backpressure│
+    │    Engine       │            │    Static       │            │                 │
+    └────────┬────────┘            └────────┬────────┘            └────────┬────────┘
+             │                              │                              │
+    ┌────────▼────────┐            ┌────────▼────────┐            ┌────────▼────────┐
+    │ A2: Transitive  │            │ B2: Tier 2      │            │ C2: Mode        │
+    │    Trust        │◄───────────│    DbC          │            │    Triggers     │
+    └────────┬────────┘            └────────┬────────┘            └─────────────────┘
+             │                              │
+    ┌────────▼────────┐            ┌────────▼────────┐
+    │ A3: L-B Stages  │            │ B3: Tier 3      │
+    │                 │            │    FV (Future)  │
+    └────────┬────────┘            └─────────────────┘
+             │
+    ┌────────▼────────┐
+    │ A4: Micro-      │
+    │    Penalties    │◄───────────────────────────────────────────────────────────┐
+    └────────┬────────┘                                                            │
+             │                                                                      │
+    ┌────────▼────────┐                                                            │
+    │ A5: Cooling-Off │                                                            │
+    │    Periods      │                                                            │
+    └────────┬────────┘                                                            │
+             │                                                                      │
+    ┌────────▼────────┐                                                            │
+    │ A6: Probation   │                                                            │
+    │    Logic        │────────────────────────────────────────────────────────────┘
+    └─────────────────┘
+```
 
 ---
 
-## Phase 5: P0 Critical Security ✅ COMPLETE
+### Track A: Trust Dynamics Engine (Sequential)
 
-| Item                     | Status | Implementation          |
-| :----------------------- | :----: | :---------------------- |
-| Ed25519 Signing          |   ✅   | `identity_manager.py`   |
-| Encrypted Keyfiles       |   ✅   | Fernet encryption       |
-| Key Rotation (30-day)    |   ✅   | NIST SP 800-57 aligned  |
-| Volatility TTL           |   ✅   | `volatility_manager.py` |
-| SLA Enforcement (24h L3) |   ✅   | Queue monitoring        |
-| System Health Check      |   ✅   | Resource monitoring     |
+These tasks must be completed in order as each builds on the previous.
+
+| ID     | Task                           | Spec       | Dependencies | Effort | Deliverable                |
+| :----- | :----------------------------- | :--------- | :----------- | :----: | :------------------------- |
+| **A1** | λ-Decay Engine                 | §5.3.3     | None         |   4h   | `trust_engine.py`          |
+|        | - Implement EWMA formula       |            |              |        | `calculate_decay()`        |
+|        | - Context-based λ (0.94/0.97)  |            |              |        | `get_lambda_for_context()` |
+|        | - Integration with SCI updates |            |              |        | `update_trust_score()`     |
+| **A2** | Transitive Trust               | §5.3.5     | A1           |   3h   | `transitive_trust.py`      |
+|        | - δ damping factor (0.5)       |            |              |        | `propagate_trust()`        |
+|        | - Max hop limit (3)            |            |              |        | `get_trust_path()`         |
+|        | - Sybil resistance checks      |            |              |        | `check_anchor_distance()`  |
+| **A3** | Lewicki-Bunker Stages          | §5.3.6     | A2           |   2h   | Stage mapping              |
+|        | - CBT threshold (0.0-0.5)      |            |              |        | `get_trust_stage()`        |
+|        | - KBT threshold (0.5-0.8)      |            |              |        | `stage_behavior()`         |
+|        | - IBT threshold (>0.8)         |            |              |        | `demote_stage()`           |
+| **A4** | Micro-Penalty Layer            | §9.1       | A3           |   4h   | Audit integration          |
+|        | - Schema violation (0.5%)      |            |              |        | `apply_micro_penalty()`    |
+|        | - API misuse (0.5%)            |            |              |        | `detect_violation_type()`  |
+|        | - Stale citation (1%)          |            |              |        | `log_micro_penalty()`      |
+|        | - Daily aggregate (2%)         |            |              |        | `aggregate_daily()`        |
+| **A5** | Cooling-Off Periods            | §9.2, §9.3 | A4           |   2h   | Recovery gates             |
+|        | - 24h gate (honest error)      |            |              |        | `check_cooling_off()`      |
+|        | - 48h gate (manipulation)      |            |              |        | `start_cooling_off()`      |
+|        | - Block trust repair during    |            |              |        | `can_recover_trust()`      |
+| **A6** | Probationary Period            | §5.3.2     | A5           |   2h   | New source protection      |
+|        | - 5 verification floor         |            |              |        | `is_in_probation()`        |
+|        | - 30 day expiry                |            |              |        | `check_probation_expiry()` |
+|        | - Floor protection (>35)       |            |              |        | `apply_probation_floor()`  |
+
+**Track A Total:** ~17 hours
 
 ---
 
-## Phase 6: P1 Citation & Fallback ✅ COMPLETE
+### Track B: Verification Pipeline (Sequential)
 
-| Item                           | Status | Implementation           |
-| :----------------------------- | :----: | :----------------------- |
-| Source Credibility Index (SCI) |   ✅   | `credibility_manager.py` |
-| Reference Tier Classification  |   ✅   | T1-T4 hierarchy          |
-| Sentinel Unavailable Fallback  |   ✅   | Conservative mode        |
-| Quarantine Enforcement (48h)   |   ✅   | Time-based release       |
+Multi-tier verification must be built layer by layer.
+
+| ID     | Task                        | Spec   | Dependencies | Effort | Deliverable                  |
+| :----- | :-------------------------- | :----- | :----------- | :----: | :--------------------------- |
+| **B1** | Tier 1: Static Analysis     | §3.3.1 | None         |   3h   | Pipeline integration         |
+|        | - Pylint integration        |        |              |        | `run_tier1_checks()`         |
+|        | - Flake8 integration        |        |              |        | `parse_linter_output()`      |
+|        | - MyPy integration          |        |              |        | `aggregate_static_results()` |
+| **B2** | Tier 2: Design by Contract  | §3.3.2 | B1           |   4h   | `deal` integration           |
+|        | - Install `deal` library    |        |              |        | `setup_dbc_environment()`    |
+|        | - Pre/post condition hooks  |        |              |        | `verify_contracts()`         |
+|        | - Z3 solver connection      |        |              |        | `formal_contract_check()`    |
+| **B3** | Tier 3: Formal Verification | §3.3.3 | B2, Phase 9  |  8h+   | External tools               |
+|        | - PyVeritas setup           |        |              |        | Future                       |
+|        | - CBMC integration          |        |              |        | Future                       |
+|        | - CrossHair fallback        |        |              |        | Future                       |
+
+**Track B Total:** ~7 hours (excl. B3)
 
 ---
 
-## Phase 7: P2 Advanced Features ✅ COMPLETE
+### Track C: Infrastructure (Parallel)
 
-| Item                     | Status | Implementation            |
-| :----------------------- | :----: | :------------------------ |
-| Deferral Windows         |   ✅   | 4h/24h/72h time-boxing    |
-| Operational Modes        |   ✅   | NORMAL/LEAN/SURGE/SAFE    |
-| Calibration Tracking     |   ✅   | Brier score (rolling 100) |
-| Reputation Auto-Recovery |   ✅   | 1% per clean audit        |
+These can be implemented independently alongside Track A and B.
+
+| ID     | Task                        | Spec   | Dependencies | Effort | Deliverable                  |
+| :----- | :-------------------------- | :----- | :----------- | :----: | :--------------------------- |
+| **C1** | Backpressure Mechanism      | §2.5.1 | None         |   3h   | Server hardening             |
+|        | - Queue bound (50 requests) |        |              |        | `check_queue_capacity()`     |
+|        | - 80% warning signal        |        |              |        | `emit_backpressure_signal()` |
+|        | - Load shedding at 100%     |        |              |        | `shed_load()`                |
+|        | - LIFO/FIFO queue types     |        |              |        | `configure_queue_type()`     |
+| **C2** | Mode Transition Triggers    | §12    | C1           |   2h   | Auto-mode switching          |
+|        | - CPU >70% (5 min) → LEAN   |        |              |        | `monitor_cpu()`              |
+|        | - Queue >50 → SURGE         |        |              |        | `monitor_queue_depth()`      |
+|        | - Security event → SAFE     |        |              |        | `trigger_safe_mode()`        |
+
+**Track C Total:** ~5 hours
 
 ---
 
-## Phase 8: Research Integration ✅ COMPLETE
+### Execution Plan
 
-**New in v2.3:**
+#### Sprint 1: Foundation (Can run in parallel)
 
-| Item                              | Status | Research Source           |
-| :-------------------------------- | :----: | :------------------------ |
-| SCI Threshold Calibration         |   ✅   | Trust dynamics research   |
-| Probationary Period (new sources) |   ✅   | Cold-start research       |
-| Hard Rejection < 35 (not 40)      |   ✅   | Buffer for single failure |
-| Trust Decay λ = 0.94/0.97         |   ✅   | RiskMetrics               |
-| Transitive Damping δ = 0.5        |   ✅   | Network theory            |
-| Max Trust Hops = 3                |   ✅   | Dunbar research           |
-| HILS Micro-Penalty Layer          |   ✅   | Nagin deterrence          |
-| Cooling-Off Periods (24h/48h)     |   ✅   | Lewicki-Bunker            |
-| Min Weight = 0.1 (not 0.0)        |   ✅   | Recovery path             |
-| 90-Day Disclosure Policy          |   ✅   | Google Project Zero       |
-| Semantic Determinism              |   ✅   | GPU non-associativity     |
-| Research Library Structure        |   ✅   | 9 documents created       |
+| Day | Track A                  | Track B                 | Track C               |
+| :-: | :----------------------- | :---------------------- | :-------------------- |
+|  1  | **A1:** λ-Decay Engine   | **B1:** Static Analysis | **C1:** Backpressure  |
+|  2  | A1 (cont.)               | B1 (cont.)              | **C2:** Mode Triggers |
+|  3  | **A2:** Transitive Trust | **B2:** DbC Setup       | C2 (cont.)            |
+
+#### Sprint 2: Integration (Sequential dependencies)
+
+| Day | Track A                 | Track B              | Track C     |
+| :-: | :---------------------- | :------------------- | :---------- |
+|  4  | A2 (cont.)              | B2 (cont.)           | ✅ Complete |
+|  5  | **A3:** L-B Stages      | B2 (cont.)           | -           |
+|  6  | **A4:** Micro-Penalties | ✅ Tier 1-2 Complete | -           |
+
+#### Sprint 3: Completion
+
+| Day | Track A             | Notes               |
+| :-: | :------------------ | :------------------ |
+|  7  | A4 (cont.)          | Integration testing |
+|  8  | **A5:** Cooling-Off | End-to-end flow     |
+|  9  | **A6:** Probation   | Final validation    |
+
+**Total Phase 8.5 Duration:** ~9 working days (~29 hours)
 
 ---
 
@@ -111,26 +206,27 @@ Core infrastructure, Sentinel engine, ruleset, and bootstrapping.
 
 Requires machine learning capabilities beyond current bootstrapping scope.
 
-| Item                     | Status | Blocker                | Priority |
-| :----------------------- | :----: | :--------------------- | :------- |
-| Semantic Drift Monitor   |   ❌   | Embedding model        | High     |
-| Diversity Quorum (L3)    |   ❌   | Multi-model inference  | High     |
-| Real CBMC Integration    |   ❌   | External tool setup    | Medium   |
-| Adversarial Review       |   ❌   | Devil's advocate model | Medium   |
-| Echo/Paraphrase Detector |   ❌   | N-gram/embedding       | Low      |
+| Item                     | Status | Blocker                | Priority | Est. Effort |
+| :----------------------- | :----: | :--------------------- | :------- | :---------- |
+| Semantic Drift Monitor   |   ❌   | Embedding model        | High     | 16h         |
+| Diversity Quorum (L3)    |   ❌   | Multi-model inference  | High     | 12h         |
+| Real CBMC Integration    |   ❌   | External tool setup    | Medium   | 8h          |
+| Adversarial Review       |   ❌   | Devil's advocate model | Medium   | 8h          |
+| Echo/Paraphrase Detector |   ❌   | N-gram/embedding       | Low      | 6h          |
 
 ---
 
-## Phase 10: Production Hardening 📋 PLANNED
+## Phase 10: Production Hardening ✅ INITIATED
 
-| Item                    | Status | Description             |
-| :---------------------- | :----: | :---------------------- |
-| Repository Creation     |   📋   | GitHub setup            |
-| CI/CD Pipeline          |   📋   | Automated testing       |
-| Docker Containerization |   📋   | Reproducible deployment |
-| Documentation Site      |   📋   | MkDocs/Docusaurus       |
-| Pilot Deployment        |   📋   | Internal dogfooding     |
-| Benchmark Validation    |   📋   | Trap dataset execution  |
+| Item                    |   Status    | Description                         | Est. Effort |
+| :---------------------- | :---------: | :---------------------------------- | :---------- |
+| Repository Creation     | ✅ **Done** | https://github.com/MythologIQ/Q-DNA | -           |
+| README + LICENSE        | ✅ **Done** | Apache 2.0                          | -           |
+| CI/CD Pipeline          |     📋      | GitHub Actions                      | 4h          |
+| Docker Containerization |     📋      | Multi-stage build                   | 4h          |
+| Documentation Site      |     📋      | MkDocs/Docusaurus                   | 6h          |
+| Pilot Deployment        |     📋      | Internal dogfooding                 | 8h          |
+| Benchmark Validation    |     📋      | Trap dataset execution              | 8h          |
 
 ---
 
@@ -214,70 +310,40 @@ Requires machine learning capabilities beyond current bootstrapping scope.
 
 ---
 
-## Implementation Gaps Identified
+## Implementation Gaps Status
 
-Based on v2.4 specification review and code audit on December 17, 2025.
+### ✅ FIXED (December 17, 2025)
 
-### ✅ FIXED (This Session)
+| Gap                    | Location                 | Fix Applied                         |
+| :--------------------- | :----------------------- | :---------------------------------- |
+| SCI_REJECT threshold   | `credibility_manager.py` | 30 → **35** per spec §5.3.1         |
+| T4 initial credibility | `credibility_manager.py` | 40 → **45** per spec §5.3.2         |
+| SCI_ESCALATE_L2        | `credibility_manager.py` | 50 → **60** per spec §5.3.1         |
+| SCI_ESCALATE_L3        | `credibility_manager.py` | 50 → **40** per spec §5.3.1         |
+| Missing SOA columns    | `schema.sql`             | Added 6 governance columns          |
+| Missing event types    | `schema.sql`             | Added 8 new event types             |
+| Schema version         | `schema.sql`             | v2.0 → **v2.4**                     |
+| GitHub repository      | -                        | https://github.com/MythologIQ/Q-DNA |
 
-| Gap                    | Location                 | Fix Applied                                                                                                                |
-| :--------------------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| SCI_REJECT threshold   | `credibility_manager.py` | 30 → **35** per spec §5.3.1                                                                                                |
-| T4 initial credibility | `credibility_manager.py` | 40 → **45** per spec §5.3.2                                                                                                |
-| Missing SOA columns    | `schema.sql`             | Added `model_version`, `trust_score`, `verification_method`, `verification_result`, `gdpr_art22_trigger`, `human_approver` |
-| Missing event types    | `schema.sql`             | Added `MICRO_PENALTY`, `COOLING_OFF_*`, `TRUST_DECAY`, `GDPR_ESCALATION`, etc.                                             |
-| Schema version         | `schema.sql`             | v2.0 → **v2.4**                                                                                                            |
+### 🚧 IN PROGRESS (Phase 8.5)
 
-### 🔧 TO IMPLEMENT (Phase 8.5)
+See detailed task breakdown in Track A, B, C above.
 
-| Gap                    | Spec Section | Current State                | Required                                     |
-| :--------------------- | :----------- | :--------------------------- | :------------------------------------------- |
-| λ-based trust decay    | §5.3.3       | SCI uses fixed α=0.8         | EWMA with λ=0.94/0.97 context-based          |
-| Transitive trust       | §5.3.5       | Not implemented              | δ=0.5 damping + max 3 hops                   |
-| Lewicki-Bunker stages  | §5.3.6       | Not mapped                   | CBT/KBT/IBT thresholds with behavior         |
-| Micro-penalty layer    | §9.1         | Not implemented              | 0.5-2% auto-penalties at 100% detection      |
-| Cooling-off periods    | §9.2, §9.3   | Not enforced                 | 24h/48h gates before trust repair            |
-| 3-tier verification    | §3.3         | Single Sentinel pass         | Tier 1 (static) + Tier 2 (DbC) + Tier 3 (FV) |
-| Backpressure mechanism | §2.5.1       | Not implemented              | Queue bounds (50), load shedding             |
-| Probationary period    | §5.3.2       | Schema exists, logic missing | 5 verification floor protection              |
+### 📋 PLANNED (Phase 9+)
 
-### 📋 TO IMPLEMENT (Phase 9+)
-
-| Gap                         | Spec Section | Blocker                           |
-| :-------------------------- | :----------- | :-------------------------------- |
-| Tier 3 formal verification  | App A        | PyVeritas/CBMC setup              |
-| Mode transition triggers    | §12          | CPU/queue monitoring              |
-| GDPR Art. 22 auto-detection | §8.6         | Pattern matching for legal effect |
-| Edge deployment profile     | §2.6         | RPi 4 testing                     |
-
----
-
-## Next Actions
-
-### Immediate (Phase 8.5)
-
-1. **[ ]** Implement trust dynamics engine (`trust_engine.py`)
-   - λ-decay formula
-   - Transitive trust with damping
-   - Lewicki-Bunker stage mapping
-2. **[ ]** Add micro-penalty layer to audit flow
-3. **[ ]** Implement cooling-off period gates
-4. **[ ]** Add backpressure to MCP server
-5. **[ ]** Implement probationary period logic
-
-### Next (Phase 10)
-
-1. **[ ]** Create GitHub repository
-2. **[ ]** Initial commit with research library
-3. **[ ]** CI/CD pipeline
-4. **[ ]** Trap dataset for benchmark validation
+| Gap                         | Spec Section | Blocker              |
+| :-------------------------- | :----------- | :------------------- |
+| Tier 3 formal verification  | App A        | PyVeritas/CBMC setup |
+| GDPR Art. 22 auto-detection | §8.6         | Pattern matching     |
+| Edge deployment profile     | §2.6         | RPi 4 hardware       |
 
 ---
 
 ## Changelog
 
-| Version | Date           | Changes                                                              |
-| :------ | :------------- | :------------------------------------------------------------------- |
-| 1.0     | 2025-12        | Initial phases                                                       |
-| 2.0     | 2025-12-17     | Research integration, gap analysis, new phases                       |
-| **2.1** | **2025-12-17** | **Fixed thresholds; updated gaps to distinguish fixed vs remaining** |
+| Version | Date           | Changes                                                                                               |
+| :------ | :------------- | :---------------------------------------------------------------------------------------------------- |
+| 1.0     | 2025-12        | Initial phases                                                                                        |
+| 2.0     | 2025-12-17     | Research integration, gap analysis                                                                    |
+| 2.1     | 2025-12-17     | Fixed thresholds, schema updates                                                                      |
+| **3.0** | **2025-12-17** | **Complete task breakdown with dependency graph, parallel tracks, effort estimates, and sprint plan** |
