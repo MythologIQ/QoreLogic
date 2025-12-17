@@ -1,0 +1,27 @@
+{
+    "workflow_roles": {
+        "audit_file": {
+            "executor_role": "Sentinel",
+            "approver_role": "Judge",
+            "description": "Static and Logic analysis of code artifacts"
+        },
+        "submit_proposal": {
+            "executor_role": "Scrivener",
+            "description": "Initial code generation or modification proposal"
+        }
+    },
+    "agent_definitions": {
+        "Sentinel": {
+            "risk_tolerance": "L1",
+            "capabilities": ["static_analysis", "bounded_model_checking"]
+        },
+        "Judge": {
+            "risk_tolerance": "L0",
+            "capabilities": ["ledger_write", "slashing"]
+        },
+        "Scrivener": {
+            "risk_tolerance": "L2",
+            "capabilities": ["text_generation", "code_generation"]
+        }
+    }
+}

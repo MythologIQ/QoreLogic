@@ -1,0 +1,59 @@
+This repository houses Q-DNA, a local-first governance layer for AI agents.
+
+## Current Status
+- **Spec Compliance:** 95%
+- **MCP Tools:** 36
+- **Database Tables:** 11
+- **All Tests:** PASSING
+- **P0/P1/P2:** COMPLETE
+
+## Core Documentation
+- Specification: docs/Q-DNA_SPECIFICATION.md (v2.0)
+- Compliance Audit: docs/SPEC_COMPLIANCE_AUDIT.md
+- Development Plan: docs/DEVELOPMENT_PLAN.md
+- PRD: docs/PRD.md
+
+## Governance
+- AAC Contract: docs/AGENT_ACCOUNTABILITY_CONTRACT.md
+- Core Rules: config/rules/core_governance.md
+- Risk Grading: config/rules/risk_grading.md
+- Citation Policy: config/rules/citation_policy.md
+
+## Research
+- First Principles: docs/RESEARCH_FIRST_PRINCIPLES.md
+- Sentinel Tech: docs/research/SENTINEL_TECH.md
+- ROI Case Study: docs/ROI_CASE_STUDY.md
+
+## Implementation
+
+### MCP Server (36 tools)
+- local_fortress/mcp_server/server.py (v2.3, ~1100 lines)
+
+### Core Engines
+- local_fortress/mcp_server/sentinel_engine.py (Verification)
+- local_fortress/mcp_server/identity_manager.py (Ed25519)
+- local_fortress/mcp_server/volatility_manager.py (TTL/SLA)
+- local_fortress/mcp_server/credibility_manager.py (SCI/Quarantine)
+- local_fortress/mcp_server/advanced_features.py (P2)
+- local_fortress/mcp_server/bootstrapper.py (Evolution)
+
+### Persistence
+- Schema: local_fortress/ledger/schema.sql (11 tables)
+- Keystore: local_fortress/keystore/
+
+## Tool Categories
+- Sentinel: audit_code, audit_claim
+- Judge: log_event, apply_penalty
+- Overseer: request_l3_approval, approve_l3, get_pending_approvals
+- Shadow Genome: archive_failure
+- Volatility: register_claim_with_ttl, check_claim_validity, get_expired_claims
+- SLA: get_sla_status
+- Identity: verify_signature
+- System: set_operational_mode, get_system_status, system_health_check
+- Credibility: register_source, check_source_credibility, update_source_verification, get_low_credibility_sources
+- Quarantine: quarantine_agent, check_agent_quarantine, get_active_quarantines, release_expired_quarantines
+- Fallback: check_sentinel_fallback
+- Deferral: request_deferral, complete_deferral, get_active_deferrals, check_expired_deferrals
+- Mode: check_verification_mode, get_mode_behavior
+- Calibration: record_prediction, get_calibration_report, check_honest_error
+- Reputation: record_clean_audit, get_all_agent_weights

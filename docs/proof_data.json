@@ -1,0 +1,11 @@
+{
+    "timestamp": 1765955486.4374778,
+    "baseline_model": "Cloud-Tier-L (Simulated)",
+    "experimental_model": "Sentinel-L (Local)",
+    "defect_caught": true,
+    "rationale": "WARNING: Unsafe function usage detected: os.system(",
+    "latency_sec": 0.0009,
+    "cloud_cost_est": 0.006,
+    "local_cost_actual": 0.0,
+    "efficiency_gain_percent": "Infinite (Div by Zero) / 100% Savings"
+}

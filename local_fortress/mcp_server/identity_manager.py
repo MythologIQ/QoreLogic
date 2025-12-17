@@ -1,0 +1,373 @@
+"""
+Q-DNA Identity Manager
+
+Provides cryptographic identity management:
+- Ed25519 key generation and storage
+- Digital signature creation and verification
+- Key rotation with audit trail
+- Secure keyfile encryption
+"""
+
+import os
+import json
+import time
+import hashlib
+import sqlite3
+from typing import Optional, Tuple, Dict
+from dataclasses import dataclass
+from pathlib import Path
+
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.backends import default_backend
+from cryptography.fernet import Fernet
+import base64
+
+# Configuration
+KEYSTORE_DIR = Path(__file__).parent.parent / "keystore"
+DB_PATH = Path(__file__).parent.parent / "ledger" / "qdna_soa_ledger.db"
+KEY_ROTATION_DAYS = 30
+
+
+@dataclass
+class AgentIdentity:
+    """Represents a cryptographic identity for an agent."""
+    did: str
+    role: str
+    public_key_hex: str
+    created_at: float
+    expires_at: float
+    
+    def is_expired(self) -> bool:
+        return time.time() > self.expires_at
+
+
+class IdentityManager:
+    """
+    Manages cryptographic identities for Q-DNA agents.
+    
+    Security Model:
+    - Ed25519 for signing (fast, secure, deterministic)
+    - Fernet for keyfile encryption (AES-128-CBC)
+    - PBKDF2 for key derivation from passphrase
+    """
+    
+    def __init__(self, passphrase: str = None):
+        """
+        Initialize the identity manager.
+        
+        Args:
+            passphrase: Optional passphrase for encrypting keyfiles.
+                       If None, uses a default (NOT SECURE for production).
+        """
+        self.passphrase = passphrase or "qdna-development-key"
+        self._fernet = self._create_fernet()
+        
+        # Ensure keystore exists
+        KEYSTORE_DIR.mkdir(parents=True, exist_ok=True)
+    
+    def _create_fernet(self) -> Fernet:
+        """Create Fernet cipher from passphrase."""
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=b"qdna-salt-v1",  # In production, use random salt per keyfile
+            iterations=100000,
+            backend=default_backend()
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(self.passphrase.encode()))
+        return Fernet(key)
+    
+    def generate_did(self, role: str) -> str:
+        """Generate a Decentralized Identifier."""
+        nonce = hashlib.sha256(f"{role}{time.time()}".encode()).hexdigest()[:12]
+        return f"did:myth:{role.lower()}:{nonce}"
+    
+    def generate_keypair(self) -> Tuple[Ed25519PrivateKey, Ed25519PublicKey]:
+        """Generate a new Ed25519 keypair."""
+        private_key = Ed25519PrivateKey.generate()
+        public_key = private_key.public_key()
+        return private_key, public_key
+    
+    def serialize_private_key(self, private_key: Ed25519PrivateKey) -> bytes:
+        """Serialize private key to bytes."""
+        return private_key.private_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PrivateFormat.Raw,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+    
+    def serialize_public_key(self, public_key: Ed25519PublicKey) -> bytes:
+        """Serialize public key to bytes."""
+        return public_key.public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw
+        )
+    
+    def load_private_key(self, key_bytes: bytes) -> Ed25519PrivateKey:
+        """Load private key from bytes."""
+        return Ed25519PrivateKey.from_private_bytes(key_bytes)
+    
+    def load_public_key(self, key_bytes: bytes) -> Ed25519PublicKey:
+        """Load public key from bytes."""
+        return Ed25519PublicKey.from_public_bytes(key_bytes)
+    
+    def create_agent(self, role: str) -> AgentIdentity:
+        """
+        Create a new agent identity with cryptographic keys.
+        
+        Args:
+            role: Agent role (Scrivener, Sentinel, Judge, Overseer)
+            
+        Returns:
+            AgentIdentity with DID and public key
+        """
+        did = self.generate_did(role)
+        private_key, public_key = self.generate_keypair()
+        
+        # Serialize keys
+        private_bytes = self.serialize_private_key(private_key)
+        public_bytes = self.serialize_public_key(public_key)
+        
+        # Encrypt private key for storage
+        encrypted_private = self._fernet.encrypt(private_bytes)
+        
+        # Create identity
+        now = time.time()
+        identity = AgentIdentity(
+            did=did,
+            role=role,
+            public_key_hex=public_bytes.hex(),
+            created_at=now,
+            expires_at=now + (KEY_ROTATION_DAYS * 24 * 60 * 60)
+        )
+        
+        # Save encrypted keyfile
+        keyfile_path = KEYSTORE_DIR / f"{did.replace(':', '_')}.key"
+        keyfile_data = {
+            "did": did,
+            "role": role,
+            "public_key": public_bytes.hex(),
+            "private_key_encrypted": encrypted_private.decode(),
+            "created_at": now,
+            "expires_at": identity.expires_at
+        }
+        
+        with open(keyfile_path, 'w') as f:
+            json.dump(keyfile_data, f, indent=2)
+        
+        # Register in database
+        self._register_in_db(identity, public_bytes.hex())
+        
+        return identity
+    
+    def _register_in_db(self, identity: AgentIdentity, public_key_hex: str):
+        """Register agent in the database."""
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                INSERT OR REPLACE INTO agent_registry 
+                (did, public_key, role, influence_weight, status, created_at, updated_at)
+                VALUES (?, ?, ?, 1.0, 'ACTIVE', datetime('now'), datetime('now'))
+            """, (identity.did, public_key_hex, identity.role))
+            conn.commit()
+        finally:
+            conn.close()
+    
+    def load_agent(self, did: str) -> Tuple[AgentIdentity, Ed25519PrivateKey]:
+        """
+        Load an agent identity and its private key.
+        
+        Args:
+            did: The agent's DID
+            
+        Returns:
+            Tuple of (AgentIdentity, Ed25519PrivateKey)
+        """
+        keyfile_path = KEYSTORE_DIR / f"{did.replace(':', '_')}.key"
+        
+        if not keyfile_path.exists():
+            raise FileNotFoundError(f"Keyfile not found for {did}")
+        
+        with open(keyfile_path, 'r') as f:
+            data = json.load(f)
+        
+        # Decrypt private key
+        encrypted_private = data["private_key_encrypted"].encode()
+        private_bytes = self._fernet.decrypt(encrypted_private)
+        private_key = self.load_private_key(private_bytes)
+        
+        identity = AgentIdentity(
+            did=data["did"],
+            role=data["role"],
+            public_key_hex=data["public_key"],
+            created_at=data["created_at"],
+            expires_at=data["expires_at"]
+        )
+        
+        return identity, private_key
+    
+    def sign(self, did: str, data: bytes) -> str:
+        """
+        Sign data with an agent's private key.
+        
+        Args:
+            did: The signing agent's DID
+            data: Data to sign
+            
+        Returns:
+            Hex-encoded signature
+        """
+        identity, private_key = self.load_agent(did)
+        
+        if identity.is_expired():
+            raise ValueError(f"Key for {did} has expired. Rotation required.")
+        
+        signature = private_key.sign(data)
+        return signature.hex()
+    
+    def verify(self, did: str, data: bytes, signature_hex: str) -> bool:
+        """
+        Verify a signature.
+        
+        Args:
+            did: The alleged signer's DID
+            data: The signed data
+            signature_hex: Hex-encoded signature
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        # Get public key from database
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT public_key FROM agent_registry WHERE did = ?", (did,))
+        row = cursor.fetchone()
+        conn.close()
+        
+        if not row:
+            return False
+        
+        public_key_bytes = bytes.fromhex(row[0])
+        public_key = self.load_public_key(public_key_bytes)
+        
+        try:
+            public_key.verify(bytes.fromhex(signature_hex), data)
+            return True
+        except Exception:
+            return False
+    
+    def rotate_key(self, did: str) -> AgentIdentity:
+        """
+        Rotate an agent's key (generate new keypair).
+        
+        Args:
+            did: The agent's DID
+            
+        Returns:
+            Updated AgentIdentity
+        """
+        # Load existing identity
+        identity, old_private = self.load_agent(did)
+        
+        # Generate new keypair
+        new_private, new_public = self.generate_keypair()
+        
+        # Update keyfile
+        now = time.time()
+        new_identity = AgentIdentity(
+            did=did,
+            role=identity.role,
+            public_key_hex=self.serialize_public_key(new_public).hex(),
+            created_at=now,
+            expires_at=now + (KEY_ROTATION_DAYS * 24 * 60 * 60)
+        )
+        
+        # Encrypt new private key
+        encrypted_private = self._fernet.encrypt(self.serialize_private_key(new_private))
+        
+        keyfile_path = KEYSTORE_DIR / f"{did.replace(':', '_')}.key"
+        keyfile_data = {
+            "did": did,
+            "role": identity.role,
+            "public_key": new_identity.public_key_hex,
+            "private_key_encrypted": encrypted_private.decode(),
+            "created_at": now,
+            "expires_at": new_identity.expires_at,
+            "rotated_from": identity.public_key_hex  # Audit trail
+        }
+        
+        with open(keyfile_path, 'w') as f:
+            json.dump(keyfile_data, f, indent=2)
+        
+        # Update database
+        self._register_in_db(new_identity, new_identity.public_key_hex)
+        
+        return new_identity
+    
+    def check_rotation_needed(self, did: str) -> bool:
+        """Check if an agent's key needs rotation."""
+        try:
+            identity, _ = self.load_agent(did)
+            return identity.is_expired()
+        except FileNotFoundError:
+            return True  # No key = needs creation
+
+
+def initialize_agents():
+    """Initialize the standard agent identities."""
+    manager = IdentityManager()
+    
+    roles = ["Scrivener", "Sentinel", "Judge", "Overseer"]
+    identities = []
+    
+    for role in roles:
+        # Check if already exists
+        existing_files = list(KEYSTORE_DIR.glob(f"did_myth_{role.lower()}_*.key"))
+        
+        if existing_files:
+            # Load existing
+            did = existing_files[0].stem.replace('_', ':')
+            identity, _ = manager.load_agent(did)
+            
+            # Check rotation
+            if identity.is_expired():
+                print(f"⚠️ Rotating expired key for {role}...")
+                identity = manager.rotate_key(did)
+            else:
+                print(f"✅ Loaded existing identity for {role}: {did}")
+        else:
+            # Create new
+            identity = manager.create_agent(role)
+            print(f"🔑 Created new identity for {role}: {identity.did}")
+        
+        identities.append(identity)
+    
+    return identities
+
+
+if __name__ == "__main__":
+    print("Q-DNA Identity Manager - Initialization")
+    print("=" * 50)
+    
+    identities = initialize_agents()
+    
+    print("\n" + "=" * 50)
+    print("Testing Signatures")
+    print("=" * 50)
+    
+    manager = IdentityManager()
+    
+    # Test signing and verification
+    test_data = b"This is a test message for Q-DNA verification."
+    
+    for identity in identities:
+        sig = manager.sign(identity.did, test_data)
+        valid = manager.verify(identity.did, test_data, sig)
+        status = "✅" if valid else "❌"
+        print(f"{status} {identity.role}: Signature {'valid' if valid else 'INVALID'}")
+    
+    print("\n🔐 Identity system initialized with Ed25519 cryptography.")
