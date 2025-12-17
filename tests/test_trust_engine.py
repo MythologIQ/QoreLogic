@@ -53,5 +53,35 @@ class TestTrustEngine(unittest.TestCase):
         self.assertLessEqual(new_score4, 0.5) # Force demote to CBT
         self.assertEqual(self.engine.get_trust_stage(new_score4), TrustStage.CBT)
 
+    def test_micro_penalties(self):
+        from local_fortress.mcp_server.trust_engine import MicroPenaltyType
+        
+        start_score = 0.5
+        # 1. Normal penalty
+        new_score, applied = self.engine.calculate_micro_penalty(start_score, MicroPenaltyType.SCHEMA_VIOLATION, 0.0)
+        self.assertAlmostEqual(applied, 0.005)
+        self.assertAlmostEqual(new_score, 0.495)
+        
+        # 2. Capped penalty
+        # Daily sum already 0.019. Cap is 0.020. Remaining 0.001.
+        # Penalty is 0.005. Should apply only 0.001.
+        new_score2, applied2 = self.engine.calculate_micro_penalty(start_score, MicroPenaltyType.SCHEMA_VIOLATION, 0.019)
+        self.assertAlmostEqual(applied2, 0.001)
+        self.assertAlmostEqual(new_score2, start_score - 0.001)
+
+    def test_probation(self):
+        import time
+        now = time.time()
+        
+        # New agent (0 verifies, 0 age) -> Probation True
+        self.assertTrue(self.engine.is_in_probation(now, 0))
+        
+        # 5 verifications -> Probation False
+        self.assertFalse(self.engine.is_in_probation(now, 5))
+        
+        # 31 days old -> Probation False
+        old_time = now - (31 * 24 * 3600)
+        self.assertFalse(self.engine.is_in_probation(old_time, 0))
+
 if __name__ == '__main__':
     unittest.main()

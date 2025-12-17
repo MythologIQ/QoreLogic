@@ -31,6 +31,23 @@ class TrustStage(Enum):
     KBT = auto() # Knowledge-Based (0.5 - 0.8): Standard
     IBT = auto() # Identification-Based (> 0.8): Trusted
 
+class MicroPenaltyType(Enum):
+    """
+    Micro-Penalty definitions (Spec §9.1).
+    Values are absolute deductions on 0.0-1.0 scale.
+    """
+    SCHEMA_VIOLATION = 0.005  # 0.5%
+    API_MISUSE = 0.005        # 0.5%
+    STALE_CITATION = 0.010    # 1.0%
+
+# Constants
+DAILY_PENALTY_CAP = 0.020 # Max 2% penalty per day
+COOLING_OFF_HONEST = 24 * 3600
+COOLING_OFF_MALICIOUS = 48 * 3600
+PROBATION_VERIFICATIONS = 5
+PROBATION_DURATION = 30 * 24 * 3600
+PROBATION_FLOOR_SCI = 0.35 # Normalized 35/100
+
 class TrustEngine:
     def get_lambda(self, context: TrustContext) -> float:
         """
@@ -93,9 +110,7 @@ class TrustEngine:
             return min(baseline, current_score + decay_amount)
         
         return current_score
-    
-        
-        return current_score
+
     
     # --- A3: Lewicki-Bunker Stages (Spec §5.3.6) ---
     
@@ -143,6 +158,52 @@ class TrustEngine:
             target_score = max(0.0, current_score - 0.1)
             
         return target_score
+
+
+
+    # --- A4: Micro-Penalties (Spec §9.1) ---
+
+    def calculate_micro_penalty(self, current_score: float, penalty_type: MicroPenaltyType, daily_penalty_sum: float) -> tuple[float, float]:
+        """
+        Applies micro-penalty with daily cap.
+        Returns (new_score, applied_penalty).
+        """
+        base_penalty = penalty_type.value
+        
+        # Check remaining cap
+        remaining_cap = max(0.0, DAILY_PENALTY_CAP - daily_penalty_sum)
+        applied_penalty = min(base_penalty, remaining_cap)
+        
+        # Apply to score
+        new_score = max(0.0, current_score - applied_penalty)
+        return new_score, applied_penalty
+
+    # --- A5: Cooling-Off Periods (Spec §9.2) ---
+
+    def get_cooling_off_duration(self, is_malicious: bool) -> float:
+        """Returns cooling-off duration in seconds."""
+        return COOLING_OFF_MALICIOUS if is_malicious else COOLING_OFF_HONEST
+
+    # --- A6: Probation Logic (Spec §5.3.2) ---
+
+    def is_in_probation(self, created_at: float, verification_count: int) -> bool:
+        """
+        Checks if entity is in probation.
+        Spec §5.3.2: Probation expires after 5 verifications OR 30 days.
+        """
+        now = time.time()
+        age = now - created_at
+        
+        # If EITHER condition is met, probation ends.
+        if verification_count >= PROBATION_VERIFICATIONS:
+            return False
+        if age >= PROBATION_DURATION:
+            return False
+            
+        return True
+
+    def get_probation_floor(self) -> float:
+        return PROBATION_FLOOR_SCI
 
     # --- A2: Transitive Trust Stubs (for Phase 8.5 Track A integration) ---
     
