@@ -104,6 +104,15 @@ def get_diversity_manager():
         _diversity_manager = _get_dm()
     return _diversity_manager
 
+_adversarial_engine = None
+
+def get_adversarius():
+    global _adversarial_engine
+    if _adversarial_engine is None:
+        from local_fortress.mcp_server.adversarial_engine import get_adversarial_engine as _get_ae
+        _adversarial_engine = _get_ae()
+    return _adversarial_engine
+
 # P2 module loaders
 _deferral_manager = None
 _mode_enforcer = None
@@ -1059,6 +1068,53 @@ def check_diversity_quorum(artifact_hash: str) -> str:
     dm = get_diversity_manager()
     result = dm.check_quorum(artifact_hash)
     return json.dumps(result)
+
+@mcp.tool()
+def get_adversarial_prompt(content: str, perspective: str) -> str:
+    """
+    Generate a prompt to instruct an external LLM to act as an adversary.
+    
+    Args:
+        content: The code/artifact to critique
+        perspective: SECURITY_PESSIMIST, PERFORMANCE_SKEPTIC, COMPLIANCE_OFFICER, CHAOS_MONKEY
+    """
+    from local_fortress.mcp_server.adversarial_engine import ReviewPerspective
+    
+    adv = get_adversarius()
+    try:
+        persp = ReviewPerspective[perspective.upper()]
+        prompt = adv.generate_challenge_prompt(content, persp)
+        return json.dumps({"prompt": prompt})
+    except KeyError:
+        return json.dumps({"error": f"Invalid perspective. Choose from {[p.name for p in ReviewPerspective]}"})
+
+@mcp.tool()
+def submit_adversarial_critique(agent_did: str, critique_json: str) -> str:
+    """
+    Submit the output from the adversarial LLM for parsing and logging.
+    
+    Args:
+        agent_did: The did of the adversarial agent (or system did)
+        critique_json: The raw text response from the adversary
+    """
+    adv = get_adversarius()
+    objections = adv.parse_critique(critique_json)
+    
+    # Log valid objections as L3 failures if severity is CRITICAL
+    critical_count = sum(1 for o in objections if o.get("severity") == "CRITICAL")
+    
+    if critical_count > 0:
+         log_event("Adversarius", "CRITIQUE_FAILED", "L3", json.dumps({
+             "agent_did": agent_did,
+             "objections": objections
+         }))
+         
+    return json.dumps({
+        "status": "PARSED",
+        "objection_count": len(objections),
+        "critical_issues": critical_count,
+        "objections": objections
+    })
 
 @mcp.tool()
 def get_low_credibility_sources(threshold: float = 50) -> str:
