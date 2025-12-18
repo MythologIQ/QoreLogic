@@ -1,7 +1,8 @@
 # Q-DNA: The Code DNA Engine
 
-**Version:** 2.4 (Fully Integrated)  
-**Status:** Active Research / Bootstrapping Phase
+**Version:** 9.0 (Formal Verification Active)  
+**Status:** Phase 9: ML & Formal Verification Active
+**Last Updated:** December 17, 2025
 
 ---
 
@@ -18,6 +19,7 @@ Q-DNA (Quality DNA Engine) is a **local-first governance layer** for high-assura
 | Static trust assumptions   | Dynamic reputation with decay    |
 | Binary security            | Probabilistic risk grading       |
 | Audit opacity              | Merkle-chained transparency      |
+| **Validation Drift**       | **Context-Aware Fail Forward**   |
 
 ---
 
@@ -105,12 +107,13 @@ python -m pytest tests/
 
 ## Implementation Status
 
-| Phase | Status | Description                               |
-| :---- | :----: | :---------------------------------------- |
-| P0    |   ✅   | Critical Security (Ed25519, key rotation) |
-| P1    |   ✅   | Citation & Fallback (SCI, tiers)          |
-| P2    |   ✅   | Advanced Features (modes, calibration)    |
-| P3    |   🔬   | ML-Dependent (drift detection, quorum)    |
+| Phase    | Status | Description                               |
+| :------- | :----: | :---------------------------------------- |
+| P0       |   ✅   | Critical Security (Ed25519, key rotation) |
+| P1       |   ✅   | Citation & Fallback (SCI, tiers)          |
+| P2       |   ✅   | Advanced Features (modes, calibration)    |
+| **P8.5** |   ✅   | **Trust Dynamics & Design by Contract**   |
+| **P9**   |   🚧   | **Formal Verification (Z3 Activated)**    |
 
 ---
 
