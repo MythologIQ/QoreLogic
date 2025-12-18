@@ -68,8 +68,8 @@ class TrustEngine:
             return LAMBDA_HIGH_RISK
         return LAMBDA_LOW_RISK
 
-    @deal.pre(lambda _self, current_score, **kwargs: 0.0 <= current_score <= 1.0)
-    @deal.pre(lambda _self, outcome_score, **kwargs: 0.0 <= outcome_score <= 1.0)
+    @deal.pre(lambda _self, current_score, *args, **kwargs: 0.0 <= current_score <= 1.0)
+    @deal.pre(lambda _self, _score, outcome_score, *args, **kwargs: 0.0 <= outcome_score <= 1.0)
     @deal.post(lambda result: 0.0 <= result <= 1.0)
     def calculate_ewma_update(self, current_score: float, outcome_score: float, context: TrustContext) -> float:
         """
@@ -95,9 +95,9 @@ class TrustEngine:
         new_score = (lam * current_score) + ((1 - lam) * outcome_score)
         return new_score
 
-    @deal.pre(lambda _self, current_score, **kwargs: 0.0 <= current_score <= 1.0)
-    @deal.pre(lambda _self, last_update_ts, **kwargs: last_update_ts >= 0)
-    @deal.pre(lambda _self, baseline=0.4, **kwargs: 0.0 <= baseline <= 1.0)
+    @deal.pre(lambda _self, current_score, *args, **kwargs: 0.0 <= current_score <= 1.0)
+    @deal.pre(lambda _self, _cs, last_update_ts, *args, **kwargs: last_update_ts >= 0)
+    @deal.pre(lambda _self, _cs, _ts, baseline=0.4, *args, **kwargs: 0.0 <= baseline <= 1.0)
     @deal.post(lambda result: 0.0 <= result <= 1.0)
     def calculate_temporal_decay(self, current_score: float, last_update_ts: float, baseline: float = 0.4) -> float:
         """
@@ -191,8 +191,8 @@ class TrustEngine:
 
     # --- A4: Micro-Penalties (Spec §9.1) ---
 
-    @deal.pre(lambda _self, current_score, **kwargs: 0.0 <= current_score <= 1.0)
-    @deal.pre(lambda _self, daily_penalty_sum, **kwargs: 0.0 <= daily_penalty_sum <= DAILY_PENALTY_CAP)
+    @deal.pre(lambda _self, current_score, *args, **kwargs: 0.0 <= current_score <= 1.0)
+    @deal.pre(lambda _self, _cs, _pt, daily_penalty_sum, *args, **kwargs: 0.0 <= daily_penalty_sum <= DAILY_PENALTY_CAP)
     @deal.post(lambda result: 0.0 <= result[0] <= 1.0)  # new_score
     @deal.post(lambda result: 0.0 <= result[1] <= DAILY_PENALTY_CAP)  # applied_penalty
     def calculate_micro_penalty(self, current_score: float, penalty_type: MicroPenaltyType, daily_penalty_sum: float) -> tuple[float, float]:

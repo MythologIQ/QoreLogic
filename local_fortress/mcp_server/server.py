@@ -33,7 +33,9 @@ _volatility_manager = None
 _sla_manager = None
 _credibility_manager = None
 _quarantine_manager = None
+_quarantine_manager = None
 _sentinel_fallback = None
+_trust_manager = None
 
 def get_identity_manager():
     global _identity_manager
@@ -76,6 +78,13 @@ def get_sentinel_fallback():
         from local_fortress.mcp_server.credibility_manager import SentinelFallback
         _sentinel_fallback = SentinelFallback()
     return _sentinel_fallback
+
+def get_trust_manager():
+    global _trust_manager
+    if _trust_manager is None:
+        from local_fortress.mcp_server.trust_manager import TrustManager
+        _trust_manager = TrustManager(DB_PATH)
+    return _trust_manager
 
 # P2 module loaders
 _deferral_manager = None
@@ -120,6 +129,15 @@ def get_traffic_monitor():
         _traffic_monitor = _get_tm()
     return _traffic_monitor
 
+_system_monitor = None
+
+def get_system_monitor():
+    global _system_monitor
+    if _system_monitor is None:
+        from local_fortress.mcp_server.traffic_control import get_system_monitor as _get_sm
+        _system_monitor = _get_sm(DB_PATH)
+    return _system_monitor
+
 # ============================================================================
 # Database Utilities
 # ============================================================================
@@ -142,6 +160,10 @@ def get_previous_hash() -> str:
         cursor.execute("SELECT entry_hash FROM soa_ledger ORDER BY entry_id DESC LIMIT 1")
         row = cursor.fetchone()
         return row[0] if row else "0" * 64
+
+def get_agent_trust_score(agent_did: str) -> float:
+    """Helper to get current trust score for ledger logging."""
+    return get_trust_manager().get_agent_trust(agent_did) or 0.4
 
 def compute_entry_hash(timestamp: str, did: str, payload: str, prev_hash: str) -> str:
     """Compute SHA256 hash for Merkle chain."""
@@ -804,6 +826,135 @@ def update_source_verification(url: str, success: bool) -> str:
         "new_sci": new_sci
     })
 
+# ============================================================================
+# Phase 8.5 Track INT: Trust Dynamics (Agent Trust)
+# ============================================================================
+
+@mcp.tool()
+def get_agent_trust(agent_did: str) -> str:
+    """
+    Get the current trust score and stage for an agent.
+    
+    Args:
+        agent_did: The agent's DID
+        
+    Returns:
+        JSON with trust score, stage, and metadata
+    """
+    trust_mgr = get_trust_manager()
+    score = trust_mgr.get_agent_trust(agent_did)
+    
+    if score is None:
+        return json.dumps({"error": f"Agent {agent_did} not found"})
+        
+    stage = trust_mgr.get_trust_stage(agent_did)
+    
+    return json.dumps({
+        "agent_did": agent_did,
+        "trust_score": score,
+        "trust_stage": stage.name if stage else "UNKNOWN",
+        "probation_active": score <= 0.5  # Rough heuristic, actual check in manager
+    })
+
+@mcp.tool()
+def update_agent_trust(agent_did: str, outcome_score: float, context: str, ledger_ref_id: int = None) -> str:
+    """
+    Update an agent's trust score based on a verification outcome (EWMA).
+    
+    Args:
+        agent_did: The agent's DID
+        outcome_score: 1.0 (PASS) or 0.0 (FAIL). Can be fractional.
+        context: LOW_RISK or HIGH_RISK
+        ledger_ref_id: Optional ID of the SOA ledger entry prompting this update
+        
+    Returns:
+        JSON with old and new scores
+    """
+    from local_fortress.mcp_server.trust_engine import TrustContext
+    
+    trust_mgr = get_trust_manager()
+    
+    try:
+        ctx = TrustContext[context.upper()]
+    except KeyError:
+        return json.dumps({"error": "Invalid context. Use: LOW_RISK, HIGH_RISK"})
+    
+    # Capture old score for reporting
+    old_score = trust_mgr.get_agent_trust(agent_did)
+    
+    success = trust_mgr.update_trust_ewma(agent_did, outcome_score, ctx, ledger_ref_id)
+    
+    if not success:
+        return json.dumps({"error": "Update failed. Agent not found?"})
+        
+    new_score = trust_mgr.get_agent_trust(agent_did)
+    
+    return json.dumps({
+        "agent_did": agent_did,
+        "old_score": old_score,
+        "new_score": new_score,
+        "delta": new_score - old_score if old_score is not None else 0
+    })
+
+@mcp.tool()
+def apply_trust_penalty(agent_did: str, penalty_type: str, reason: str) -> str:
+    """
+    Apply a micro-penalty to an agent's trust score.
+    
+    Args:
+        agent_did: The agent's DID
+        penalty_type: SCHEMA_VIOLATION, API_MISUSE, STALE_CITATION
+        reason: Justification for penalty
+        
+    Returns:
+        JSON with new score and applied penalty amount
+    """
+    from local_fortress.mcp_server.trust_engine import MicroPenaltyType
+    
+    trust_mgr = get_trust_manager()
+    
+    try:
+        ptype = MicroPenaltyType[penalty_type.upper()]
+    except KeyError:
+        return json.dumps({"error": "Invalid penalty type. Use: SCHEMA_VIOLATION, API_MISUSE, STALE_CITATION"})
+        
+    success = trust_mgr.apply_micro_penalty(agent_did, ptype, reason)
+    
+    if not success:
+        return json.dumps({"error": "Penalty application failed"})
+        
+    # We don't get the exact applied amount back easily without querying history, 
+    # but the manager logs it. We'll return the new current score.
+    new_score = trust_mgr.get_agent_trust(agent_did)
+    
+    return json.dumps({
+        "agent_did": agent_did,
+        "new_score": new_score,
+        "status": "PENALIZED"
+    })
+
+@mcp.tool()
+def apply_trust_decay(agent_did: str) -> str:
+    """
+    Apply temporal decay to an agent if inactive.
+    
+    Args:
+        agent_did: The agent's DID
+        
+    Returns:
+        JSON with status
+    """
+    trust_mgr = get_trust_manager()
+    changed = trust_mgr.apply_temporal_decay(agent_did)
+    
+    new_score = trust_mgr.get_agent_trust(agent_did)
+    
+    return json.dumps({
+        "agent_did": agent_did,
+        "decay_applied": changed,
+        "current_score": new_score
+    })
+
 @mcp.tool()
 def get_low_credibility_sources(threshold: float = 50) -> str:
     """
@@ -1136,11 +1287,31 @@ def get_all_agent_weights() -> str:
     agents = recovery.get_all_agent_weights()
     return json.dumps(agents)
 
+@mcp.tool()
+def get_monitor_status() -> str:
+    """
+    Get status of the background System Monitor (CPU & Queue).
+    
+    Returns:
+        JSON with monitor metrics
+    """
+    monitor = get_system_monitor()
+    return json.dumps(monitor.get_system_status())
+
 # ============================================================================
 # Entry Point
 # ============================================================================
 
 if __name__ == "__main__":
+    # Start System Monitor (Background Thread)
+    try:
+        monitor = get_system_monitor()
+        monitor.start_monitoring()
+        # print("System Monitor started", file=sys.stderr)
+    except Exception as e:
+        pass
+        # print(f"Failed to start monitor: {e}", file=sys.stderr)
+
     mcp.run(transport='stdio')
 
 
