@@ -158,23 +158,56 @@ Relevance: Penalty calibration, HILS vs LIHS
 
 | Category     | Documents | Complete | In Progress | Planned |
 | ------------ | --------- | -------- | ----------- | ------- |
-| Foundations  | 4         | 1        | 0           | 3       |
-| Technologies | 5         | 3        | 0           | 2       |
-| Compliance   | 3         | 1        | 0           | 2       |
-| Benchmarks   | 3         | 0        | 0           | 3       |
+| Foundations  | 5         | 5        | 0           | 0       |
+| Technologies | 4         | 4        | 0           | 0       |
+| Compliance   | 3         | 3        | 0           | 0       |
+| Benchmarks   | 2         | 2        | 0           | 1       |
 | Original     | 0         | 0        | 0           | TBD     |
 | Synthesis    | 2         | 2        | 0           | 0       |
 
-**Total:** 17 documents planned, 7 complete
+**Total:** 16 category documents complete, 4 root-level documents
 
-### Completed Documents (This Session)
+> **Note:** HALLUCINATION_RATES.md is documented in foundations/ but INDEX structure lists it under benchmarks/. Consider relocating for consistency.
+
+### Completed Documents
+
+**Foundations (5):**
 
 - `foundations/TRUST_DYNAMICS.md` - EigenTrust, Lewicki-Bunker, decay factors
-- `technologies/LLM_RELIABILITY.md` - Hallucination, PyVeritas, verification pipeline
+- `foundations/FORMAL_METHODS.md` - Hoare logic, BMC, PyVeritas, Z3
+- `foundations/BEHAVIORAL_ECONOMICS.md` - HILS, deterrence, loss aversion
+- `foundations/INFORMATION_THEORY.md` - Citation decay, DPI, TTL
+- `foundations/HALLUCINATION_RATES.md` - 18-50% spectrum, HaluEval, TruthfulQA
+
+**Technologies (4):**
+
+- `technologies/LLM_RELIABILITY.md` - Hallucination mitigation, verification pipeline
 - `technologies/MULTI_AGENT_COORDINATION.md` - JSON-RPC, topologies, edge deployment
-- `compliance/AI_GOVERNANCE.md` - GDPR, NIST, ISO 42001, disclosure policy
+- `technologies/PRIVACY_ENGINEERING.md` - Differential privacy, ε budget, PII detection
+- `technologies/CRYPTOGRAPHIC_STANDARDS.md` - Ed25519, key rotation, Merkle chains
+
+**Compliance (3):**
+
+- `compliance/AI_GOVERNANCE.md` - GDPR, NIST AI RMF, ISO 42001, EU AI Act
+- `compliance/DATA_PROTECTION.md` - GDPR, CCPA, HIPAA, cross-border
+- `compliance/DISCLOSURE_STANDARDS.md` - CERT/CC, Project Zero 90-day policy
+
+**Benchmarks (2):**
+
+- `benchmarks/SAST_ACCURACY.md` - OWASP, Veracode, LLM triage
+- `benchmarks/SRE_THRESHOLDS.md` - Queue depth, CPU saturation, backpressure
+
+**Synthesis (2):**
+
 - `synthesis/RESEARCH_VALIDATION.md` - Design parameter validation
 - `synthesis/GAPS_AND_QUESTIONS.md` - Open research agenda
+
+**Root Level (4):**
+
+- `INDEX.md` - This catalog
+- `METHODOLOGY.md` - Citation standards
+- `GENERATION_PROMPTS.md` - Research prompt templates
+- `SENTINEL_TECH.md` - Sentinel verification overview
 
 ---
 
@@ -237,23 +270,24 @@ When Q-DNA produces original findings:
 - [x] Create METHODOLOGY.md (citation standards)
 - [x] Create GAPS_AND_QUESTIONS.md (open research agenda)
 - [x] Move RESEARCH_VALIDATION.md to synthesis/
+- [x] Create foundations/FORMAL_METHODS.md
+- [x] Create foundations/TRUST_DYNAMICS.md
+- [x] Create foundations/BEHAVIORAL_ECONOMICS.md
+- [x] Create foundations/INFORMATION_THEORY.md
+- [x] Create foundations/HALLUCINATION_RATES.md
+- [x] Create technologies/LLM_RELIABILITY.md
+- [x] Create technologies/PRIVACY_ENGINEERING.md
+- [x] Create technologies/CRYPTOGRAPHIC_STANDARDS.md
+- [x] Create technologies/MULTI_AGENT_COORDINATION.md
+- [x] Create compliance/DISCLOSURE_STANDARDS.md
+- [x] Create compliance/DATA_PROTECTION.md
+- [x] Create compliance/AI_GOVERNANCE.md
+- [x] Create benchmarks/SAST_ACCURACY.md
+- [x] Create benchmarks/SRE_THRESHOLDS.md
 
-**In Progress:**
+**Remaining:**
 
 - [ ] Expand SENTINEL_TECH.md (add formal citations per METHODOLOGY.md)
-
-**Pending (use GAPS_AND_QUESTIONS.md research prompt):**
-
-- [ ] Create foundations/FORMAL_METHODS.md
-- [ ] Create foundations/TRUST_DYNAMICS.md (Lewicki-Bunker, EigenTrust)
-- [ ] Create foundations/BEHAVIORAL_ECONOMICS.md (HILS, deterrence)
-- [ ] Create foundations/INFORMATION_THEORY.md
-- [ ] Create technologies/LLM_RELIABILITY.md (hallucination baselines)
-- [ ] Create technologies/PRIVACY_ENGINEERING.md
-- [ ] Create technologies/CRYPTOGRAPHIC_STANDARDS.md
-- [ ] Create compliance/DISCLOSURE_STANDARDS.md
-- [ ] Create compliance/DATA_PROTECTION.md
-- [ ] Create compliance/AI_GOVERNANCE.md
-- [ ] Create benchmarks/HALLUCINATION_RATES.md
-- [ ] Create benchmarks/SAST_ACCURACY.md
-- [ ] Create benchmarks/SRE_THRESHOLDS.md
+- [ ] Create benchmarks/HALLUCINATION_RATES.md (or relocate from foundations/)
+- [ ] Create CITATION_REGISTRY.md (central citation index)
+- [ ] Begin original_findings/ population after pilot deployment

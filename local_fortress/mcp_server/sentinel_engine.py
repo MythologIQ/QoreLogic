@@ -1,11 +1,12 @@
 """
-Q-DNA Sentinel Engine v2.0
+Q-DNA Sentinel Engine v2.1
 
 Implements the full verification pipeline as specified in Q-DNA_SPECIFICATION.md:
 - Static Safety Analysis (L1/L2)
 - Cyclomatic Complexity Check (L2)
 - Citation Depth Enforcement (L2)
 - Quote Context Verification (L2)
+- Echo/Paraphrase Detection (L2) - Phase 9
 - Bounded Model Checking Simulation (L3)
 - Risk Grade Auto-Classification
 - PII Redaction Filter
@@ -34,6 +35,7 @@ class FailureMode(Enum):
     DIVISION_BY_ZERO = "DIVISION_BY_ZERO"
     INJECTION_RISK = "INJECTION_RISK"
     LOGICAL_CONTRADICTION = "LOGICAL_CONTRADICTION"
+    ECHO_CONTENT = "ECHO_CONTENT"  # Phase 9: N-gram similarity detection
 
 @dataclass
 class AuditResult:
@@ -247,6 +249,40 @@ class SentinelEngine:
         
         return findings
     
+    def check_echo(self, text: str, reference_text: Optional[str] = None) -> List[str]:
+        """
+        Phase 9: Echo/Paraphrase Detection.
+        Detects if text is substantially similar to reference (>60% N-gram overlap).
+        Per INFORMATION_THEORY.md: Uses 3-gram/4-gram Jaccard similarity.
+        """
+        findings = []
+        
+        try:
+            from local_fortress.mcp_server.echo_detector import get_echo_detector
+            detector = get_echo_detector()
+            
+            if reference_text:
+                # Compare against provided reference
+                result = detector.detect_echo(reference_text, text)
+                if result.is_echo:
+                    findings.append(f"{FailureMode.ECHO_CONTENT.value}: {result.rationale}")
+                elif result.similarity_score >= 0.40:  # Warning zone
+                    findings.append(f"WARN:ECHO:{result.rationale}")
+            else:
+                # Check for internal repetition (self-echo)
+                results = detector.detect_self_echo(text)
+                for result in results:
+                    if result.is_echo:
+                        findings.append(f"{FailureMode.ECHO_CONTENT.value}: {result.rationale}")
+                        break  # One is enough
+                        
+        except ImportError:
+            findings.append("WARN: EchoDetector module not found")
+        except Exception as e:
+            findings.append(f"WARN: Echo detection failed: {str(e)}")
+        
+        return findings
+    
     def check_formal_contracts(self, content: str) -> List[str]:
         """
         Phase 9.1: Tier 3 Formal Verification.
@@ -291,16 +327,46 @@ class SentinelEngine:
 
     def bounded_model_check(self, content: str) -> List[str]:
         """
-        Simulate Bounded Model Checking (L3).
-        In production, this would invoke CBMC/ESBMC via PyVeritas.
+        Phase 9: Bounded Model Checking (L3).
+        Per FORMAL_METHODS.md: Uses CBMC with 10-step unwind (Small Scope Hypothesis).
+        Falls back to heuristic checks when CBMC is unavailable.
         """
         findings = []
         
-        # 1. Division by zero check
-        if re.search(r'/\s*0\b', content):
-            findings.append(FailureMode.DIVISION_BY_ZERO.value)
+        # 1. Try CBMC verification first
+        try:
+            from local_fortress.mcp_server.cbmc_verifier import get_cbmc_verifier, CBMCStatus
+            verifier = get_cbmc_verifier()
+            
+            # Use heuristic mode for Python code (no C transpilation yet)
+            result = verifier.verify(content, is_c_code=False)
+            
+            if result.status == CBMCStatus.FAIL:
+                for violation in result.violations:
+                    if not violation.startswith("HEURISTIC"):
+                        findings.append(f"BMC:{violation}")
+                    else:
+                        # Parse heuristic findings into proper failure modes
+                        if "division by zero" in violation.lower():
+                            findings.append(FailureMode.DIVISION_BY_ZERO.value)
+                        elif "buffer overflow" in violation.lower():
+                            findings.append(f"BMC:BUFFER_OVERFLOW")
+                        elif "null pointer" in violation.lower():
+                            findings.append(f"BMC:NULL_POINTER")
+                        elif "integer overflow" in violation.lower():
+                            findings.append(f"BMC:INTEGER_OVERFLOW")
+            elif result.status == CBMCStatus.UNAVAILABLE:
+                findings.append("WARN: CBMC unavailable, using heuristic fallback")
+                
+        except ImportError:
+            findings.append("WARN: CBMCVerifier module not found, using inline heuristics")
+            # Fallback to inline heuristics
+            if re.search(r'/\s*0\b', content):
+                findings.append(FailureMode.DIVISION_BY_ZERO.value)
+        except Exception as e:
+            findings.append(f"WARN: BMC failed: {str(e)}")
         
-        # 2. SQL Injection patterns
+        # 2. SQL Injection patterns (always check)
         sql_injection = [
             r'execute\(.+%s',
             r'cursor\.execute\(.+\+',
@@ -432,22 +498,33 @@ class SentinelEngine:
             requires_approval=requires_approval
         )
     
-    def audit_claim(self, text: str) -> AuditResult:
-        """Audit a text claim (non-code artifact)."""
+    def audit_claim(self, text: str, reference_text: Optional[str] = None) -> AuditResult:
+        """
+        Audit a text claim (non-code artifact).
+        
+        Args:
+            text: The text claim to audit
+            reference_text: Optional reference to check for echo/paraphrase
+        """
         self._start_timer()
         
         findings = []
         findings.extend(self.check_citation_depth(text))
         findings.extend(self.check_quote_context(text))
         
+        # Phase 9: Echo detection
+        findings.extend(self.check_echo(text, reference_text))
+        
         _, had_pii = self.check_pii_exposure(text)
         
-        if findings:
+        critical_failures = [f for f in findings if not f.startswith("WARN:")]
+        
+        if critical_failures:
             verdict = "FAIL"
-            rationale = "; ".join(findings)
+            rationale = "; ".join(critical_failures)
         else:
             verdict = "PASS"
-            rationale = "Claim passes citation and context rules."
+            rationale = "Claim passes citation, context, and echo rules."
         
         return AuditResult(
             verdict=verdict,

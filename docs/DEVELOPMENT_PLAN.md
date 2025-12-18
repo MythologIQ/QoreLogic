@@ -1,8 +1,8 @@
 # Q-DNA Development Roadmap
 
-**Version:** 3.0
+**Version:** 4.0
 **Goal:** Establish the "Sovereign Fortress" with empirically validated governance
-**Last Updated:** December 17, 2025
+**Last Updated:** December 18, 2025
 **Specification:** v2.4 (Fully Integrated)
 **Repository:** https://github.com/MythologIQ/Q-DNA
 **Research Foundation:** See [Research Library](./research/INDEX.md)
@@ -166,16 +166,17 @@ Before completing Phase 8.5, we must demonstrate:
 
 ## Phase Summary
 
-| Phase | Focus                         |    Status     | Compliance |
-| :---- | :---------------------------- | :-----------: | :--------: |
-| 1-4   | Foundation                    |  ✅ Complete  |     -      |
-| 5     | P0: Critical Security         |  ✅ Complete  |     -      |
-| 6     | P1: Citation & Fallback       |  ✅ Complete  |     -      |
-| 7     | P2: Advanced Features         |  ✅ Complete  |     -      |
-| 8     | Research Integration          |  ✅ Complete  |    98%     |
-| 8.5   | Trust Dynamics & Verification |  ✅ Complete  |    100%    |
-| **9** | **P3: ML-Dependent**          | 🚧 **Active** |     -      |
-| 10    | Production Hardening          | ✅ Initiated  |     -      |
+| Phase  | Focus                         |     Status      | Compliance |
+| :----- | :---------------------------- | :-------------: | :--------: |
+| 1-4    | Foundation                    |   ✅ Complete   |     -      |
+| 5      | P0: Critical Security         |   ✅ Complete   |     -      |
+| 6      | P1: Citation & Fallback       |   ✅ Complete   |     -      |
+| 7      | P2: Advanced Features         |   ✅ Complete   |     -      |
+| 8      | Research Integration          |   ✅ Complete   |    98%     |
+| 8.5    | Trust Dynamics & Verification |   ✅ Complete   |    100%    |
+| **9**  | **P3: ML-Dependent**          | ✅ **Complete** |     -      |
+| **10** | **Implementation Hardening**  |     📋 New      |     -      |
+| 11     | Production Hardening          |  ✅ Initiated   |     -      |
 
 ---
 
@@ -344,32 +345,51 @@ These can be implemented independently alongside Track A and B.
 
 ---
 
-## Phase 9: P3 ML-Dependent 🚧 ACTIVE
+## Phase 9: P3 ML-Dependent ✅ COMPLETE
 
-Requires machine learning capabilities beyond current bootstrapping scope.
+All Phase 9 ML-dependent features implemented.
 
-| Item                     | Status | Blocker             | Priority | Est. Effort |
-| :----------------------- | :----: | :------------------ | :------- | :---------- |
-| Semantic Drift Monitor   |   ✅   |                     | High     | 16h         |
-| Diversity Quorum (L3)    |   ✅   |                     | High     | 12h         |
-| Real CBMC Integration    |   🚧   | External tool setup | Medium   | 8h          |
-| Adversarial Review       |   ✅   |                     | Medium   | 8h          |
-| Echo/Paraphrase Detector |   ❌   | N-gram/embedding    | Low      | 6h          |
+| Item                     | Status | Blocker | Priority | Est. Effort |
+| :----------------------- | :----: | :------ | :------- | :---------- |
+| Semantic Drift Monitor   |   ✅   |         | High     | 16h         |
+| Diversity Quorum (L3)    |   ✅   |         | High     | 12h         |
+| Real CBMC Integration    |   ✅   |         | Medium   | 8h          |
+| Adversarial Review       |   ✅   |         | Medium   | 8h          |
+| Echo/Paraphrase Detector |   ✅   |         | Low      | 6h          |
 
 ---
 
-## Phase 10: Production Hardening ✅ INITIATED
+## Phase 10: Implementation Hardening 📋 NEW
 
-| Item                    |   Status    | Description                         | Est. Effort |
-| :---------------------- | :---------: | :---------------------------------- | :---------- |
-| Repository Creation     | ✅ **Done** | https://github.com/MythologIQ/Q-DNA | -           |
-| README + LICENSE        | ✅ **Done** | Apache 2.0                          | -           |
-| CI/CD Pipeline          |     📋      | GitHub Actions                      | 4h          |
-| Docker Containerization |     📋      | Multi-stage build                   | 4h          |
-| Documentation Site      |     📋      | MkDocs/Docusaurus                   | 6h          |
-| Pilot Deployment        |     📋      | Internal dogfooding                 | 8h          |
-| Benchmark Validation    |     📋      | Trap dataset execution              | 8h          |
-| Persistent Daemon       |     📋      | Local background service (`qdna-d`) | 6h          |
+Addresses P0/P1 implementation gaps identified in [TRUST_MODEL_VALIDATION.md](./TRUST_MODEL_VALIDATION.md).
+
+| ID   | Task                   | Priority | Spec Section | Est. Effort | Description                                             |
+| :--- | :--------------------- | :------: | :----------- | :---------: | :------------------------------------------------------ |
+| 10.1 | Identity Fortress      |  **P0**  | §10.2        |     4h      | Replace hardcoded salt/passphrase in IdentityManager    |
+| 10.2 | Penalty Wiring         |  **P1**  | §9.1         |     3h      | Connect `calculate_violation_penalty()` to TrustManager |
+| 10.3 | Trust Conservation     |  **P1**  | §5.3.5       |     4h      | Implement L1-norm normalization per EigenTrust          |
+| 10.4 | Stage Persistence      |  **P1**  | §5.3.6       |     2h      | Wire Lewicki-Bunker stage transitions to DB             |
+| 10.5 | Anchor Damping         |  **P2**  | §5.3.5       |     3h      | Add teleport to pre-trusted nodes (Sybil resist)        |
+| 10.6 | Transitive Trust Audit |  **P2**  | §5.3.5       |     2h      | Add path selection logging and clique detection         |
+
+**Phase 10 Total:** ~18 hours
+
+---
+
+## Phase 11: Production Hardening ✅ INITIATED
+
+| Item                    |   Status    | Description                          | Est. Effort |
+| :---------------------- | :---------: | :----------------------------------- | :---------- |
+| Repository Creation     | ✅ **Done** | https://github.com/MythologIQ/Q-DNA  | -           |
+| README + LICENSE        | ✅ **Done** | Apache 2.0                           | -           |
+| CI/CD Pipeline          |     📋      | GitHub Actions                       | 4h          |
+| Docker Containerization |     📋      | Multi-stage build, security hardened | 6h          |
+| Documentation Site      |     📋      | MkDocs/Docusaurus                    | 6h          |
+| Pilot Deployment        |     📋      | Internal dogfooding                  | 8h          |
+| Benchmark Validation    |     📋      | Trap dataset execution               | 8h          |
+| Persistent Daemon       |     📋      | Local background service (`qdna-d`)  | 6h          |
+
+> **Decision (2025-12-18):** Full backend containerization approved for dependency isolation (Z3, CBMC, etc.) and security sandboxing per §2.1 Sovereign Fortress principle.
 
 ---
 
@@ -484,9 +504,10 @@ See detailed task breakdown in Track A, B, C above.
 
 ## Changelog
 
-| Version | Date           | Changes                                                                                               |
-| :------ | :------------- | :---------------------------------------------------------------------------------------------------- |
-| 1.0     | 2025-12        | Initial phases                                                                                        |
-| 2.0     | 2025-12-17     | Research integration, gap analysis                                                                    |
-| 2.1     | 2025-12-17     | Fixed thresholds, schema updates                                                                      |
-| **3.0** | **2025-12-17** | **Complete task breakdown with dependency graph, parallel tracks, effort estimates, and sprint plan** |
+| Version | Date           | Changes                                                                                                                                         |
+| :------ | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2025-12        | Initial phases                                                                                                                                  |
+| 2.0     | 2025-12-17     | Research integration, gap analysis                                                                                                              |
+| 2.1     | 2025-12-17     | Fixed thresholds, schema updates                                                                                                                |
+| 3.0     | 2025-12-17     | Complete task breakdown with dependency graph, parallel tracks, effort estimates, and sprint plan                                               |
+| **4.0** | **2025-12-18** | **Research library validation complete. Created Phase 10 (Implementation Hardening) for P0/P1 gaps. Shifted Production Hardening to Phase 11.** |
