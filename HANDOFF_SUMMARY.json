@@ -16,8 +16,11 @@
       ],
       "modified_files": [
         "local_fortress/mcp_server/contract_verifier.py (Z3 implementation)",
+        "local_fortress/mcp_server/sentinel_engine.py (Integrated Z3 checks)",
         "local_fortress/ledger/schema.sql (Added decision_rationale)",
-        "docs/DEVELOPMENT_PLAN.md (Phase 9 Active)"
+        "docs/DEVELOPMENT_PLAN.md (Added Persistent Daemon)",
+        "docs/Q-DNA_SPECIFICATION.md (Updated to v9.0)",
+        "README.md (Updated status)"
       ]
     }
   },
