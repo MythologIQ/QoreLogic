@@ -350,7 +350,7 @@ Requires machine learning capabilities beyond current bootstrapping scope.
 
 | Item                     | Status | Blocker                | Priority | Est. Effort |
 | :----------------------- | :----: | :--------------------- | :------- | :---------- |
-| Semantic Drift Monitor   |   ❌   | Embedding model        | High     | 16h         |
+| Semantic Drift Monitor   |   ✅   |                        | High     | 16h         |
 | Diversity Quorum (L3)    |   ❌   | Multi-model inference  | High     | 12h         |
 | Real CBMC Integration    |   🚧   | External tool setup    | Medium   | 8h          |
 | Adversarial Review       |   ❌   | Devil's advocate model | Medium   | 8h          |
