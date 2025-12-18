@@ -344,7 +344,7 @@ These can be implemented independently alongside Track A and B.
 
 ---
 
-## Phase 9: P3 ML-Dependent 🔬 FUTURE
+## Phase 9: P3 ML-Dependent 🚧 ACTIVE
 
 Requires machine learning capabilities beyond current bootstrapping scope.
 
@@ -352,7 +352,7 @@ Requires machine learning capabilities beyond current bootstrapping scope.
 | :----------------------- | :----: | :--------------------- | :------- | :---------- |
 | Semantic Drift Monitor   |   ❌   | Embedding model        | High     | 16h         |
 | Diversity Quorum (L3)    |   ❌   | Multi-model inference  | High     | 12h         |
-| Real CBMC Integration    |   ❌   | External tool setup    | Medium   | 8h          |
+| Real CBMC Integration    |   🚧   | External tool setup    | Medium   | 8h          |
 | Adversarial Review       |   ❌   | Devil's advocate model | Medium   | 8h          |
 | Echo/Paraphrase Detector |   ❌   | N-gram/embedding       | Low      | 6h          |
 
