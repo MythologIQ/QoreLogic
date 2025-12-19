@@ -1,7 +1,7 @@
 # QoreLogic: The Autopoietic Code Governance Engine
 
 **Package:** `qorelogic-gatekeeper` (v2.1.0)
-**Status:** Active Research (Phase 15 Complete)
+**Status:** Production Ready (Phase 17 Complete)
 
 ---
 
@@ -14,8 +14,6 @@
 ```bash
 pip install qorelogic-gatekeeper
 ```
-
-_(Note: In this pilot repo, use `pip install -e local_fortress`)_
 
 ### 2. Auto-Bootstrap (IDE)
 

@@ -14,9 +14,6 @@ QoreLogic is available as a standard Python package.
 ```bash
 # Standard Install
 pip install qorelogic-gatekeeper
-
-# For this repository (Editable Mode)
-pip install -e local_fortress
 ```
 
 ### 1.2. Automated Setup (IDE / Agent)
