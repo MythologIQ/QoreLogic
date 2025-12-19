@@ -58,7 +58,33 @@ def main():
 
         mode_label = "[MONITOR MODE]" if args.monitor else "[ACTIVE BLOCKING]"
         if not args.monitor:
-             print(f"Running Sentinel Gatekeeper {mode_label} on {file_path}...")
+            # Branch Protection Policy
+            try:
+                import subprocess
+                branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL).decode().strip()
+                if branch in ["main", "master"]:
+                    print(f"\n{Colors.FAIL}⛔ POLICY VIOLATION: DIRECT COMMIT TO '{branch}' PROHIBITED{Colors.ENDC}")
+                    print(f"{Colors.FAIL}   QoreLogic enforces a strict Pull Request workflow.{Colors.ENDC}")
+                    print(f"{Colors.WARNING}   ACTION: Create a feature branch (git checkout -b feature/xyz) and submit a PR.{Colors.ENDC}")
+                    sys.exit(1)
+            except Exception:
+                pass
+
+            # Immutable Paths Policy (Anti-Goalpost Moving)
+            # Prevents agents from modifying tests or core specs
+            immutable_patterns = os.environ.get("QORELOGIC_IMMUTABLE_PATHS", "tests/*,specs/*,*.test.py").split(",")
+            from fnmatch import fnmatch
+            for pattern in immutable_patterns:
+                if fnmatch(file_path, pattern.strip()):
+                    # Check if explicit bypass is authorized (Human Override)
+                    if os.environ.get("QORELOGIC_AUTHOR_TYPE") != "HUMAN":
+                        print(f"\n{Colors.FAIL}🔒 SECURITY LOCK: IMMUTABLE FILE MODIFICATION ATTEMPTED{Colors.ENDC}")
+                        print(f"{Colors.FAIL}   File '{file_path}' is protected by the Integrity Policy.{Colors.ENDC}")
+                        print(f"{Colors.FAIL}   Automated Agents are NOT permitted to modify Verification Logic (Tests/Specs).{Colors.ENDC}")
+                        sys.exit(1)
+
+            # Initialize Audit
+            print(f"{Colors.HEADER}QoreLogic Gatekeeper v2.1.0{Colors.ENDC} on {file_path}...")
         
         result_json = audit_code(str(file_path), content)
         result = json.loads(result_json)
