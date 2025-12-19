@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+import sys
+import re
+import subprocess
+
+def check_commit_message(msg_file):
+    with open(msg_file, 'r') as f:
+        msg = f.read().strip()
+    
+    # Regex for standard semantic commit + QoreLogic Grade
+    # Example: feat(trust): Implement λ-decay [L3]
+    # Or strict schema in body. Let's check for [Lx] presence.
+    
+    # NOTE: Spec requires [L<grade>] <spec-reference> in body or footer.
+    # Simple check: Does it contain [L1], [L2], or [L3]?
+    if not re.search(r'\[L[1-3]\]', msg):
+        print("❌ COMMIT REJECTED: Missing Risk Grade [L1/L2/L3].")
+        print("   Please classify your change per QoreLogic Governance:")
+        print("   [L1] Docs/Typos  [L2] Features  [L3] Security/Trust")
+        return False
+        
+    return True
+
+def main():
+    # Git passes the commit message file as the first argument
+    if len(sys.argv) > 1:
+        msg_file = sys.argv[1]
+        if not check_commit_message(msg_file):
+            sys.exit(1)
+            
+    print("✅ Pre-commit audit passed.")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()

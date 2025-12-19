@@ -3,14 +3,14 @@
 **Version:** 1.0  
 **Created:** December 18, 2025  
 **Status:** Complete  
-**Purpose:** Deterrence theory and incentive design for Q-DNA governance  
-**Cross-Reference:** Q-DNA Spec §9 (Remediation), §5.3.3 (Adjustment Formula)
+**Purpose:** Deterrence theory and incentive design for QoreLogic governance  
+**Cross-Reference:** QoreLogic Spec §9 (Remediation), §5.3.3 (Adjustment Formula)
 
 ---
 
 ## 1. Executive Summary
 
-Traditional AI governance relies on rigid determinism. Q-DNA requires a paradigm shift to **probabilistic and incentive-based governance** rooted in Behavioral Economics. This report synthesizes:
+Traditional AI governance relies on rigid determinism. QoreLogic requires a paradigm shift to **probabilistic and incentive-based governance** rooted in Behavioral Economics. This report synthesizes:
 
 - **Gary Becker's** economic model of crime (rational choice)
 - **Daniel Nagin's** empirical findings on detection certainty vs punishment severity
@@ -36,7 +36,7 @@ Where:
 - $f$ = severity of punishment
 - $Y$ = gain from offense
 
-**Implication for Q-DNA:** If agents deviate from safety protocols, it's because Expected Utility of Violation > Expected Utility of Compliance. The deviation is a **rational response to flawed incentives**.
+**Implication for QoreLogic:** If agents deviate from safety protocols, it's because Expected Utility of Violation > Expected Utility of Compliance. The deviation is a **rational response to flawed incentives**.
 
 ### 2.2 Bounded Rationality
 
@@ -68,7 +68,7 @@ Agents operate under:
 | Behavioral Outcome        | **High Compliance** | Risk-Seeking / Gambling |
 | Mechanism                 | Immediate Feedback  | Temporal Discounting    |
 | System Stability          | **High**            | Low (Variance & Shocks) |
-| **Q-DNA Recommendation**  | **ADOPT**           | REJECT                  |
+| **QoreLogic Recommendation**  | **ADOPT**           | REJECT                  |
 
 **Result:** HILS ($p=0.9$) significantly more effective than LIHS.
 
@@ -76,7 +76,7 @@ Agents operate under:
 
 - Human sentinels suffer **vigilance decrement**
 - AI monitors can maintain $p = 1.0$ indefinitely
-- Q-DNA should invest in **Continuous Automated Auditing** (HILS)
+- QoreLogic should invest in **Continuous Automated Auditing** (HILS)
 
 ---
 
@@ -89,7 +89,7 @@ Losses hurt **2.25× more** than equivalent gains feel good.
 **Value Function:**
 $$v(x) = \begin{cases} x^\alpha & \text{if } x \ge 0 \\ -\lambda(-x)^\beta & \text{if } x < 0 \end{cases}$$
 
-**For Q-DNA:** Penalty must be at least **2.25× the perceived gain** to be psychologically neutral.
+**For QoreLogic:** Penalty must be at least **2.25× the perceived gain** to be psychologically neutral.
 
 ### 4.2 Asymmetric Penalty Design
 
@@ -156,7 +156,7 @@ Agents in high-pressure states make poor decisions. Temporal governance restores
 | Domestic Violence   | 48-72 hours | Prevent retaliation                |
 | Labor Strikes       | 10-20 days  | Allow negotiation                  |
 
-### 6.3 Q-DNA Implementation
+### 6.3 QoreLogic Implementation
 
 | Trigger Event         | Duration   | Mechanism                         |
 | --------------------- | ---------- | --------------------------------- |
@@ -167,7 +167,7 @@ Agents in high-pressure states make poor decisions. Temporal governance restores
 
 ---
 
-## 7. The Q-DNA Governance Architecture
+## 7. The QoreLogic Governance Architecture
 
 ### 7.1 HILS-Convex Model
 
@@ -182,7 +182,7 @@ Agents in high-pressure states make poor decisions. Temporal governance restores
 **Bayesian Inspection Updates:**
 
 - Standard: If detected → punish
-- Q-DNA: If detected → punish **AND** increase sampling rate for next N periods
+- QoreLogic: If detected → punish **AND** increase sampling rate for next N periods
 
 ### 7.3 Explicit Signaling
 
@@ -199,7 +199,7 @@ Agents in high-pressure states make poor decisions. Temporal governance restores
 
 ## 8. Conclusion
 
-The optimal Q-DNA configuration:
+The optimal QoreLogic configuration:
 
 - **High-Inspection (HILS)** environment
 - **Asymmetric, convex penalties** (λ ≈ 2.25×)

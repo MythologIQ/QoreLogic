@@ -1,6 +1,6 @@
 # Research First Principles: The Bootstrapping Strategy
 
-**Goal:** Establish Q-DNA "Gen 0" by identifying failure first.
+**Goal:** Establish QoreLogic "Gen 0" by identifying failure first.
 
 ## 1. The Bootstrapping Loop (Fail Forward)
 

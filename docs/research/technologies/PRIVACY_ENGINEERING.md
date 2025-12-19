@@ -3,14 +3,14 @@
 **Version:** 1.0  
 **Created:** December 18, 2025  
 **Status:** Complete  
-**Purpose:** Differential privacy and PII handling for Q-DNA audit systems  
-**Cross-Reference:** Q-DNA Spec §10 (Privacy), §10.3 (ε Budget)
+**Purpose:** Differential privacy and PII handling for QoreLogic audit systems  
+**Cross-Reference:** QoreLogic Spec §10 (Privacy), §10.3 (ε Budget)
 
 ---
 
 ## 1. Executive Summary
 
-Q-DNA adopts **Differential Privacy (DP)** as its sole metric for privacy preservation. Traditional anonymization (k-anonymity, l-diversity, masking) has been systematically defeated by reconstruction and membership inference attacks. This document specifies:
+QoreLogic adopts **Differential Privacy (DP)** as its sole metric for privacy preservation. Traditional anonymization (k-anonymity, l-diversity, masking) has been systematically defeated by reconstruction and membership inference attacks. This document specifies:
 
 - DP implementation with ε budget management
 - PII detection and redaction architectures
@@ -36,7 +36,7 @@ $$\Pr[\mathcal{M}(D_1) \in S] \le e^{\epsilon} \cdot \Pr[\mathcal{M}(D_2) \in S]
 
 ### 2.2 Parameters
 
-| Parameter       | Meaning                               | Q-DNA Constraint            |
+| Parameter       | Meaning                               | QoreLogic Constraint            |
 | --------------- | ------------------------------------- | --------------------------- |
 | **ε (epsilon)** | Privacy budget / maximum privacy loss | Lower = stronger protection |
 | **δ (delta)**   | Probability of complete failure       | Must be < 10⁻⁶ for PII      |
@@ -212,7 +212,7 @@ def luhn_check(number: str) -> bool:
 
 ---
 
-## 8. Q-DNA Mandates
+## 8. QoreLogic Mandates
 
 | Category         | Mandate                                                  |
 | ---------------- | -------------------------------------------------------- |

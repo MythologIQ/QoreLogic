@@ -4,7 +4,7 @@ import secrets
 import sqlite3
 
 # Configuration
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ledger', 'qdna_soa_ledger.db')
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ledger', 'qorelogic_soa_ledger.db')
 
 def generate_did(role):
     """Generate a Decentralized Identifier based on role and randomness."""

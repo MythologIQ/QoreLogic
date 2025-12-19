@@ -1,4 +1,4 @@
-# Security Audit Report: Q-DNA Cryptographic Implementation
+# Security Audit Report: QoreLogic Cryptographic Implementation
 
 **Auditor:** Manus 1.6 Lite  
 **Date:** December 18, 2025  
@@ -20,7 +20,7 @@
 ## 1. Critical: Hardcoded Default Passphrase
 
 **Location:** Line 64  
-**Code:** `self.passphrase = passphrase or "qdna-development-key"`
+**Code:** `self.passphrase = passphrase or "qorelogic-development-key"`
 
 **Vulnerability:** Any agent identity created without providing a passphrase will be encrypted using the hardcoded string. An attacker with keyfile access can immediately decrypt all private keys.
 
@@ -31,7 +31,7 @@
 ## 2. Critical: Static Salt Reuse
 
 **Location:** Line 75  
-**Code:** `salt=b"qdna-salt-v1"`
+**Code:** `salt=b"qorelogic-salt-v1"`
 
 **Vulnerability:** Static salt defeats the purpose of salting. Enables rainbow table attacks across all keyfiles simultaneously.
 

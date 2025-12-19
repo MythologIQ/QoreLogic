@@ -1,5 +1,5 @@
 """
-Q-DNA System Test Suite
+QoreLogic System Test Suite
 
 Validates all core functionality specified in the design documents:
 - Sentinel verification pipeline
@@ -213,7 +213,7 @@ def authenticate(username, password):
 def run_all_tests():
     """Run all system tests."""
     print("\n" + "#"*60)
-    print("# Q-DNA SYSTEM VALIDATION SUITE")
+    print("# QoreLogic SYSTEM VALIDATION SUITE")
     print("#"*60)
     
     results = {

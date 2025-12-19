@@ -1,7 +1,7 @@
 """
-Q-DNA Source Credibility System (v2.4 Aligned)
+QoreLogic Source Credibility System (v2.4 Aligned)
 
-Implements P1 features per Q-DNA_SPECIFICATION.md v2.4:
+Implements P1 features per QoreLogic_SPECIFICATION.md v2.4:
 - Source Credibility Index (SCI) management
 - Reference Tier Classification (T1-T4)
 - Automatic risk grade escalation based on source quality
@@ -23,11 +23,11 @@ from enum import Enum
 from pathlib import Path
 from contextlib import contextmanager
 
-DB_PATH = Path(__file__).parent.parent / "ledger" / "qdna_soa_ledger.db"
+DB_PATH = Path(__file__).parent.parent / "ledger" / "qorelogic_soa_ledger.db"
 
 
 class ReferenceTier(Enum):
-    """Reference quality tiers per Q-DNA Spec Section 5.1"""
+    """Reference quality tiers per QoreLogic Spec Section 5.1"""
     T1 = 1  # Formal Proofs, Primary Records, Official Specs - 100% credibility
     T2 = 2  # Reviewed Standards (MISRA, OWASP), Textbooks - 90% credibility
     T3 = 3  # Reputable Reporting - 70% credibility
@@ -557,7 +557,7 @@ class SentinelFallback:
 def run_p1_demo():
     """Demonstrate P1 features."""
     print("\n" + "="*60)
-    print("Q-DNA P1 FEATURES DEMONSTRATION")
+    print("QoreLogic P1 FEATURES DEMONSTRATION")
     print("="*60)
     
     # 1. Source Credibility

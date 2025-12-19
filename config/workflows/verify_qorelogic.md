@@ -1,8 +1,8 @@
 ---
-description: Run the Q-DNA Sentinel Audit Workflow
+description: Run the QoreLogic Sentinel Audit Workflow
 ---
 
-# Q-DNA Verification Workflow
+# QoreLogic Verification Workflow
 
 This workflow triggers the Sentinel Engine to audit a specific artifact (Code or Text) against the AAC v1.1 standards.
 
@@ -16,7 +16,7 @@ This workflow triggers the Sentinel Engine to audit a specific artifact (Code or
 Execute the following step to run the audit simulation:
 
 ```bash
-python g:/MythologIQ/Q-DNA/Q-DNA/audit_runner.py
+python g:/MythologIQ/QoreLogic/QoreLogic/audit_runner.py
 ```
 
 _Note: In production, this would accept arguments like `--file path/to/code.py`._
@@ -30,4 +30,4 @@ _Note: In production, this would accept arguments like `--file path/to/code.py`.
 
 ## 4. Ledger Commit
 
-Ensure the final verdict is logged to `qdna_soa_ledger.db` (The script handles this automatically).
+Ensure the final verdict is logged to `qorelogic_soa_ledger.db` (The script handles this automatically).

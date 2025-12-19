@@ -4,13 +4,13 @@
 **Created:** December 18, 2025  
 **Status:** Complete  
 **Purpose:** Citation depth, information decay, and provenance tracking  
-**Cross-Reference:** Q-DNA Spec §5.2 (Citation Policy), §5.4 (TTL)
+**Cross-Reference:** QoreLogic Spec §5.2 (Citation Policy), §5.4 (TTL)
 
 ---
 
 ## 1. Executive Summary
 
-Information degrades as it traverses citation chains. This document establishes the theoretical constraints on citation fidelity using Shannon's Data Processing Inequality, quantifies the "Telephone Effect" in academic networks, and defines cryptographic provenance standards for the Q-DNA project.
+Information degrades as it traverses citation chains. This document establishes the theoretical constraints on citation fidelity using Shannon's Data Processing Inequality, quantifies the "Telephone Effect" in academic networks, and defines cryptographic provenance standards for the QoreLogic project.
 
 **Key Claims Substantiated:**
 
@@ -153,7 +153,7 @@ Quantitative limits are necessary but not sufficient:
 | Contextual brackets | Permitted but discouraged            |
 | Context buffer      | ±200 characters to determine intent  |
 
-**Q-DNA Atomic Unit:** Maximum 50 words or 2 sentences, whichever is shorter.
+**QoreLogic Atomic Unit:** Maximum 50 words or 2 sentences, whichever is shorter.
 
 ---
 
@@ -182,7 +182,7 @@ Quantitative limits are necessary but not sufficient:
 
 ---
 
-## 7. Q-DNA Protocol Recommendations
+## 7. QoreLogic Protocol Recommendations
 
 ### 7.1 Zero-Hop Mandate
 

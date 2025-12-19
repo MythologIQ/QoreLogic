@@ -1,8 +1,8 @@
 ---
-description: Verification Workflow for Q-DNA Code Diffs
+description: Verification Workflow for QoreLogic Code Diffs
 ---
 
-# Verify Q-DNA Diff
+# Verify QoreLogic Diff
 
 **Trigger:** Scrivener Agent submits a `Code Diff Artifact`.
 

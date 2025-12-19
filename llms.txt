@@ -1,4 +1,4 @@
-This repository houses Q-DNA, a local-first governance layer for AI agents.
+This repository houses QoreLogic, a local-first governance layer for AI agents.
 
 ## Current Status
 - **Spec Compliance:** 95%
@@ -8,7 +8,7 @@ This repository houses Q-DNA, a local-first governance layer for AI agents.
 - **P0/P1/P2:** COMPLETE
 
 ## Core Documentation
-- Specification: docs/Q-DNA_SPECIFICATION.md (v2.0)
+- Specification: docs/QoreLogic_SPECIFICATION.md (v2.0)
 - Compliance Audit: docs/SPEC_COMPLIANCE_AUDIT.md
 - Development Plan: docs/DEVELOPMENT_PLAN.md
 - PRD: docs/PRD.md

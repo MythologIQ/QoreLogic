@@ -1,8 +1,8 @@
-# Q-DNA Architecture Specification (Sovereign Fortress)
+# QoreLogic Architecture Specification (Sovereign Fortress)
 
 **Version:** 2.0
 **Last Updated:** December 17, 2025
-**Scope:** Hardware, Software, Network, and Trust topology for Q-DNA governance
+**Scope:** Hardware, Software, Network, and Trust topology for QoreLogic governance
 **Research Foundation:** See [Research Library](./research/INDEX.md)
 
 ---
@@ -239,7 +239,7 @@ signature = Ed25519_Sign(private_key, hash(n))
 
 | Mechanism         | Implementation                 |
 | :---------------- | :----------------------------- |
-| Port Separation   | Q-DNA: 8001, Hearthlink: 8002+ |
+| Port Separation   | QoreLogic: 8001, Hearthlink: 8002+ |
 | File Lock         | SQLite exclusive lock          |
 | Process Isolation | Separate process space         |
 | No Shared Memory  | No RAG vector overlap          |

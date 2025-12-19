@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-Large Language Models are probabilistic engines, not logic engines. They suffer from **hallucination**, and in the context of code generation, this manifests as security vulnerabilities or "Package Hallucination" (importing non-existent or malicious libraries). This document establishes the mandatory "Zero-Trust" Verification Pipeline for Q-DNA.
+Large Language Models are probabilistic engines, not logic engines. They suffer from **hallucination**, and in the context of code generation, this manifests as security vulnerabilities or "Package Hallucination" (importing non-existent or malicious libraries). This document establishes the mandatory "Zero-Trust" Verification Pipeline for QoreLogic.
 
 The key finding is that achieving the <1% hallucination target requires a **multi-tier defense** combining static analysis, Design by Contract, and formal verification through transpilation to C and Bounded Model Checking.
 
@@ -47,7 +47,7 @@ Research indicates an **inverse correlation** in some models: highly capable mod
 
 ---
 
-## 2. The Q-DNA Verification Pipeline
+## 2. The QoreLogic Verification Pipeline
 
 The pipeline employs a "Swiss Cheese" model—multiple overlapping defenses to catch errors that slip through any single layer.
 
@@ -131,7 +131,7 @@ CrossHair uses symbolic execution directly on Python (via Z3) to find counterexa
 
 ### 3.2 Semantic Determinism
 
-Since bitwise reproducibility is infeasible without significant performance penalty, Q-DNA adopts **Semantic Determinism**:
+Since bitwise reproducibility is infeasible without significant performance penalty, QoreLogic adopts **Semantic Determinism**:
 
 **Definition:** Given the same input, outputs are **logically equivalent** even if not bitwise identical.
 
@@ -157,11 +157,11 @@ To achieve <1% hallucination in production:
 | +CoT               | Chain-of-Thought Prompting        | → ~3% error |
 | +Span Verification | Verify each claim against sources | → <1% error |
 
-**Q-DNA Requirement:** All four layers mandatory for L2/L3 tasks.
+**QoreLogic Requirement:** All four layers mandatory for L2/L3 tasks.
 
 ---
 
-## 5. Q-DNA Verification Policy
+## 5. QoreLogic Verification Policy
 
 ### 5.1 Mandatory Verification by Trust Level
 
@@ -196,7 +196,7 @@ To achieve <1% hallucination in production:
 
 ## 7. Specification Updates
 
-Based on this research, recommend the following updates to Q-DNA_SPECIFICATION.md:
+Based on this research, recommend the following updates to QoreLogic_SPECIFICATION.md:
 
 1. **§3 (Sentinel):** Add verification tier requirements
 2. **Appendix A:**

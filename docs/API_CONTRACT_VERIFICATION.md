@@ -1,8 +1,8 @@
-# API Contract Verification: Q-DNA MCP Tools
+# API Contract Verification: QoreLogic MCP Tools
 
 **Auditor:** ChatGPT  
 **Date:** December 18, 2025  
-**Scope:** `server.py` MCP tools vs Q-DNA Specification
+**Scope:** `server.py` MCP tools vs QoreLogic Specification
 
 ---
 

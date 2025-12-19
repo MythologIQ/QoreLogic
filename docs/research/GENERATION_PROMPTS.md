@@ -1,4 +1,4 @@
-# Q-DNA Research Document Generation Prompts
+# QoreLogic Research Document Generation Prompts
 
 Use these prompts with a research-capable LLM to generate the pending documentation.
 
@@ -7,7 +7,7 @@ Use these prompts with a research-capable LLM to generate the pending documentat
 ## 1. FORMAL_METHODS.md
 
 ```
-Generate a research document for the Q-DNA project titled "FORMAL_METHODS.md" that covers formal verification theory for code verification systems.
+Generate a research document for the QoreLogic project titled "FORMAL_METHODS.md" that covers formal verification theory for code verification systems.
 
 Required content:
 - Historical foundations: Hoare Logic, Dijkstra's weakest precondition calculus
@@ -20,7 +20,7 @@ Required content:
 Format requirements:
 - Use citation format: [FM-001], [FM-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §3 (Sentinel), §13 (Implementation)
+- Cross-reference to QoreLogic Spec sections: §3 (Sentinel), §13 (Implementation)
 - Target length: 800-1200 words
 
 Key claims to substantiate:
@@ -33,7 +33,7 @@ Key claims to substantiate:
 ## 2. BEHAVIORAL_ECONOMICS.md
 
 ```
-Generate a research document for the Q-DNA project titled "BEHAVIORAL_ECONOMICS.md" covering deterrence theory and incentive design for AI governance.
+Generate a research document for the QoreLogic project titled "BEHAVIORAL_ECONOMICS.md" covering deterrence theory and incentive design for AI governance.
 
 Required content:
 - Nagin's HILS (High Inspection/Low Severity) vs LIHS model
@@ -46,7 +46,7 @@ Required content:
 Format requirements:
 - Use citation format: [BEHAV-001], [BEHAV-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §9 (Remediation), §5.3.3 (Adjustment Formula)
+- Cross-reference to QoreLogic Spec sections: §9 (Remediation), §5.3.3 (Adjustment Formula)
 - Target length: 800-1200 words
 
 Key claims to substantiate:
@@ -60,7 +60,7 @@ Key claims to substantiate:
 ## 3. INFORMATION_THEORY.md
 
 ```
-Generate a research document for the Q-DNA project titled "INFORMATION_THEORY.md" covering citation depth, information decay, and provenance tracking.
+Generate a research document for the QoreLogic project titled "INFORMATION_THEORY.md" covering citation depth, information decay, and provenance tracking.
 
 Required content:
 - Shannon's information theory basics relevant to citation chains
@@ -73,7 +73,7 @@ Required content:
 Format requirements:
 - Use citation format: [INFO-001], [INFO-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §5.2 (Citation Policy), §5.4 (TTL)
+- Cross-reference to QoreLogic Spec sections: §5.2 (Citation Policy), §5.4 (TTL)
 - Target length: 600-1000 words
 
 Key claims to substantiate:
@@ -87,7 +87,7 @@ Key claims to substantiate:
 ## 4. PRIVACY_ENGINEERING.md
 
 ```
-Generate a research document for the Q-DNA project titled "PRIVACY_ENGINEERING.md" covering differential privacy and PII handling for AI audit systems.
+Generate a research document for the QoreLogic project titled "PRIVACY_ENGINEERING.md" covering differential privacy and PII handling for AI audit systems.
 
 Required content:
 - Dwork's differential privacy foundations (ε definition, guarantees)
@@ -100,7 +100,7 @@ Required content:
 Format requirements:
 - Use citation format: [PRIV-001], [PRIV-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §10 (Privacy), §10.3 (ε Budget)
+- Cross-reference to QoreLogic Spec sections: §10 (Privacy), §10.3 (ε Budget)
 - Target length: 800-1200 words
 
 Key claims to substantiate:
@@ -114,7 +114,7 @@ Key claims to substantiate:
 ## 5. CRYPTOGRAPHIC_STANDARDS.md
 
 ```
-Generate a research document for the Q-DNA project titled "CRYPTOGRAPHIC_STANDARDS.md" covering key management and digital signing for audit integrity.
+Generate a research document for the QoreLogic project titled "CRYPTOGRAPHIC_STANDARDS.md" covering key management and digital signing for audit integrity.
 
 Required content:
 - NIST SP 800-57 key management recommendations
@@ -127,7 +127,7 @@ Required content:
 Format requirements:
 - Use citation format: [CRYPTO-001], [CRYPTO-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §10.2 (Identity), §11 (SOA Ledger)
+- Cross-reference to QoreLogic Spec sections: §10.2 (Identity), §11 (SOA Ledger)
 - Target length: 600-1000 words
 
 Key claims to substantiate:
@@ -141,7 +141,7 @@ Key claims to substantiate:
 ## 6. DISCLOSURE_STANDARDS.md
 
 ```
-Generate a research document for the Q-DNA project titled "DISCLOSURE_STANDARDS.md" covering vulnerability disclosure timing and responsible disclosure practices.
+Generate a research document for the QoreLogic project titled "DISCLOSURE_STANDARDS.md" covering vulnerability disclosure timing and responsible disclosure practices.
 
 Required content:
 - CERT/CC coordinated vulnerability disclosure guidelines
@@ -154,7 +154,7 @@ Required content:
 Format requirements:
 - Use citation format: [DISC-001], [DISC-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §8.5 (Vulnerability Disclosure), §8.2 (Deferral)
+- Cross-reference to QoreLogic Spec sections: §8.5 (Vulnerability Disclosure), §8.2 (Deferral)
 - Target length: 600-1000 words
 
 Key claims to substantiate:
@@ -168,7 +168,7 @@ Key claims to substantiate:
 ## 7. DATA_PROTECTION.md
 
 ```
-Generate a research document for the Q-DNA project titled "DATA_PROTECTION.md" covering GDPR, CCPA, and HIPAA implications for AI governance systems.
+Generate a research document for the QoreLogic project titled "DATA_PROTECTION.md" covering GDPR, CCPA, and HIPAA implications for AI governance systems.
 
 Required content:
 - GDPR Article 22: right to non-automated decisions with legal effect
@@ -181,7 +181,7 @@ Required content:
 Format requirements:
 - Use citation format: [DATA-001], [DATA-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §8.6 (Regulatory), §10 (Privacy)
+- Cross-reference to QoreLogic Spec sections: §8.6 (Regulatory), §10 (Privacy)
 - Target length: 800-1200 words
 
 Key claims to substantiate:
@@ -195,7 +195,7 @@ Key claims to substantiate:
 ## 8. HALLUCINATION_RATES.md
 
 ```
-Generate a research document for the Q-DNA project titled "HALLUCINATION_RATES.md" covering LLM hallucination baselines and detection benchmarks.
+Generate a research document for the QoreLogic project titled "HALLUCINATION_RATES.md" covering LLM hallucination baselines and detection benchmarks.
 
 Required content:
 - HaluEval benchmark: methodology and reported rates
@@ -208,7 +208,7 @@ Required content:
 Format requirements:
 - Use citation format: [HALLU-001], [HALLU-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §1 (Problem Statement), Appendix A
+- Cross-reference to QoreLogic Spec sections: §1 (Problem Statement), Appendix A
 - Target length: 800-1200 words
 
 Key claims to substantiate:
@@ -222,7 +222,7 @@ Key claims to substantiate:
 ## 9. SAST_ACCURACY.md
 
 ```
-Generate a research document for the Q-DNA project titled "SAST_ACCURACY.md" covering static analysis false positive rates and LLM-based triage.
+Generate a research document for the QoreLogic project titled "SAST_ACCURACY.md" covering static analysis false positive rates and LLM-based triage.
 
 Required content:
 - OWASP Benchmark: SAST tool accuracy baselines
@@ -235,7 +235,7 @@ Required content:
 Format requirements:
 - Use citation format: [SAST-001], [SAST-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §3.2 (Check Matrix), §3.3.1 (Tier 1)
+- Cross-reference to QoreLogic Spec sections: §3.2 (Check Matrix), §3.3.1 (Tier 1)
 - Target length: 600-1000 words
 
 Key claims to substantiate:
@@ -249,7 +249,7 @@ Key claims to substantiate:
 ## 10. SRE_THRESHOLDS.md
 
 ```
-Generate a research document for the Q-DNA project titled "SRE_THRESHOLDS.md" covering resource governance and operational thresholds.
+Generate a research document for the QoreLogic project titled "SRE_THRESHOLDS.md" covering resource governance and operational thresholds.
 
 Required content:
 - Google SRE: error budgets, SLO/SLI concepts
@@ -262,7 +262,7 @@ Required content:
 Format requirements:
 - Use citation format: [SRE-001], [SRE-002], etc.
 - Include a References section with DOIs where available
-- Cross-reference to Q-DNA Spec sections: §12 (Operational Modes), §2.5.1 (Backpressure)
+- Cross-reference to QoreLogic Spec sections: §12 (Operational Modes), §2.5.1 (Backpressure)
 - Target length: 600-1000 words
 
 Key claims to substantiate:

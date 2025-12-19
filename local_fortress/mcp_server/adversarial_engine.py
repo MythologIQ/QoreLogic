@@ -1,5 +1,5 @@
 """
-Q-DNA Adversarial Engine (Phase 9 - Track P3)
+QoreLogic Adversarial Engine (Phase 9 - Track P3)
 Implements the 'Devil's Advocate' review mechanism for L3 artifacts.
 
 Research: Adversarial Review [ML-003]
@@ -54,7 +54,7 @@ class AdversarialEngine:
         
         prompt = f"""
         *** ADVERSARIAL REVIEW REQUEST ***
-        CONTEXT: Phase 9 Q-DNA Trusted System
+        CONTEXT: Phase 9 QoreLogic Trusted System
         ROLE: {perspective.value}
         INSTRUCTION: {base_instruction}
         

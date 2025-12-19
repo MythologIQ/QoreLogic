@@ -4,7 +4,7 @@
 **Created:** December 18, 2025  
 **Status:** Complete  
 **Purpose:** Evaluation of SAST error rates and AI-driven precision improvements  
-**Cross-Reference:** Q-DNA Spec §4 (Security), §9 (ML-Dependent Verification)
+**Cross-Reference:** QoreLogic Spec §4 (Security), §9 (ML-Dependent Verification)
 
 ---
 

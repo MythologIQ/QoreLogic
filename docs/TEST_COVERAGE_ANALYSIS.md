@@ -1,4 +1,4 @@
-# Test Coverage Analysis: Q-DNA
+# Test Coverage Analysis: QoreLogic
 
 **Auditor:** Manus 1.6 Lite  
 **Date:** December 18, 2025  

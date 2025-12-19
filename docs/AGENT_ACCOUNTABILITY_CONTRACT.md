@@ -151,7 +151,7 @@ Trust_{A→C} = Trust_{A→B} × Trust_{B→C} × 0.5
 
 ### 5.3 Lewicki-Bunker Trust Stages
 
-| Stage | Name                             | Trust Score | Q-DNA Behavior                  |
+| Stage | Name                             | Trust Score | QoreLogic Behavior                  |
 | :---- | :------------------------------- | :---------- | :------------------------------ |
 | 1     | Calculus-Based Trust (CBT)       | 0.0 – 0.5   | Probationary; 100% verification |
 | 2     | Knowledge-Based Trust (KBT)      | 0.5 – 0.8   | Standard; sampling verification |
@@ -227,7 +227,7 @@ Supportive framing is permitted **only after** verified facts are recorded in th
 
 ### 8.1 Regulatory Alignment
 
-| Regulation   | Requirement                      | Q-DNA Implementation |
+| Regulation   | Requirement                      | QoreLogic Implementation |
 | :----------- | :------------------------------- | :------------------- |
 | GDPR Art. 22 | Right to non-automated decisions | L3 Human-in-the-Loop |
 | NIST AI RMF  | Govern, Map, Measure, Manage     | SOA Ledger + Metrics |

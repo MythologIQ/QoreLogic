@@ -1,15 +1,15 @@
-# Q-DNA Research Library
+# QoreLogic Research Library
 
 **Version:** 1.0
 **Created:** December 17, 2025
 **Status:** Active Collection
-**Purpose:** Authoritative reference library for Q-DNA specification development and evolution
+**Purpose:** Authoritative reference library for QoreLogic specification development and evolution
 
 ---
 
 ## Research Structure Overview
 
-Q-DNA maintains **two complementary research locations**:
+QoreLogic maintains **two complementary research locations**:
 
 | Location                       | Purpose               | Content                                               |
 | ------------------------------ | --------------------- | ----------------------------------------------------- |
@@ -23,7 +23,7 @@ The Reference Library provides the **intellectual foundation**; the Laboratory p
 ## Library Structure
 
 ```
-Q-DNA/docs/research/
+QoreLogic/docs/research/
 ├── INDEX.md                    ← This file (catalog and navigation)
 ├── METHODOLOGY.md              ← Research standards and citation format
 │
@@ -49,7 +49,7 @@ Q-DNA/docs/research/
 │   ├── SAST_ACCURACY.md        ← False positive rate benchmarks
 │   └── SRE_THRESHOLDS.md       ← Resource governance standards
 │
-├── original_findings/          ← Q-DNA specific research (future)
+├── original_findings/          ← QoreLogic specific research (future)
 │   └── .gitkeep                ← Placeholder for original research
 │
 └── synthesis/                  ← Integration documents
@@ -63,9 +63,9 @@ Q-DNA/docs/research/
 
 ### 1. Foundations (Theoretical)
 
-Core academic research that informs Q-DNA design philosophy.
+Core academic research that informs QoreLogic design philosophy.
 
-| Document                | Primary Sources                          | Q-DNA Sections     |
+| Document                | Primary Sources                          | QoreLogic Sections     |
 | ----------------------- | ---------------------------------------- | ------------------ |
 | FORMAL_METHODS.md       | Hoare, Dijkstra, CBMC, ESBMC             | §3 (Sentinel), §13 |
 | TRUST_DYNAMICS.md       | Lewicki-Bunker, EigenTrust, Dirks-Ferrin | §5.3 (SCI), §9     |
@@ -76,7 +76,7 @@ Core academic research that informs Q-DNA design philosophy.
 
 Practical research on tools, techniques, and systems.
 
-| Document                   | Primary Sources           | Q-DNA Sections |
+| Document                   | Primary Sources           | QoreLogic Sections |
 | -------------------------- | ------------------------- | -------------- |
 | SENTINEL_TECH.md           | PyVeritas, ACCA, SPIN     | §3, §13        |
 | LLM_RELIABILITY.md         | HaluEval, TruthfulQA, RAG | §4, App A      |
@@ -87,7 +87,7 @@ Practical research on tools, techniques, and systems.
 
 Legal and regulatory requirements affecting design.
 
-| Document                | Primary Sources        | Q-DNA Sections |
+| Document                | Primary Sources        | QoreLogic Sections |
 | ----------------------- | ---------------------- | -------------- |
 | DISCLOSURE_STANDARDS.md | CERT/CC, Google P0     | §8             |
 | DATA_PROTECTION.md      | GDPR, CCPA, HIPAA      | §10            |
@@ -97,15 +97,15 @@ Legal and regulatory requirements affecting design.
 
 Quantitative data informing specific thresholds.
 
-| Document               | Primary Sources       | Q-DNA Sections |
+| Document               | Primary Sources       | QoreLogic Sections |
 | ---------------------- | --------------------- | -------------- |
 | HALLUCINATION_RATES.md | Li et al., Lin et al. | App A          |
 | SAST_ACCURACY.md       | OWASP, Veracode       | App A          |
 | SRE_THRESHOLDS.md      | Google SRE, FinOps    | §12            |
 
-### 5. Original Findings (Q-DNA Specific)
+### 5. Original Findings (QoreLogic Specific)
 
-Research conducted during Q-DNA development.
+Research conducted during QoreLogic development.
 
 | Document | Content                  | Status  |
 | -------- | ------------------------ | ------- |
@@ -149,7 +149,7 @@ Relevance: Penalty calibration, HILS vs LIHS
 ### Cross-Reference to Spec
 
 ```markdown
-> Applied in: Q-DNA_SPECIFICATION.md §9.1 (Micro-Penalty Layer)
+> Applied in: QoreLogic_SPECIFICATION.md §9.1 (Micro-Penalty Layer)
 ```
 
 ---
@@ -248,12 +248,12 @@ The research library serves the specification through:
 
 When research library is complete, the following can be archived:
 
-- `Q-DNA-discussion.md` → Replaced by structured research docs
+- `QoreLogic-discussion.md` → Replaced by structured research docs
 - Any ad-hoc notes → Consolidated into category documents
 
 ### Original Research Protocol
 
-When Q-DNA produces original findings:
+When QoreLogic produces original findings:
 
 1. Document methodology in finding document
 2. Include raw data or links to data

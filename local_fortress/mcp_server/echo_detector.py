@@ -1,5 +1,5 @@
 """
-Q-DNA Echo/Paraphrase Detector
+QoreLogic Echo/Paraphrase Detector
 
 Phase 9: ML-Dependent Features
 Spec Reference: §5.2 (Citation Policy), INFORMATION_THEORY.md

@@ -1,4 +1,4 @@
-# Q-DNA Research Methodology and Citation Standards
+# QoreLogic Research Methodology and Citation Standards
 
 **Version:** 1.0
 **Created:** December 17, 2025
@@ -25,13 +25,13 @@ Every research document follows this template:
 
 ## Executive Summary
 
-[2-3 paragraph overview of key findings and relevance to Q-DNA]
+[2-3 paragraph overview of key findings and relevance to QoreLogic]
 
 ---
 
 ## 1. Background and Context
 
-[Why this research matters to Q-DNA]
+[Why this research matters to QoreLogic]
 
 ## 2. Literature Review
 
@@ -41,7 +41,7 @@ Every research document follows this template:
 
 [Bulleted or tabled findings with citations]
 
-## 4. Application to Q-DNA
+## 4. Application to QoreLogic
 
 [How findings inform specification design]
 
@@ -99,13 +99,13 @@ Each citation receives a unique identifier:
 | COMP          | Compliance & Legal      |
 | SRE           | Site Reliability        |
 | BENCH         | Benchmarks              |
-| QDNA          | Original Q-DNA Research |
+| QORELOGIC          | Original QoreLogic Research |
 
 **Examples:**
 
 - `[TRUST-001]` - First trust dynamics citation
 - `[LLM-003]` - Third LLM reliability citation
-- `[QDNA-001]` - First original Q-DNA finding
+- `[QORELOGIC-001]` - First original QoreLogic finding
 
 ### 2.2 In-Text Citation
 
@@ -140,7 +140,7 @@ Access Date: 2025-12-17
 
 ### 2.4 Source Tiers
 
-Citations are graded by reliability (aligned with Q-DNA SCI):
+Citations are graded by reliability (aligned with QoreLogic SCI):
 
 | Tier | Description                                       | Citation Confidence |
 | ---- | ------------------------------------------------- | ------------------- |
@@ -235,7 +235,7 @@ Quantitative data informing thresholds.
 
 ### 4.5 Original Findings
 
-Q-DNA-specific research.
+QoreLogic-specific research.
 
 **Characteristics:**
 

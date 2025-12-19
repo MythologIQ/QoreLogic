@@ -1,5 +1,5 @@
 """
-Q-DNA P2 Advanced Features
+QoreLogic P2 Advanced Features
 
 Implements:
 1. Deferral Windows - Time-boxed disclosure (4h/24h/72h)
@@ -18,7 +18,7 @@ from enum import Enum
 from pathlib import Path
 from contextlib import contextmanager
 
-DB_PATH = Path(__file__).parent.parent / "ledger" / "qdna_soa_ledger.db"
+DB_PATH = Path(__file__).parent.parent / "ledger" / "qorelogic_soa_ledger.db"
 
 
 # =============================================================================
@@ -585,7 +585,7 @@ class ReputationRecovery:
 def run_p2_demo():
     """Demonstrate P2 features."""
     print("\n" + "="*60)
-    print("Q-DNA P2 FEATURES DEMONSTRATION")
+    print("QoreLogic P2 FEATURES DEMONSTRATION")
     print("="*60)
     
     # 1. Deferral Windows

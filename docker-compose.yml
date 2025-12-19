@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  qorelogic-fortress:
+    build: .
+    image: qorelogic-fortress:latest
+    container_name: qorelogic-fortress
+    volumes:
+      # Persist ledger database
+      - ./local_fortress/ledger:/app/local_fortress/ledger
+      # Persist keystore (if not using secrets manager yet)
+      - ./local_fortress/keystore:/app/local_fortress/keystore
+    environment:
+      # Required for IdentityManager
+      - QORELOGIC_IDENTITY_PASSPHRASE=${QORELOGIC_IDENTITY_PASSPHRASE:-dev-passphrase-do-not-use-in-prod}
+      # Required for TrustEngine context
+      - QORELOGIC_ENV=production
+    restart: unless-stopped
+    # Security hardening
+    read_only: false # Needed for sqlite WAL/locks if in /app? 
+    # Actually, if we mount volumes, those are writable. app code should be read-only ideally.
+    # But python writes __pycache__ unless disabled.
+    # Let's keep it simple for now. 
+    user: qorelogic
+    # MCP Stdout Transport requires stdin/stdout access
+    stdin_open: true # -i
+    tty: true        # -t

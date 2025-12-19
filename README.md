@@ -1,4 +1,4 @@
-# Q-DNA: The Code DNA Engine
+# QoreLogic: The Code DNA Engine
 
 **Version:** 9.0 (Formal Verification Active)  
 **Status:** Phase 9: ML & Formal Verification Active
@@ -6,13 +6,32 @@
 
 ---
 
+## Development Setup
+
+### Prerequisites
+
+- Python 3.11+
+- Git
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. **Configure Git Hooks** (Critical for Governance):
+   ```bash
+   git config core.hooksPath scripts
+   chmod +x scripts/pre-commit scripts/commit-msg
+   ```
+
+---
+
 ## Overview
 
-Q-DNA (Quality DNA Engine) is a **local-first governance layer** for high-assurance AI-assisted code development. It addresses the fundamental unreliability of Large Language Models by implementing a multi-tier verification pipeline grounded in formal methods and probabilistic trust engineering.
+QoreLogic (Quality DNA Engine) is a **local-first governance layer** for high-assurance AI-assisted code development. It addresses the fundamental unreliability of Large Language Models by implementing a multi-tier verification pipeline grounded in formal methods and probabilistic trust engineering.
 
 ### Core Value Proposition
 
-| Problem                    | Q-DNA Solution                   |
+| Problem                    | QoreLogic Solution                   |
 | :------------------------- | :------------------------------- |
 | LLM hallucination (18-50%) | Multi-tier verification pipeline |
 | Cloud dependency           | Sovereign local execution        |
@@ -82,7 +101,7 @@ Q-DNA (Quality DNA Engine) is a **local-first governance layer** for high-assura
 
 | Document                                              | Description                       |
 | :---------------------------------------------------- | :-------------------------------- |
-| [Q-DNA_SPECIFICATION.md](docs/Q-DNA_SPECIFICATION.md) | Complete specification (v2.4)     |
+| [QoreLogic_SPECIFICATION.md](docs/QoreLogic_SPECIFICATION.md) | Complete specification (v2.4)     |
 | [PRD.md](docs/PRD.md)                                 | Product requirements              |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md)               | Technical architecture            |
 | [DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md)       | Roadmap and implementation status |
@@ -119,7 +138,7 @@ python -m pytest tests/
 
 ## Research Foundation
 
-Q-DNA is grounded in empirical research:
+QoreLogic is grounded in empirical research:
 
 - **Trust:** EigenTrust, Lewicki-Bunker, RiskMetrics
 - **Verification:** HaluEval, PyVeritas, OWASP Benchmark
@@ -138,7 +157,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## Contributing
 
-Q-DNA is currently in active research phase. Contributions welcome after v1.0 release.
+QoreLogic is currently in active research phase. Contributions welcome after v1.0 release.
 
 ---
 

@@ -114,16 +114,18 @@ class TrustManager:
                     new_score = max(new_score, probation_floor)
 
                 # Update agent_registry
+                new_stage = self.engine.get_trust_stage(new_score).name
                 conn.execute(
                     """
                     UPDATE agent_registry
                     SET trust_score = ?,
+                        trust_stage = ?,
                         last_trust_update = CURRENT_TIMESTAMP,
                         verification_count = verification_count + 1,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE did = ?
                     """,
-                    (new_score, agent_did)
+                    (new_score, new_stage, agent_did)
                 )
 
                 # Record in trust_updates history
@@ -210,10 +212,12 @@ class TrustManager:
                 )
 
                 # Update agent_registry
+                new_stage = self.engine.get_trust_stage(new_score).name
                 conn.execute(
                     """
                     UPDATE agent_registry
                     SET trust_score = ?,
+                        trust_stage = ?,
                         daily_penalty_sum = ?,
                         penalty_reset_date = ?,
                         last_trust_update = CURRENT_TIMESTAMP,
@@ -222,6 +226,7 @@ class TrustManager:
                     """,
                     (
                         new_score,
+                        new_stage,
                         daily_penalty_sum + applied_penalty,
                         today.isoformat(),
                         agent_did
@@ -300,15 +305,17 @@ class TrustManager:
                     return True
 
                 # Update agent_registry
+                new_stage = self.engine.get_trust_stage(new_score).name
                 conn.execute(
                     """
                     UPDATE agent_registry
                     SET trust_score = ?,
+                        trust_stage = ?,
                         last_trust_update = CURRENT_TIMESTAMP,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE did = ?
                     """,
-                    (new_score, agent_did)
+                    (new_score, new_stage, agent_did)
                 )
 
                 # Record in trust_updates history
@@ -385,6 +392,180 @@ class TrustManager:
         except Exception as e:
             self.logger.error(f"Error reading trust history for {agent_did}: {e}")
             return []
+
+    def apply_violation_penalty(
+        self,
+        agent_did: str,
+        reason: str,
+        is_malicious: bool = False,
+        ledger_ref_id: Optional[int] = None
+    ) -> bool:
+        """
+        Apply major violation penalty and stage demotion.
+        
+        Args:
+            agent_did: Agent DID
+            reason: Violation reason
+            is_malicious: True if violation implies potential intent (triggers longer cooling off)
+            ledger_ref_id: SOA ledger reference
+            
+        Returns:
+            True if successful
+        """
+        from datetime import datetime, timedelta
+        
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                # Get current state
+                cursor = conn.execute(
+                    "SELECT trust_score FROM agent_registry WHERE did = ?",
+                    (agent_did,)
+                )
+                row = cursor.fetchone()
+                if not row:
+                    self.logger.error(f"Agent {agent_did} not found")
+                    return False
+                
+                current_score = row[0]
+                
+                # Calculate new score via TrustEngine (handles stage demotion)
+                new_score = self.engine.calculate_violation_penalty(current_score)
+                
+                # Determine cooling off
+                cooling_off_seconds = self.engine.get_cooling_off_duration(is_malicious)
+                now = datetime.now()
+                end_time = now + timedelta(seconds=cooling_off_seconds)
+                
+                # Update trust_score and set status to QUARANTINED
+                new_stage = self.engine.get_trust_stage(new_score).name
+                conn.execute(
+                    """
+                    UPDATE agent_registry
+                    SET trust_score = ?,
+                        trust_stage = ?,
+                        status = 'QUARANTINED',
+                        last_trust_update = CURRENT_TIMESTAMP,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE did = ?
+                    """,
+                    (new_score, new_stage, agent_did)
+                )
+                
+                # Insert into agent_quarantine
+                conn.execute(
+                    """
+                    INSERT INTO agent_quarantine 
+                    (agent_did, start_time, end_time, reason, active)
+                    VALUES (?, CURRENT_TIMESTAMP, ?, ?, 1)
+                    """,
+                    (agent_did, end_time, reason)
+                )
+                
+                # Log VIOLATION_PENALTY
+                conn.execute(
+                    """
+                    INSERT INTO trust_updates (
+                        agent_did, old_score, new_score, delta,
+                        update_type, context, ledger_ref_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        agent_did, current_score, new_score, new_score - current_score,
+                        'VIOLATION_PENALTY', reason, ledger_ref_id
+                    )
+                )
+                
+                # Log COOLING_OFF_START
+                conn.execute(
+                    """
+                    INSERT INTO trust_updates (
+                        agent_did, old_score, new_score, delta,
+                        update_type, context, ledger_ref_id
+                    ) VALUES (?, ?, ?, ?, 'COOLING_OFF_START', ?, ?)
+                    """,
+                    (
+                        agent_did, new_score, new_score, 0.0,
+                        f"Duration: {cooling_off_seconds}s (Malicious={is_malicious})",
+                        ledger_ref_id
+                    )
+                )
+                
+                conn.commit()
+                self.logger.warning(
+                    f"VIOLATION penalty applied to {agent_did}: {current_score:.3f} -> {new_score:.3f}. "
+                    f"Quarantined until {end_time}."
+                )
+                return True
+                
+        except Exception as e:
+            self.logger.error(f"Error applying violation penalty to {agent_did}: {e}", exc_info=True)
+            return False
+
+    def update_influence_weights(self) -> bool:
+        """
+        Recalculate and update influence weights for all agents based on L1-normalized trust scores.
+        This ensures system-wide conservation of influence.
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                # Fetch all active agents and their trust scores
+                cursor = conn.execute(
+                    "SELECT did, trust_score FROM agent_registry WHERE status = 'ACTIVE'"
+                )
+                agents = cursor.fetchall()  # List of (did, score)
+                
+                if not agents:
+                    return True
+                
+                dids = [a[0] for a in agents]
+                scores = [a[1] for a in agents]
+                
+                # Normalize current trust scores (eigenvector approximation)
+                normalized_scores = self.engine.normalize_trust_vector(scores)
+                
+                # --- Phase 10.5: Anchor Damping (Sybil Resistance) ---
+                # Create pre-trusted vector based on roles
+                cursor = conn.execute(
+                    "SELECT did, role FROM agent_registry WHERE status = 'ACTIVE'"
+                )
+                role_map = {row[0]: row[1] for row in cursor.fetchall()}
+                
+                anchor_scores = []
+                for did in dids:
+                    role = role_map.get(did, "")
+                    # Anchors: Judge, Overseer, Sentinel (Genesis Agents)
+                    if role in ["Judge", "Overseer", "Sentinel"]:
+                        anchor_scores.append(1.0)
+                    else:
+                        anchor_scores.append(0.0) # Scriveners/others trust anchors
+                
+                # Normalize anchor vector
+                normalized_anchors = self.engine.normalize_trust_vector(anchor_scores)
+                
+                # Apply damping (Teleportation)
+                if normalized_anchors: # Only if we have anchors
+                    final_weights = self.engine.apply_anchor_damping(
+                        normalized_scores, 
+                        normalized_anchors,
+                        damping_factor=0.85 
+                    )
+                else:
+                    final_weights = normalized_scores
+                
+                # Update influence_weight for each agent
+                for did, weight in zip(dids, final_weights):
+                    conn.execute(
+                        "UPDATE agent_registry SET influence_weight = ?, updated_at = CURRENT_TIMESTAMP WHERE did = ?",
+                        (weight, did)
+                    )
+                
+                conn.commit()
+                self.logger.info(f"Updated influence weights for {len(agents)} agents (L1 Norm + Anchor Damping).")
+                return True
+                
+        except Exception as e:
+            self.logger.error(f"Error updating influence weights: {e}", exc_info=True)
+            return False
 
     def _parse_timestamp(self, ts_str: str) -> float:
         """

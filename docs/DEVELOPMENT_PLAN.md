@@ -1,10 +1,10 @@
-# Q-DNA Development Roadmap
+# QoreLogic Development Roadmap
 
 **Version:** 4.0
 **Goal:** Establish the "Sovereign Fortress" with empirically validated governance
 **Last Updated:** December 18, 2025
 **Specification:** v2.4 (Fully Integrated)
-**Repository:** https://github.com/MythologIQ/Q-DNA
+**Repository:** https://github.com/MythologIQ/QoreLogic
 **Research Foundation:** See [Research Library](./research/INDEX.md)
 
 ---
@@ -25,17 +25,17 @@
 
 ### Self-Governance (Bootstrapping)
 
-> _"We eat our own cooking."_ Q-DNA's governance principles apply to Q-DNA's development.
+> _"We eat our own cooking."_ QoreLogic's governance principles apply to QoreLogic's development.
 
 ---
 
-## Governance Framework for Q-DNA Development
+## Governance Framework for QoreLogic Development
 
-This section defines how we apply Q-DNA principles to our own development process.
+This section defines how we apply QoreLogic principles to our own development process.
 
 ### Task Risk Grading
 
-Every development task is classified using Q-DNA's L1/L2/L3 system:
+Every development task is classified using QoreLogic's L1/L2/L3 system:
 
 | Grade  | Development Task Type         | Verification Required | Approval       |
 | :----- | :---------------------------- | :-------------------- | :------------- |
@@ -380,14 +380,14 @@ Addresses P0/P1 implementation gaps identified in [TRUST_MODEL_VALIDATION.md](./
 
 | Item                    |   Status    | Description                          | Est. Effort |
 | :---------------------- | :---------: | :----------------------------------- | :---------- |
-| Repository Creation     | ✅ **Done** | https://github.com/MythologIQ/Q-DNA  | -           |
+| Repository Creation     | ✅ **Done** | https://github.com/MythologIQ/QoreLogic  | -           |
 | README + LICENSE        | ✅ **Done** | Apache 2.0                           | -           |
 | CI/CD Pipeline          |     📋      | GitHub Actions                       | 4h          |
 | Docker Containerization |     📋      | Multi-stage build, security hardened | 6h          |
 | Documentation Site      |     📋      | MkDocs/Docusaurus                    | 6h          |
 | Pilot Deployment        |     📋      | Internal dogfooding                  | 8h          |
 | Benchmark Validation    |     📋      | Trap dataset execution               | 8h          |
-| Persistent Daemon       |     📋      | Local background service (`qdna-d`)  | 6h          |
+| Persistent Daemon       |     📋      | Local background service (`qorelogic-d`)  | 6h          |
 
 > **Decision (2025-12-18):** Full backend containerization approved for dependency isolation (Z3, CBMC, etc.) and security sandboxing per §2.1 Sovereign Fortress principle.
 
@@ -486,7 +486,7 @@ Addresses P0/P1 implementation gaps identified in [TRUST_MODEL_VALIDATION.md](./
 | Missing SOA columns    | `schema.sql`             | Added 6 governance columns          |
 | Missing event types    | `schema.sql`             | Added 8 new event types             |
 | Schema version         | `schema.sql`             | v2.0 → **v2.4**                     |
-| GitHub repository      | -                        | https://github.com/MythologIQ/Q-DNA |
+| GitHub repository      | -                        | https://github.com/MythologIQ/QoreLogic |
 
 ### 🚧 IN PROGRESS (Phase 8.5)
 

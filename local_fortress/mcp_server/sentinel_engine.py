@@ -1,7 +1,7 @@
 """
-Q-DNA Sentinel Engine v2.1
+QoreLogic Sentinel Engine v2.1
 
-Implements the full verification pipeline as specified in Q-DNA_SPECIFICATION.md:
+Implements the full verification pipeline as specified in QoreLogic_SPECIFICATION.md:
 - Static Safety Analysis (L1/L2)
 - Cyclomatic Complexity Check (L2)
 - Citation Depth Enforcement (L2)
@@ -114,7 +114,7 @@ class SentinelEngine:
     def classify_risk_grade(self, file_path: str, content: str) -> RiskGrade:
         """
         Auto-classify risk based on file path and content patterns.
-        Per Q-DNA Spec Section 4: Risk Grading.
+        Per QoreLogic Spec Section 4: Risk Grading.
         """
         file_lower = file_path.lower()
         

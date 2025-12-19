@@ -15,7 +15,7 @@ except ImportError:
     # Fallback if running from root
     from local_fortress.mcp_server.sentinel_engine import SentinelEngine
 
-DB_PATH = os.path.join("local_fortress", "ledger", "qdna_soa_ledger.db")
+DB_PATH = os.path.join("local_fortress", "ledger", "qorelogic_soa_ledger.db")
 
 
 # Load Workflow Configuration
@@ -126,7 +126,7 @@ def audit_file(file_path):
         sys.exit(1) # Return error code for CI/CD blocking
 
 def main():
-    parser = argparse.ArgumentParser(description="Q-DNA Soverign Gatekeeper")
+    parser = argparse.ArgumentParser(description="QoreLogic Soverign Gatekeeper")
     subparsers = parser.add_subparsers(dest="command")
     
     # Audit Command

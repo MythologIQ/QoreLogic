@@ -1,5 +1,5 @@
 """
-Q-DNA Evolutionary Bootstrapping System
+QoreLogic Evolutionary Bootstrapping System
 
 Implements the "Fail Forward" multi-pass build model:
 1. Generate multiple candidate solutions (variants)
@@ -41,7 +41,7 @@ except ImportError:
     # Fallback for direct execution
     from sentinel_engine import SentinelEngine, AuditResult
 
-DB_PATH = os.path.join(PROJECT_ROOT, "local_fortress", "ledger", "qdna_soa_ledger.db")
+DB_PATH = os.path.join(PROJECT_ROOT, "local_fortress", "ledger", "qorelogic_soa_ledger.db")
 
 
 
@@ -432,7 +432,7 @@ class EvolutionaryBootstrapper:
 def run_bootstrap_demo():
     """Demonstrate the evolutionary bootstrapping system."""
     print("\n" + "="*70)
-    print("Q-DNA EVOLUTIONARY BOOTSTRAPPING DEMO")
+    print("QoreLogic EVOLUTIONARY BOOTSTRAPPING DEMO")
     print("="*70)
     
     bootstrapper = EvolutionaryBootstrapper()

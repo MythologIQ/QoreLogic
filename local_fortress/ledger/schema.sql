@@ -1,5 +1,5 @@
--- Q-DNA SOA Ledger Schema v2.5
--- Aligned with Q-DNA_SPECIFICATION.md v2.5 (Fully Integrated)
+-- QoreLogic SOA Ledger Schema v2.5
+-- Aligned with QoreLogic_SPECIFICATION.md v2.5 (Fully Integrated)
 
 -- Agent Identity Registry (Enhanced for Trust Integration - Track INT)
 CREATE TABLE IF NOT EXISTS agent_registry (
@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS agent_registry (
     status TEXT DEFAULT 'ACTIVE' CHECK(status IN ('ACTIVE', 'QUARANTINED', 'SUSPENDED')),
     -- Trust Dynamics Integration (Phase 8.5 Track INT)
     trust_score REAL DEFAULT 0.4 CHECK(trust_score >= 0.0 AND trust_score <= 1.0),  -- Normalized 0-1
+    trust_stage TEXT DEFAULT 'CBT' CHECK(trust_stage IN ('CBT', 'KBT', 'IBT')),    -- Phase 10.4
     last_trust_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     verification_count INTEGER DEFAULT 0,  -- For probation tracking (Spec §5.3.2)
     daily_penalty_sum REAL DEFAULT 0.0,    -- For micro-penalty cap (Spec §9.1)
@@ -140,3 +141,17 @@ CREATE INDEX IF NOT EXISTS idx_shadow_failure ON shadow_genome(failure_mode);
 CREATE INDEX IF NOT EXISTS idx_l3_status ON l3_approval_queue(status);
 CREATE INDEX IF NOT EXISTS idx_trust_updates_agent ON trust_updates(agent_did);
 CREATE INDEX IF NOT EXISTS idx_trust_updates_timestamp ON trust_updates(timestamp);
+
+-- Agent Quarantine (Missing table for Phase 10 compliance)
+CREATE TABLE IF NOT EXISTS agent_quarantine (
+    quarantine_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    agent_did TEXT NOT NULL,
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_time TIMESTAMP NOT NULL,
+    reason TEXT,
+    active INTEGER DEFAULT 1 CHECK(active IN (0, 1)),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (agent_did) REFERENCES agent_registry(did)
+);
+CREATE INDEX IF NOT EXISTS idx_quarantine_agent ON agent_quarantine(agent_did);
+CREATE INDEX IF NOT EXISTS idx_quarantine_active ON agent_quarantine(active);

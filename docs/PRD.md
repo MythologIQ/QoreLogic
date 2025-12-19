@@ -1,4 +1,4 @@
-# Q-DNA Product Requirements Document (PRD)
+# QoreLogic Product Requirements Document (PRD)
 
 **Version:** 2.0 (Empirically Validated)
 **Status:** Active Research / Bootstrapping
@@ -9,11 +9,11 @@
 
 ## 1. Executive Summary
 
-Q-DNA (Quality DNA Engine) is a **local-first governance layer** for high-assurance AI-assisted code development. It addresses the fundamental unreliability of Large Language Models by implementing a multi-tier verification pipeline grounded in formal methods and probabilistic trust engineering.
+QoreLogic (Quality DNA Engine) is a **local-first governance layer** for high-assurance AI-assisted code development. It addresses the fundamental unreliability of Large Language Models by implementing a multi-tier verification pipeline grounded in formal methods and probabilistic trust engineering.
 
 ### Core Value Proposition
 
-| Problem                    | Q-DNA Solution                   | Research Basis            |
+| Problem                    | QoreLogic Solution                   | Research Basis            |
 | :------------------------- | :------------------------------- | :------------------------ |
 | LLM hallucination (18-50%) | Multi-tier verification pipeline | HaluEval, TruthfulQA      |
 | Cloud dependency           | Sovereign local execution        | Data sovereignty          |

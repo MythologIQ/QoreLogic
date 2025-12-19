@@ -1,4 +1,4 @@
-# Q-DNA Sentinel Technical Specification
+# QoreLogic Sentinel Technical Specification
 
 ## 1. Efficiency Benchmarks (2025)
 

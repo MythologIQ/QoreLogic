@@ -1,6 +1,6 @@
-# Q-DNA Source Code Structure
+# QoreLogic Source Code Structure
 
-This directory contains the reference implementation for the **Q-DNA Code DNA Engine**.
+This directory contains the reference implementation for the **QoreLogic Code DNA Engine**.
 
 ## Directory Layout
 
@@ -14,6 +14,6 @@ This directory contains the reference implementation for the **Q-DNA Code DNA En
 
 ## Getting Started
 
-1.  Review the **Q-DNA Specification** in `../docs/Q-DNA_SPECIFICATION.md`.
+1.  Review the **QoreLogic Specification** in `../docs/QoreLogic_SPECIFICATION.md`.
 2.  Configure your workspace rules in `../config/rules`.
 3.  Deploy the Judge MCP server (Implementation TBD).

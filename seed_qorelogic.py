@@ -1,7 +1,7 @@
 import os
 
 # Project Identity
-ROOT = "MythologIQ_QDNA"
+ROOT = "MythologIQ_QORELOGIC"
 
 # Complete Folder Hierarchy
 folders = [
@@ -15,7 +15,7 @@ folders = [
 
 # THE FULL REPOSITORY CONTENT (UNSURFACED & SYNTHESIZED)
 files = {
-    "README.md": """# MythologIQ: Q-DNA (Quality DNA Engine)
+    "README.md": """# MythologIQ: QoreLogic (Quality DNA Engine)
 Autonomous Accountability for the MythologIQ Ecosystem.
 
 ## The Hypothesis
@@ -28,7 +28,7 @@ A hierarchical multi-agent system using a 27M-parameter recurrent model (HRM) fo
 - **DNA:** Agent Accountability Contract (AAC) v1.1.
 """,
 
-    "llms.txt": """# Q-DNA Project Context
+    "llms.txt": """# QoreLogic Project Context
 - Framework: Hierarchical Reasoning Model (HRM)
 - Engine: Local Sentinel (27M) + Cloud Scrivener
 - Enforcement: MCP + SQLite SOA Ledger
@@ -45,7 +45,7 @@ Testing: docs/TESTING_STRATEGY.md
     "docs/PRD.md": """# Product Requirements Document (PRD)
 
 ## 1. Executive Summary
-Q-DNA is a governance layer designed to facilitate high-assurance code development on legacy hardware. It targets the "hallucination gap" by moving verification from cloud-based probabilistic models to local, deterministic formal methods.
+QoreLogic is a governance layer designed to facilitate high-assurance code development on legacy hardware. It targets the "hallucination gap" by moving verification from cloud-based probabilistic models to local, deterministic formal methods.
 
 ## 2. Key Objectives
 - **Defect Reduction:** Target a 78% drop in code logic errors (L3).
@@ -73,7 +73,7 @@ The system is split between a "Cloud Scrivener" (creative generation) and a "Loc
 - **SOA Ledger:** A local SQLite database using hash-chaining (prev_hash) for every entry.
 """,
 
-    "docs/research/SENTINEL_TECH.md": """# Q-DNA Sentinel Technical Specification
+    "docs/research/SENTINEL_TECH.md": """# QoreLogic Sentinel Technical Specification
 
 ## 1. Efficiency Benchmarks (2025)
 - **HRM Accuracy:** 40.3% on ARC-AGI-1 vs. 37% for GPT-4.
@@ -85,7 +85,7 @@ The system is split between a "Cloud Scrivener" (creative generation) and a "Loc
 - **C-Transpilation:** Python code is transpiled to C via PyVeritas to leverage mature SMT solvers (CBMC) on the 10-year-old CPU.
 """,
 
-    ".agent/rules/core_governance.md": """# Q-DNA DNA: AAC v1.1 Core Rules
+    ".agent/rules/core_governance.md": """# QoreLogic DNA: AAC v1.1 Core Rules
 
 ## 1. Risk Grading
 - Every artifact must be tagged L1, L2, or L3.
@@ -100,7 +100,7 @@ The system is split between a "Cloud Scrivener" (creative generation) and a "Loc
 - Any TTL (Time-To-Live) breach triggers a re-validation.
 """,
 
-    "local_fortress/ledger/schema.sql": """-- Q-DNA SOA Ledger Schema
+    "local_fortress/ledger/schema.sql": """-- QoreLogic SOA Ledger Schema
 CREATE TABLE agent_registry (
     did TEXT PRIMARY KEY, 
     public_key TEXT, 
@@ -126,16 +126,16 @@ CREATE TABLE reputation_log (
 );
 """,
 
-    ".env.example": "QDNA_DB_PATH=./local_fortress/ledger/qdna_soa_ledger.db\nMCP_PORT=8001\nHEARTHLINK_PORT=8000"
+    ".env.example": "QORELOGIC_DB_PATH=./local_fortress/ledger/qorelogic_soa_ledger.db\nMCP_PORT=8001\nHEARTHLINK_PORT=8000"
 }
 
 def bootstrap():
-    print(f"📦 Extracting the Complete MythologIQ Q-DNA Omnibus...")
+    print(f"📦 Extracting the Complete MythologIQ QoreLogic Omnibus...")
     for f in folders: os.makedirs(os.path.join(ROOT, f), exist_ok=True)
     for path, content in files.items():
         with open(os.path.join(ROOT, path), "w") as f: f.write(content)
     print(f"✨ SUCCESS: Repository seeded in '{ROOT}'.")
-    print("👉 Next: Run 'sqlite3 qdna_soa_ledger.db < schema.sql' in the ledger folder.")
+    print("👉 Next: Run 'sqlite3 qorelogic_soa_ledger.db < schema.sql' in the ledger folder.")
 
 if __name__ == "__main__":
     bootstrap()

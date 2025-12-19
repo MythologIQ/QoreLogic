@@ -4,13 +4,13 @@
 **Created:** December 18, 2025  
 **Status:** Complete  
 **Purpose:** Coordinated Vulnerability Disclosure (CVD) policy and SLAs  
-**Cross-Reference:** Q-DNA Spec §4 (Security), ISO/IEC 29147, ISO/IEC 30111
+**Cross-Reference:** QoreLogic Spec §4 (Security), ISO/IEC 29147, ISO/IEC 30111
 
 ---
 
 ## 1. Executive Summary
 
-The Q-DNA Project adopts **Coordinated Vulnerability Disclosure (CVD)** to minimize the window of exposure. This document defines the "90+30" model, severity-based SLAs, and specific strategies for AI/ML vulnerabilities where traditional patching (recompilation) is replaced by "Layered Remediation" (guardrails + retraining).
+The QoreLogic Project adopts **Coordinated Vulnerability Disclosure (CVD)** to minimize the window of exposure. This document defines the "90+30" model, severity-based SLAs, and specific strategies for AI/ML vulnerabilities where traditional patching (recompilation) is replaced by "Layered Remediation" (guardrails + retraining).
 
 **Key Claims Substantiated:**
 
@@ -87,7 +87,7 @@ Consisent with CISA/FDA guidelines:
 
 ## 6. Legal Safe Harbor
 
-Q-DNA considers security research to be **authorized access** under the CFAA provided the researcher:
+QoreLogic considers security research to be **authorized access** under the CFAA provided the researcher:
 
 1. Acts in good faith.
 2. Follows the CVD policy.

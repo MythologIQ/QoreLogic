@@ -1,5 +1,5 @@
 """
-Q-DNA Identity Manager
+QoreLogic Identity Manager
 
 Provides cryptographic identity management:
 - Ed25519 key generation and storage
@@ -26,9 +26,9 @@ import base64
 
 # Configuration
 KEYSTORE_DIR = Path(__file__).parent.parent / "keystore"
-DB_PATH = Path(__file__).parent.parent / "ledger" / "qdna_soa_ledger.db"
+DB_PATH = Path(__file__).parent.parent / "ledger" / "qorelogic_soa_ledger.db"
 KEY_ROTATION_DAYS = 30
-
+LEGACY_SALT = b"qorelogic-salt-v1"  # For backward compatibility
 
 @dataclass
 class AgentIdentity:
@@ -45,7 +45,7 @@ class AgentIdentity:
 
 class IdentityManager:
     """
-    Manages cryptographic identities for Q-DNA agents.
+    Manages cryptographic identities for QoreLogic agents.
     
     Security Model:
     - Ed25519 for signing (fast, secure, deterministic)
@@ -59,20 +59,27 @@ class IdentityManager:
         
         Args:
             passphrase: Optional passphrase for encrypting keyfiles.
-                       If None, uses a default (NOT SECURE for production).
+                       If None, checks QORELOGIC_IDENTITY_PASSPHRASE env var,
+                       then falls back to default (NOT SECURE for production).
         """
-        self.passphrase = passphrase or "qdna-development-key"
-        self._fernet = self._create_fernet()
-        
+        env_pass = os.environ.get("QORELOGIC_IDENTITY_PASSPHRASE")
+        if passphrase:
+            self.passphrase = passphrase
+        elif env_pass:
+            self.passphrase = env_pass
+        else:
+            print("⚠️ WARNING: Using insecure default passphrase. Set QORELOGIC_IDENTITY_PASSPHRASE for production.")
+            self.passphrase = "qorelogic-development-key"
+            
         # Ensure keystore exists
         KEYSTORE_DIR.mkdir(parents=True, exist_ok=True)
     
-    def _create_fernet(self) -> Fernet:
-        """Create Fernet cipher from passphrase."""
+    def _get_cipher(self, salt: bytes) -> Fernet:
+        """Create Fernet cipher from passphrase and specific salt."""
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
-            salt=b"qdna-salt-v1",  # In production, use random salt per keyfile
+            salt=salt,
             iterations=100000,
             backend=default_backend()
         )
@@ -130,8 +137,10 @@ class IdentityManager:
         private_bytes = self.serialize_private_key(private_key)
         public_bytes = self.serialize_public_key(public_key)
         
-        # Encrypt private key for storage
-        encrypted_private = self._fernet.encrypt(private_bytes)
+        # Encrypt private key with fresh salt
+        salt = os.urandom(16)
+        cipher = self._get_cipher(salt)
+        encrypted_private = cipher.encrypt(private_bytes)
         
         # Create identity
         now = time.time()
@@ -150,6 +159,7 @@ class IdentityManager:
             "role": role,
             "public_key": public_bytes.hex(),
             "private_key_encrypted": encrypted_private.decode(),
+            "salt": base64.b64encode(salt).decode(),
             "created_at": now,
             "expires_at": identity.expires_at
         }
@@ -165,13 +175,18 @@ class IdentityManager:
     def _register_in_db(self, identity: AgentIdentity, public_key_hex: str):
         """Register agent in the database."""
         conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        # Check if table has trust_stage (it might if schema update worked, else ignore)
+        # We just want to update keys and timestamps.
         
         try:
-            cursor.execute("""
-                INSERT OR REPLACE INTO agent_registry 
+            # UPSERT syntax (SQLite 3.24+)
+            conn.execute("""
+                INSERT INTO agent_registry 
                 (did, public_key, role, influence_weight, status, created_at, updated_at)
                 VALUES (?, ?, ?, 1.0, 'ACTIVE', datetime('now'), datetime('now'))
+                ON CONFLICT(did) DO UPDATE SET
+                    public_key=excluded.public_key,
+                    updated_at=excluded.updated_at
             """, (identity.did, public_key_hex, identity.role))
             conn.commit()
         finally:
@@ -195,9 +210,16 @@ class IdentityManager:
         with open(keyfile_path, 'r') as f:
             data = json.load(f)
         
+        # Determine salt
+        if "salt" in data:
+            salt = base64.b64decode(data["salt"])
+        else:
+            salt = LEGACY_SALT
+            
         # Decrypt private key
+        cipher = self._get_cipher(salt)
         encrypted_private = data["private_key_encrypted"].encode()
-        private_bytes = self._fernet.decrypt(encrypted_private)
+        private_bytes = cipher.decrypt(encrypted_private)
         private_key = self.load_private_key(private_bytes)
         
         identity = AgentIdentity(
@@ -286,8 +308,10 @@ class IdentityManager:
             expires_at=now + (KEY_ROTATION_DAYS * 24 * 60 * 60)
         )
         
-        # Encrypt new private key
-        encrypted_private = self._fernet.encrypt(self.serialize_private_key(new_private))
+        # Encrypt new private key with fresh salt
+        salt = os.urandom(16)
+        cipher = self._get_cipher(salt)
+        encrypted_private = cipher.encrypt(self.serialize_private_key(new_private))
         
         keyfile_path = KEYSTORE_DIR / f"{did.replace(':', '_')}.key"
         keyfile_data = {
@@ -295,6 +319,7 @@ class IdentityManager:
             "role": identity.role,
             "public_key": new_identity.public_key_hex,
             "private_key_encrypted": encrypted_private.decode(),
+            "salt": base64.b64encode(salt).decode(),
             "created_at": now,
             "expires_at": new_identity.expires_at,
             "rotated_from": identity.public_key_hex  # Audit trail
@@ -350,7 +375,7 @@ def initialize_agents():
 
 
 if __name__ == "__main__":
-    print("Q-DNA Identity Manager - Initialization")
+    print("QoreLogic Identity Manager - Initialization")
     print("=" * 50)
     
     identities = initialize_agents()
@@ -362,7 +387,7 @@ if __name__ == "__main__":
     manager = IdentityManager()
     
     # Test signing and verification
-    test_data = b"This is a test message for Q-DNA verification."
+    test_data = b"This is a test message for QoreLogic verification."
     
     for identity in identities:
         sig = manager.sign(identity.did, test_data)

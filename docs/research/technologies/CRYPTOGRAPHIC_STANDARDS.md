@@ -3,14 +3,14 @@
 **Version:** 1.0  
 **Created:** December 18, 2025  
 **Status:** Complete  
-**Purpose:** Technical specification for high-assurance cryptography in Q-DNA  
-**Cross-Reference:** Q-DNA Spec §4 (Security), §4.2 (Identity), §4.4 (Ledger Integrity)
+**Purpose:** Technical specification for high-assurance cryptography in QoreLogic  
+**Cross-Reference:** QoreLogic Spec §4 (Security), §4.2 (Identity), §4.4 (Ledger Integrity)
 
 ---
 
 ## 1. Executive Summary
 
-Q-DNA mandates a zero-trust cryptographic framework centered on:
+QoreLogic mandates a zero-trust cryptographic framework centered on:
 
 - **Ed25519** for all digital signatures (Performance + Security)
 - **W3C DIDs (did:key)** for decentralized agent identity
@@ -24,7 +24,7 @@ This report analyzes the theoretical foundations and implementation requirements
 
 ## 2. Key Management Framework (NIST SP 800-57)
 
-Q-DNA adopts the lifecycle phases defined in NIST SP 800-57 Part 1 Revision 5.
+QoreLogic adopts the lifecycle phases defined in NIST SP 800-57 Part 1 Revision 5.
 
 ### 2.1 Functional Classification
 
@@ -43,7 +43,7 @@ Q-DNA adopts the lifecycle phases defined in NIST SP 800-57 Part 1 Revision 5.
 
 ### 2.3 Cryptoperiods
 
-Q-DNA enforces a **30-day cryptoperiod** to:
+QoreLogic enforces a **30-day cryptoperiod** to:
 
 - Limit exposure of compromised keys (Blast Radius)
 - Force operational rigor through automation
@@ -57,7 +57,7 @@ Ed25519 is the mandated standard, superseding RSA and ECDSA.
 
 ### 3.1 Comparison Matrix
 
-| Feature               | RSA-3072  | ECDSA (P-256) | Ed25519       | Q-DNA Result          |
+| Feature               | RSA-3072  | ECDSA (P-256) | Ed25519       | QoreLogic Result          |
 | --------------------- | --------- | ------------- | ------------- | --------------------- |
 | **Security Level**    | ~128-bit  | ~128-bit      | ~128-bit      | ✅ Match              |
 | **Public Key Size**   | 384 bytes | 64 bytes      | **32 bytes**  | ✅ Minimal            |
@@ -89,7 +89,7 @@ Long-term verification is handled by anchoring keys to the **Merkle Log Timestam
 
 ## 5. Audit Integrity: Merkle Hash Chains
 
-To ensure the ledger is tamper-evident, Q-DNA implements a Binary Merkle Tree compliant with **RFC 6962**.
+To ensure the ledger is tamper-evident, QoreLogic implements a Binary Merkle Tree compliant with **RFC 6962**.
 
 ### 5.1 RFC 6962 Hashing Strategy
 
@@ -108,7 +108,7 @@ Protects against second preimage attacks (structural collisions):
 
 ## 6. Decentralized Identity (DIDs)
 
-Q-DNA uses **did:key** for serverless, location-agnostic identity.
+QoreLogic uses **did:key** for serverless, location-agnostic identity.
 
 ### 6.1 Derivation (Ed25519)
 

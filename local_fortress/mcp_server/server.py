@@ -1,7 +1,7 @@
 """
-Q-DNA MCP Server v2.1 - Sovereign Gatekeeper
+QoreLogic MCP Server v2.1 - Sovereign Gatekeeper
 
-Provides the Model Context Protocol interface for the Q-DNA governance layer.
+Provides the Model Context Protocol interface for the QoreLogic governance layer.
 Exposes tools for:
 - Code auditing (Sentinel)
 - Ledger logging (Judge) with Ed25519 signatures
@@ -22,10 +22,10 @@ from contextlib import contextmanager
 from pathlib import Path
 
 # Initialize the FastMCP Server
-mcp = FastMCP("Q-DNA Sovereign Gatekeeper v2.1")
+mcp = FastMCP("QoreLogic Sovereign Gatekeeper v2.1")
 
 # Configuration
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ledger", "qdna_soa_ledger.db")
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "ledger", "qorelogic_soa_ledger.db")
 
 # Import P0 modules (lazy load to avoid circular imports)
 _identity_manager = None
@@ -698,7 +698,7 @@ def verify_signature(did: str, data: str, signature_hex: str) -> str:
 @mcp.tool()
 def system_health_check() -> str:
     """
-    Run a comprehensive health check on all Q-DNA systems.
+    Run a comprehensive health check on all QoreLogic systems.
     
     Returns:
         JSON with health status across all subsystems

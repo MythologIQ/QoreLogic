@@ -4,13 +4,13 @@
 **Created:** December 18, 2025  
 **Status:** Complete  
 **Purpose:** Tripartite Governance (GDPR, CCPA/CPRA, HIPAA) in AI systems  
-**Cross-Reference:** Q-DNA Spec §10 (Privacy), §10.2 (Data Sovereignty)
+**Cross-Reference:** QoreLogic Spec §10 (Privacy), §10.2 (Data Sovereignty)
 
 ---
 
 ## 1. Executive Summary
 
-Q-DNA operates at the intersection of GDPR, CCPA/CPRA, and HIPAA. Compliance requires a "Privacy by Design" re-architecture addressing the "Tripartite Governance Challenge." This document specifies technical requirements for managing Automated Decision-Making (ADM), cross-border transfers (Schrems II), and the inherent re-identification risks of high-dimensional AI models.
+QoreLogic operates at the intersection of GDPR, CCPA/CPRA, and HIPAA. Compliance requires a "Privacy by Design" re-architecture addressing the "Tripartite Governance Challenge." This document specifies technical requirements for managing Automated Decision-Making (ADM), cross-border transfers (Schrems II), and the inherent re-identification risks of high-dimensional AI models.
 
 **Key Claims Substantiated:**
 

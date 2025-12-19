@@ -1,6 +1,6 @@
-# Q-DNA Research Laboratory
+# QoreLogic Research Laboratory
 
-This directory contains the active research artifacts, data tables, and study protocols for the Q-DNA project.
+This directory contains the active research artifacts, data tables, and study protocols for the QoreLogic project.
 
 ## Directory Structure
 

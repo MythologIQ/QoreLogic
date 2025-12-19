@@ -274,9 +274,86 @@ class TrustEngine:
 
         # Start with the first link
         trust = trust_path[0]
+        
+        # Audit Log (Phase 10.6)
+        path_log = [f"{trust:.3f}"]
 
         # Multiply by subsequent links and damping factor
         for next_link in trust_path[1:]:
             trust = trust * next_link * DAMPING_FACTOR
+            path_log.append(f"->({DAMPING_FACTOR}*{next_link:.3f})")
+            
+        # In production, this would go to a structured audit log
+        # print(f"Transitive Path Audit: {' '.join(path_log)} = {trust:.4f}")
 
         return trust
+
+    # --- Phase 10: Trust Conservation (EigenTrust L1 Norm) ---
+    
+    @deal.pre(lambda _self, scores: all(0.0 <= s <= 1.0 for s in scores))
+    @deal.post(lambda result: abs(sum(result) - 1.0) < 1e-6 if result else True)
+    def normalize_trust_vector(self, scores: List[float]) -> List[float]:
+        """
+        Normalize a vector of trust scores (L1 Norm).
+        Ensures the sum of scores equals 1.0.
+        Commonly used in EigenTrust to calculate relative influence.
+        
+        Args:
+           scores: List of raw trust scores (0.0 - 1.0)
+           
+        Returns:
+           Normalized scores summing to 1.0
+        """
+        total = sum(scores)
+        if total == 0:
+            # Avoid division by zero, return uniform distribution or zeros
+            if not scores:
+                return []
+            uniform = 1.0 / len(scores)
+            return [uniform] * len(scores)
+            
+        return [s / total for s in scores]
+
+    @deal.pre(lambda _self, current_vector, *args: all(0.0 <= s <= 1.0 for s in current_vector))
+    @deal.pre(lambda _self, _cv, anchor_vector, *args: all(0.0 <= s <= 1.0 for s in anchor_vector))
+    @deal.pre(lambda _self, _cv, anchor_vector, *args: abs(sum(anchor_vector) - 1.0) < 1e-6 if anchor_vector else True)
+    @deal.pre(lambda _self, _cv, _av, damping_factor=0.85: 0.0 <= damping_factor <= 1.0)
+    @deal.post(lambda result: abs(sum(result) - 1.0) < 1e-6 if result else True)
+    def apply_anchor_damping(
+        self, 
+        current_vector: List[float], 
+        anchor_vector: List[float], 
+        damping_factor: float = 0.85
+    ) -> List[float]:
+        """
+        Applies Anchor Damping (Teleportation) to the trust vector.
+        Formula: T_new = (1 - a) * T_current + a * T_anchor
+        where 'a' is (1 - damping_factor).
+        
+        This ensures that even if a clique forms, some trust always 'teleports' 
+        back to the pre-trusted anchor nodes, preventing Sybil attacks.
+        
+        Args:
+            current_vector: Normalized current trust scores
+            anchor_vector: Normalized pre-trusted distribution (must be same length as current)
+            damping_factor: Probability of following links vs teleporting (default 0.85 like PageRank)
+            
+        Returns:
+            Damped (blended) trust vector
+        """
+        if not current_vector:
+            return []
+            
+        if len(current_vector) != len(anchor_vector):
+            raise ValueError("Trust vector and anchor vector must have same length")
+            
+        teleport_prob = 1.0 - damping_factor
+        
+        new_vector = []
+        for t, a in zip(current_vector, anchor_vector):
+            # Blending logic
+            val = (damping_factor * t) + (teleport_prob * a)
+            new_vector.append(val)
+            
+        return new_vector
+

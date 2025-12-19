@@ -1,4 +1,4 @@
-# Q-DNA: The Code DNA Engine Specification
+# QoreLogic: The Code DNA Engine Specification
 
 **Version:** 9.0 (Formal Verification Active)
 **Status:** Actively Implementing Formal Verification (Phase 9)
@@ -12,17 +12,17 @@
 
 | Section            | Description                                                                                                                                                                          |
 | :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Product Name**   | **Q-DNA: The Code DNA Engine** (Antigravity Extension)                                                                                                                               |
+| **Product Name**   | **QoreLogic: The Code DNA Engine** (Antigravity Extension)                                                                                                                               |
 | **Project Type**   | **Research Initiative** (Not Commercial MVP)                                                                                                                                         |
 | **Problem Solved** | Current agentic platforms prioritize velocity over correctness. We seek to establish **definitive results** through rigorous governance.                                             |
-| **Solution**       | Q-DNA implements the **Agent Accountability Contract (AAC)** using a **Hierarchical Reason Model (HRM)**. It bootstraps quality by identifying failure modes first ("Fail Forward"). |
+| **Solution**       | QoreLogic implements the **Agent Accountability Contract (AAC)** using a **Hierarchical Reason Model (HRM)**. It bootstraps quality by identifying failure modes first ("Fail Forward"). |
 | **Core Value**     | Establishes a **Verifiable System of Record** for autonomous development, with progressive formalization from heuristic to proof.                                                    |
 
 ---
 
 ## 2. Architectural Specification: The Sovereign Fortress
 
-The Q-DNA extension operates as a **Verification Pipeline** that injects policy at critical stages of the Antigravity workflow. All verification and enforcement occurs on **local, sovereign hardware**.
+The QoreLogic extension operates as a **Verification Pipeline** that injects policy at critical stages of the Antigravity workflow. All verification and enforcement occurs on **local, sovereign hardware**.
 
 ### 2.1. The Sovereign Fortress Principle
 
@@ -67,11 +67,11 @@ To prevent context contamination between co-located systems:
 | `config/rules/core_governance.md` | AAC Core: Divergence Doctrine, Remediation Tracks |
 | `config/rules/risk_grading.md`    | L1/L2/L3 classification matrix                    |
 | `config/rules/citation_policy.md` | Transitive Cap, Quote Context, Reference Tiers    |
-| `config/workflows/verify_qdna.md` | MCP tool invocation workflow                      |
+| `config/workflows/verify_qorelogic.md` | MCP tool invocation workflow                      |
 
 ### 2.5. Communication Protocol
 
-Per Multi-Agent Coordination research [MAC-002], Q-DNA uses **JSON-RPC 2.0** as the native protocol:
+Per Multi-Agent Coordination research [MAC-002], QoreLogic uses **JSON-RPC 2.0** as the native protocol:
 
 | Property  | Specification                  | Rationale                             |
 | :-------- | :----------------------------- | :------------------------------------ |
@@ -347,7 +347,7 @@ Trust_{A→C} = Trust_{A→B} × Trust_{B→C} × δ
 
 Agent trust scores map to behavioral stages (per trust dynamics research [TRUST-002]):
 
-| Stage | Name                             | Score Range | Q-DNA Behavior                  |
+| Stage | Name                             | Score Range | QoreLogic Behavior                  |
 | :---- | :------------------------------- | :---------- | :------------------------------ |
 | **1** | Calculus-Based Trust (CBT)       | 0.0 – 0.5   | Probationary; 100% verification |
 | **2** | Knowledge-Based Trust (KBT)      | 0.5 – 0.8   | Standard; sampling verification |
@@ -485,7 +485,7 @@ The **Comfort Layer** is supportive framing provided _only after_ verified facts
 
 ### 8.5. Vulnerability Disclosure Policy
 
-Per AI Governance research [COMP-004], Q-DNA adopts the **Google Project Zero standard**:
+Per AI Governance research [COMP-004], QoreLogic adopts the **Google Project Zero standard**:
 
 | Phase          | Timeline  | Action                                    |
 | :------------- | :-------- | :---------------------------------------- |
@@ -498,9 +498,9 @@ Per AI Governance research [COMP-004], Q-DNA adopts the **Google Project Zero st
 
 ### 8.6. Regulatory Compliance
 
-Q-DNA aligns with major AI governance frameworks (per [COMP-001], [COMP-002], [COMP-003]):
+QoreLogic aligns with major AI governance frameworks (per [COMP-001], [COMP-002], [COMP-003]):
 
-| Regulation       | Requirement                      | Q-DNA Implementation             |
+| Regulation       | Requirement                      | QoreLogic Implementation             |
 | :--------------- | :------------------------------- | :------------------------------- |
 | **GDPR Art. 22** | Right to non-automated decisions | L3 Human-in-the-Loop mandatory   |
 | **GDPR Art. 33** | 72-hour breach notification      | Immediate escalation workflow    |
@@ -864,7 +864,7 @@ Automatic throttling mechanisms to prevent runaway costs:
 
 ### Research Library
 
-**Primary Reference:** [Research Library Index](./research/INDEX.md) — Complete catalog of Q-DNA research documentation.
+**Primary Reference:** [Research Library Index](./research/INDEX.md) — Complete catalog of QoreLogic research documentation.
 
 **Design Validation:** [RESEARCH_VALIDATION.md](./research/synthesis/RESEARCH_VALIDATION.md) — Comprehensive empirical justification for all design parameters, including 57 academic and industry citations.
 

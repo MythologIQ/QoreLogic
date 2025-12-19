@@ -10,9 +10,9 @@
 
 ## Executive Summary
 
-This document addresses a previously unspecified gap in the Q-DNA Specification: **Multi-Agent Coordination (MAC)**. The transition from single-agent to Multi-Agent System (MAS) architecture requires rigorous standards for communication protocols, topological patterns, and resource management.
+This document addresses a previously unspecified gap in the QoreLogic Specification: **Multi-Agent Coordination (MAC)**. The transition from single-agent to Multi-Agent System (MAS) architecture requires rigorous standards for communication protocols, topological patterns, and resource management.
 
-Key finding: FIPA-ACL's semantic richness comes with unacceptable overhead for edge deployment. Q-DNA adopts **JSON-RPC 2.0** (MCP-compatible) with strict Pydantic schemas to retain semantic integrity at minimal cost.
+Key finding: FIPA-ACL's semantic richness comes with unacceptable overhead for edge deployment. QoreLogic adopts **JSON-RPC 2.0** (MCP-compatible) with strict Pydantic schemas to retain semantic integrity at minimal cost.
 
 ---
 
@@ -49,7 +49,7 @@ JSON-RPC 2.0 is the de facto standard for LLM tool interoperability, exemplified
 | Discovery      | Centralized          | Dynamic/Ad-hoc     |
 | State          | Often stateful       | Stateless          |
 
-### 1.3 Q-DNA Protocol Adoption
+### 1.3 QoreLogic Protocol Adoption
 
 **Decision:** JSON-RPC 2.0 as transport layer with **Semantic Schema Layer** for performative reconstruction.
 
@@ -60,7 +60,7 @@ JSON-RPC 2.0 is the de facto standard for LLM tool interoperability, exemplified
 - All agents implement `handle_request` accepting JSON-RPC payloads
 
 ```python
-# Example: Q-DNA Agent Request Handler
+# Example: QoreLogic Agent Request Handler
 from pydantic import BaseModel
 
 class AgentRequest(BaseModel):
@@ -97,7 +97,7 @@ async def handle_request(request: AgentRequest) -> dict:
 - Local blackboards for sub-teams (e.g., "Dev Team")
 - Summarize to global blackboard
 
-**Q-DNA Application:** The "World Model" implements Hierarchical Blackboard for global context without network saturation.
+**QoreLogic Application:** The "World Model" implements Hierarchical Blackboard for global context without network saturation.
 
 ### 2.2 Contract Net Protocol (CNP)
 
@@ -110,7 +110,7 @@ async def handle_request(request: AgentRequest) -> dict:
 3. **Award:** Manager evaluates and awards contract
 4. **Execution:** Winner executes and returns result
 
-**Q-DNA Application:** Dynamic task routing away from overloaded nodes (backpressure implementation).
+**QoreLogic Application:** Dynamic task routing away from overloaded nodes (backpressure implementation).
 
 ### 2.3 Hierarchical Swarms
 
@@ -122,7 +122,7 @@ async def handle_request(request: AgentRequest) -> dict:
 - Delegates to specialized Worker agents
 - Event-driven: Agents subscribe to topics (e.g., `code.generated`, `test.failed`)
 
-**Q-DNA Application:** Asynchronous coupling enables robust error handling without explicit invocation chains.
+**QoreLogic Application:** Asynchronous coupling enables robust error handling without explicit invocation chains.
 
 ---
 
@@ -141,7 +141,7 @@ In high-throughput systems, queues grow unbounded if arrival rate exceeds proces
 | **Backpressure**   | Signal sender to slow down                        |
 | **LIFO Queues**    | Process most recent first (for interactive tasks) |
 
-### 3.3 Q-DNA Implementation
+### 3.3 QoreLogic Implementation
 
 **Mandatory:** All agents implement bounded queues for JSON-RPC requests.
 
@@ -189,7 +189,7 @@ Target: Raspberry Pi 4 (4GB RAM)
 - Distributed patterns
 - RPi as Worker, cloud as Orchestrator
 
-### 4.3 Q-DNA Edge Stack
+### 4.3 QoreLogic Edge Stack
 
 | Component       | Selection                                | Rationale         |
 | --------------- | ---------------------------------------- | ----------------- |
@@ -216,7 +216,7 @@ Target: Raspberry Pi 4 (4GB RAM)
 
 ## 6. Specification Updates
 
-Based on this research, recommend the following additions to Q-DNA_SPECIFICATION.md:
+Based on this research, recommend the following additions to QoreLogic_SPECIFICATION.md:
 
 1. **New Section §2.5:** Communication Protocol (JSON-RPC 2.0 + Pydantic)
 2. **§12 (Operations):** Add backpressure and load shedding requirements

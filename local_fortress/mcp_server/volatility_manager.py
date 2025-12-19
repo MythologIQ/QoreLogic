@@ -1,5 +1,5 @@
 """
-Q-DNA Volatility & SLA Manager
+QoreLogic Volatility & SLA Manager
 
 Implements:
 - Volatility TTL tracking for claims
@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent / "ledger" / "qdna_soa_ledger.db"
+DB_PATH = Path(__file__).parent.parent / "ledger" / "qorelogic_soa_ledger.db"
 
 
 class VolatilityClass(Enum):
@@ -346,7 +346,7 @@ class SLAManager:
 def run_health_check():
     """Run a health check on volatility and SLA status."""
     print("\n" + "=" * 60)
-    print("Q-DNA VOLATILITY & SLA HEALTH CHECK")
+    print("QoreLogic VOLATILITY & SLA HEALTH CHECK")
     print("=" * 60)
     
     vol_mgr = VolatilityManager()

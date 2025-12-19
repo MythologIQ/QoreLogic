@@ -1,4 +1,4 @@
-# Q-DNA: End-to-End (E2E) Architecture Review
+# QoreLogic: End-to-End (E2E) Architecture Review
 
 **Date:** December 17, 2025
 **Status:** Review Complete (v2.3)
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-This document reviews the Q-DNA architecture from end-to-end, tracking the resolution of previously identified gaps and documenting the current system state.
+This document reviews the QoreLogic architecture from end-to-end, tracking the resolution of previously identified gaps and documenting the current system state.
 
 ### Gap Resolution Status
 

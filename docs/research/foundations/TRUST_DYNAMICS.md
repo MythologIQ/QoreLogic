@@ -10,9 +10,9 @@
 
 ## Executive Summary
 
-Trust in distributed multi-agent systems cannot be assumed—it must be engineered. This document synthesizes research on dynamic reputation modeling, transitive trust propagation, and trust repair mechanisms to provide validated parameters for the Q-DNA Specification.
+Trust in distributed multi-agent systems cannot be assumed—it must be engineered. This document synthesizes research on dynamic reputation modeling, transitive trust propagation, and trust repair mechanisms to provide validated parameters for the QoreLogic Specification.
 
-The key insight is that **trust is a volatile asset** with temporal decay. Static trust scores are insufficient for long-running autonomous systems. The Q-DNA framework adopts the Exponential Weighted Moving Average (EWMA) model from financial risk management to model the "half-life" of reliability.
+The key insight is that **trust is a volatile asset** with temporal decay. Static trust scores are insufficient for long-running autonomous systems. The QoreLogic framework adopts the Exponential Weighted Moving Average (EWMA) model from financial risk management to model the "half-life" of reliability.
 
 ---
 
@@ -70,7 +70,7 @@ The EigenTrust algorithm computes global trust by:
 
 ### 2.3 Damped Propagation
 
-To prevent infinite trust propagation, Q-DNA implements **Damped Propagation**:
+To prevent infinite trust propagation, QoreLogic implements **Damped Propagation**:
 
 ```
 T_{A→C} = T_{A→B} × T_{B→C} × δ
@@ -89,7 +89,7 @@ T_{A→C} = T_{A→B} × T_{B→C} × δ
 
 Quantitative scores map to qualitative behaviors:
 
-| Stage | Name                             | Trust Score | Q-DNA Behavior                        |
+| Stage | Name                             | Trust Score | QoreLogic Behavior                        |
 | ----- | -------------------------------- | ----------- | ------------------------------------- |
 | **1** | Calculus-Based Trust (CBT)       | 0.0 – 0.5   | Probationary; 100% verification       |
 | **2** | Knowledge-Based Trust (KBT)      | 0.5 – 0.8   | Standard; sampling verification       |
@@ -133,7 +133,7 @@ Research on platform governance (eBay, gaming) shows:
 - **Permanent bans** lead to "Ban Evasion" (creating new identities)
 - **Temporary suspensions** are more effective for behavior correction
 
-**Q-DNA Policy:**
+**QoreLogic Policy:**
 
 - First-time offenders: Cooling-off state (cannot bid on Contract Nets)
 - Duration: Calculated by trust decay function—time to re-enter CBT threshold
@@ -154,7 +154,7 @@ A malicious actor creates multiple fake identities to:
 
 ### 5.2 Countermeasures
 
-| Mechanism         | Description                      | Q-DNA Application                             |
+| Mechanism         | Description                      | QoreLogic Application                             |
 | ----------------- | -------------------------------- | --------------------------------------------- |
 | **Identity Cost** | Make identity creation expensive | DID registration requires cryptographic work  |
 | **Trust Anchors** | Pre-trusted seeds in EigenTrust  | Overseer (Human) is the ultimate trust anchor |
@@ -182,7 +182,7 @@ A malicious actor creates multiple fake identities to:
 
 ## 7. Specification Updates
 
-Based on this research, recommend the following updates to Q-DNA_SPECIFICATION.md:
+Based on this research, recommend the following updates to QoreLogic_SPECIFICATION.md:
 
 1. **§5.3.3:** Add λ decay factor to SCI adjustment formula
 2. **§5.3:** Add transitive trust damping factor (δ=0.5) and hop limit (3)

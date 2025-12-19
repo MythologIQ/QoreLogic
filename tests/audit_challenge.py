@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from local_fortress.mcp_server.sentinel_engine import SentinelEngine
 
 def run_roi_challenge():
-    print("🔬 Q-DNA Audit Challenge: Cloud Baseline vs Local Sentinel")
+    print("🔬 QoreLogic Audit Challenge: Cloud Baseline vs Local Sentinel")
     print("---------------------------------------------------------")
 
     # 1. The "Baseline" (Simulated Cloud LLM Output)

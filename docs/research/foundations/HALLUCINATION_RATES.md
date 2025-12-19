@@ -4,7 +4,7 @@
 **Created:** December 18, 2025  
 **Status:** Complete  
 **Purpose:** Establishing error baselines for Generative AI in critical decision-making  
-**Cross-Reference:** Q-DNA Spec §9 (ML-Dependent Verification), §9.2 (Diversity Quorum)
+**Cross-Reference:** QoreLogic Spec §9 (ML-Dependent Verification), §9.2 (Diversity Quorum)
 
 ---
 
@@ -107,9 +107,9 @@ Retrieval Augmented Generation converts "open-book" memory tasks into "reading c
 
 ---
 
-## 7. Q-DNA Strategic Mandate
+## 7. QoreLogic Strategic Mandate
 
-No LLM can be deployed as a standalone source of truth. Q-DNA architecture must be hybrid:
+No LLM can be deployed as a standalone source of truth. QoreLogic architecture must be hybrid:
 
 1. **RAG** for knowledge grounding.
 2. **Diversity Quorum** (Multiple Models) for consensus validation.

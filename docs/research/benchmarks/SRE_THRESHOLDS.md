@@ -4,13 +4,13 @@
 **Created:** December 18, 2025  
 **Status:** Complete  
 **Purpose:** Defining operational boundaries, resource limits, and failure response protocols  
-**Cross-Reference:** Q-DNA Spec §3.3 (Operational Modes), §12 (Metrics)
+**Cross-Reference:** QoreLogic Spec §3.3 (Operational Modes), §12 (Metrics)
 
 ---
 
 ## 1. Executive Summary
 
-Q-DNA transitions from ad-hoc monitoring to mathematically derived governance. This document defines "goodput" preservation under saturation using Error Budgets, utilization thresholds (70% CPU rule), and concurrency bulkheads. It balances innovation velocity against system stability using SRE methodologies.
+QoreLogic transitions from ad-hoc monitoring to mathematically derived governance. This document defines "goodput" preservation under saturation using Error Budgets, utilization thresholds (70% CPU rule), and concurrency bulkheads. It balances innovation velocity against system stability using SRE methodologies.
 
 **Key Claims Substantiated:**
 

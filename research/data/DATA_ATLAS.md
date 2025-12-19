@@ -1,10 +1,10 @@
-# Q-DNA Research Findings and Data Atlas
+# QoreLogic Research Findings and Data Atlas
 
-**Status:** Compiled from Q-DNA-discussion.md & Research Agents.
+**Status:** Compiled from QoreLogic-discussion.md & Research Agents.
 **Philosophy:** Data-Driven Governance.
 
 ## 1. Safety and Reliability Benchmarks
-The "Acceptance Criteria" for Q-DNA are derived from these baseline industry failure rates. The goal is to improve upon these metrics.
+The "Acceptance Criteria" for QoreLogic are derived from these baseline industry failure rates. The goal is to improve upon these metrics.
 
 | Domain | Observed Hallucination Rate | Source / Context |
 | :--- | :--- | :--- |
@@ -16,7 +16,7 @@ The "Acceptance Criteria" for Q-DNA are derived from these baseline industry fai
 ## 2. Formal Verification Toolset (The Sentinel's Arsenal)
 Research identified specific tools for the Sentinel Micro-Agent to execute Formal Verification in CI/CD.
 
-| Tool | Language Focus | Methodology | Suitability for Q-DNA |
+| Tool | Language Focus | Methodology | Suitability for QoreLogic |
 | :--- | :--- | :--- | :--- |
 | **CBMC** | C / C++ | Bounded Model Checking (BMC) | **High.** Mature, industry standard. |
 | **ESBMC** | C / C++ / Python | Evaluation & Verification | **High.** Emerging Python support is critical. |
@@ -27,7 +27,7 @@ Research identified specific tools for the Sentinel Micro-Agent to execute Forma
 ## 3. Hierarchical Reason Model (HRM) Stats
 **Verified Data Point:** Sapient Intelligence's 27M Parameter HRM.
 
-| Feature | Monolithic LLM (e.g., GPT-4) | HRM Micro-Agent (Sapient 27M) | Q-DNA Advantage |
+| Feature | Monolithic LLM (e.g., GPT-4) | HRM Micro-Agent (Sapient 27M) | QoreLogic Advantage |
 | :--- | :--- | :--- | :--- |
 | **Parameter Count** | ~70B - 1.8T | **27 Million** | **Efficiency.** 100x cost reduction. |
 | **Reasoning Method** | Chain-of-Thought (External) | Latent Recurrent (Internal) | **Privacy & Speed.** No token leakage. |

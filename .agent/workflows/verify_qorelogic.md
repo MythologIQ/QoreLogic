@@ -1,14 +1,14 @@
 ---
-description: Verify Q-DNA Compliance via MCP
+description: Verify QoreLogic Compliance via MCP
 ---
 
-# Q-DNA Verification Workflow (MCP)
+# QoreLogic Verification Workflow (MCP)
 
 This workflow triggers the **Sovereign Gatekeeper** via the Model Context Protocol.
 
 ## 1. Tool Call
 
-The Agent invokes the `audit_code_artifact` tool provided by the Q-DNA MCP Server.
+The Agent invokes the `audit_code_artifact` tool provided by the QoreLogic MCP Server.
 
 ## 2. Process
 

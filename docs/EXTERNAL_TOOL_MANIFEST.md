@@ -1,6 +1,6 @@
-# Q-DNA External Tool Manifest
+# QoreLogic External Tool Manifest
 
-This manifest enumerates all external binaries, tools, and system dependencies required for the Q-DNA engine to operate in full sovereign mode.
+This manifest enumerates all external binaries, tools, and system dependencies required for the QoreLogic engine to operate in full sovereign mode.
 
 ## 1. Core Runtime
 

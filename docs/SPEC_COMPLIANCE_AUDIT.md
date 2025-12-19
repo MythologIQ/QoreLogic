@@ -1,4 +1,4 @@
-# Q-DNA Specification v2.3 Compliance Audit
+# QoreLogic Specification v2.3 Compliance Audit
 
 **Audit Date:** December 17, 2025
 **Spec Version:** 2.3 (Empirically Validated)

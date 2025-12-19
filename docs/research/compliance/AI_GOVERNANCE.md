@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-To transition from "Experimental" to "Enterprise," the Q-DNA framework must satisfy rigorous global standards for AI governance. The "Black Box" nature of neural networks is unacceptable in regulated industries. This document maps Q-DNA requirements to GDPR, NIST AI RMF, and ISO 42001.
+To transition from "Experimental" to "Enterprise," the QoreLogic framework must satisfy rigorous global standards for AI governance. The "Black Box" nature of neural networks is unacceptable in regulated industries. This document maps QoreLogic requirements to GDPR, NIST AI RMF, and ISO 42001.
 
 ---
 
@@ -18,7 +18,7 @@ To transition from "Experimental" to "Enterprise," the Q-DNA framework must sati
 
 ### 1.1 Key Regulations
 
-| Regulation       | Jurisdiction  | Focus                     | Q-DNA Impact                  |
+| Regulation       | Jurisdiction  | Focus                     | QoreLogic Impact                  |
 | ---------------- | ------------- | ------------------------- | ----------------------------- |
 | **GDPR Art. 22** | EU            | Automated decision rights | Human-in-the-loop requirement |
 | **NIST AI RMF**  | US            | Risk management framework | Documentation standards       |
@@ -33,7 +33,7 @@ To transition from "Experimental" to "Enterprise," the Q-DNA framework must sati
 
 > "The data subject shall have the right not to be subject to a decision based solely on automated processing, including profiling, which produces legal effects concerning him or her."
 
-### 2.2 Q-DNA Implementation
+### 2.2 QoreLogic Implementation
 
 **Detection Requirement:** The system must detect "Legal Effect" decisions:
 
@@ -57,7 +57,7 @@ To transition from "Experimental" to "Enterprise," the Q-DNA framework must sati
 
 GDPR implies (though doesn't explicitly mandate) explainability for automated decisions.
 
-**Q-DNA Implementation:**
+**QoreLogic Implementation:**
 
 - Chain-of-Thought reasoning preserved in audit log
 - `prompt_hash` enables replay of decision context
@@ -69,7 +69,7 @@ GDPR implies (though doesn't explicitly mandate) explainability for automated de
 
 ### 3.1 The Four Core Functions
 
-| Function    | Purpose                      | Q-DNA Mapping                       |
+| Function    | Purpose                      | QoreLogic Mapping                       |
 | ----------- | ---------------------------- | ----------------------------------- |
 | **GOVERN**  | Culture, accountability      | Agent Accountability Contract       |
 | **MAP**     | Context, risk identification | SOA Ledger event taxonomy           |
@@ -80,7 +80,7 @@ GDPR implies (though doesn't explicitly mandate) explainability for automated de
 
 ### 3.2 Risk Categories
 
-| Category              | Description                         | Q-DNA Risk Grade   |
+| Category              | Description                         | QoreLogic Risk Grade   |
 | --------------------- | ----------------------------------- | ------------------ |
 | **Minimal Risk**      | Low impact, reversible              | L1                 |
 | **Limited Risk**      | Moderate impact, transparency needs | L2                 |
@@ -96,7 +96,7 @@ NIST recommends:
 - Risk assessments
 - Continuous monitoring logs
 
-**Q-DNA Implementation:** The SOA Ledger provides continuous monitoring; model cards should be added to agent registration.
+**QoreLogic Implementation:** The SOA Ledger provides continuous monitoring; model cards should be added to agent registration.
 
 ---
 
@@ -108,7 +108,7 @@ ISO 42001 is the first international standard specifically for AI Management Sys
 
 ### 4.2 Requirements
 
-| Requirement                   | Q-DNA Evidence               |
+| Requirement                   | QoreLogic Evidence               |
 | ----------------------------- | ---------------------------- |
 | Risk assessment documentation | SOA Ledger + Risk Grades     |
 | Operational controls          | Sentinel verification policy |
@@ -120,7 +120,7 @@ ISO 42001 is the first international standard specifically for AI Management Sys
 
 ### 4.3 Audit Evidence
 
-The Q-DNA Audit Log serves as the primary evidence artifact for ISO certification audits. Every agent action is traceable to:
+The QoreLogic Audit Log serves as the primary evidence artifact for ISO certification audits. Every agent action is traceable to:
 
 - Actor (DID)
 - Model version
@@ -134,16 +134,16 @@ The Q-DNA Audit Log serves as the primary evidence artifact for ISO certificatio
 
 ### 5.1 Risk Categories
 
-| Category         | Examples                                       | Q-DNA Classification         |
+| Category         | Examples                                       | QoreLogic Classification         |
 | ---------------- | ---------------------------------------------- | ---------------------------- |
 | **Unacceptable** | Social scoring, manipulation                   | N/A                          |
 | **High-Risk**    | Biometric, employment, critical infrastructure | Possible (context-dependent) |
 | **Limited**      | Chatbots, emotion recognition                  | Likely baseline              |
 | **Minimal**      | Spam filters, games                            | N/A                          |
 
-### 5.2 Q-DNA as "High-Risk"?
+### 5.2 QoreLogic as "High-Risk"?
 
-If Q-DNA is used for:
+If QoreLogic is used for:
 
 - Code that controls critical infrastructure → High-Risk
 - Employment-related decision support → High-Risk
@@ -153,7 +153,7 @@ If Q-DNA is used for:
 
 ### 5.3 Requirements for High-Risk Systems
 
-| Requirement             | Q-DNA Implementation                |
+| Requirement             | QoreLogic Implementation                |
 | ----------------------- | ----------------------------------- |
 | Risk management system  | §8 Divergence Protocol + SOA Ledger |
 | Data governance         | §5 Citation Policy + SCI            |
@@ -165,16 +165,16 @@ If Q-DNA is used for:
 
 ---
 
-## 6. The Q-DNA Audit Log Schema
+## 6. The QoreLogic Audit Log Schema
 
-To satisfy all regulatory requirements, Q-DNA mandates a standardized JSON Audit Schema:
+To satisfy all regulatory requirements, QoreLogic mandates a standardized JSON Audit Schema:
 
 ```json
 {
   "event_id": "UUID-v4",
   "timestamp": "ISO-8601-UTC",
   "actor": {
-    "agent_id": "Q-DNA-Worker-05",
+    "agent_id": "QoreLogic-Worker-05",
     "model_version": "Phi-3-Mini-4k-Instruct",
     "trust_score": 0.88
   },
@@ -191,7 +191,7 @@ To satisfy all regulatory requirements, Q-DNA mandates a standardized JSON Audit
     "required": true,
     "method": "PyVeritas",
     "result": "PASS",
-    "verifier_id": "Q-DNA-Verifier-01"
+    "verifier_id": "QoreLogic-Verifier-01"
   },
   "governance": {
     "gdpr_art22_trigger": true,
@@ -222,7 +222,7 @@ To satisfy all regulatory requirements, Q-DNA mandates a standardized JSON Audit
 | **CERT/CC**             | 45 days  | Faster pressure on vendors        |
 | **Google Project Zero** | 90 days  | Complex vulnerabilities need time |
 
-### 7.2 Q-DNA Policy
+### 7.2 QoreLogic Policy
 
 **Adopted Standard:** Google Project Zero (90 days)
 
@@ -252,7 +252,7 @@ To satisfy all regulatory requirements, Q-DNA mandates a standardized JSON Audit
 
 ## 9. Specification Updates
 
-Based on this research, recommend the following updates to Q-DNA_SPECIFICATION.md:
+Based on this research, recommend the following updates to QoreLogic_SPECIFICATION.md:
 
 1. **§8 (Disclosure):** Adopt 90-day disclosure policy (vs. 45-day)
 2. **§11 (SOA Ledger):** Extend schema with governance fields

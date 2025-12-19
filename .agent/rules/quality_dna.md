@@ -4,7 +4,7 @@ description: Quality DNA Definitions (The Genetic Code)
 
 # Quality DNA
 
-This file defines the **Base DNA** constraints for all Q-DNA agents. These are the immutable traits that the system seeks to replicate and protect.
+This file defines the **Base DNA** constraints for all QoreLogic agents. These are the immutable traits that the system seeks to replicate and protect.
 
 ## 1. Traceability (The Hash Chain)
 

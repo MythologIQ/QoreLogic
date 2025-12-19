@@ -1,8 +1,8 @@
-# Q-DNA Testing & Validation Strategy
+# QoreLogic Testing & Validation Strategy
 
 **Version:** 2.0
 **Last Updated:** December 17, 2025
-**Objective:** Scientifically validate Q-DNA governance using research-backed benchmarks
+**Objective:** Scientifically validate QoreLogic governance using research-backed benchmarks
 
 ---
 
@@ -17,7 +17,7 @@ All testing targets are derived from empirical research documented in the [Resea
 Per HaluEval research [LLM-002], raw LLM hallucination rates range from 18-50%. Testing must establish:
 
 1. **Control Group:** Unverified LLM output baseline
-2. **Experimental Group:** Q-DNA Sentinel-verified output
+2. **Experimental Group:** QoreLogic Sentinel-verified output
 3. **Delta:** Measured improvement with statistical significance
 
 ---
@@ -45,7 +45,7 @@ Per HaluEval research [LLM-002], raw LLM hallucination rates range from 18-50%. 
 
 ---
 
-## 3. Q-DNA Verification (Experimental Group)
+## 3. QoreLogic Verification (Experimental Group)
 
 ### 3.1 Verification Pipeline Testing
 

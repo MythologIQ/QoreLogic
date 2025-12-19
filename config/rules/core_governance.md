@@ -1,6 +1,6 @@
 # Agent Accountability Contract (AAC) v1.1 - Core Governance
 
-This file defines the immutable _Quality DNA_ for the MythologIQ Q-DNA project. These rules are non-negotiable and must be enforced by the Judge Agent.
+This file defines the immutable _Quality DNA_ for the MythologIQ QoreLogic project. These rules are non-negotiable and must be enforced by the Judge Agent.
 
 ## 1. The Divergence Doctrine
 

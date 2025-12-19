@@ -19,7 +19,7 @@
         "local_fortress/mcp_server/sentinel_engine.py (Integrated Z3 checks)",
         "local_fortress/ledger/schema.sql (Added decision_rationale)",
         "docs/DEVELOPMENT_PLAN.md (Added Persistent Daemon)",
-        "docs/Q-DNA_SPECIFICATION.md (Updated to v9.0)",
+        "docs/QoreLogic_SPECIFICATION.md (Updated to v9.0)",
         "README.md (Updated status)"
       ]
     }
@@ -109,9 +109,9 @@
   "environment": {
     "platform": "Windows",
     "python_version": "3.13",
-    "working_directory": "G:\\MythologIQ\\Q-DNA\\Q-DNA",
+    "working_directory": "G:\\MythologIQ\\QoreLogic\\QoreLogic",
     "git_branch": "main",
-    "database_path": "local_fortress/ledger/qdna_soa_ledger.db"
+    "database_path": "local_fortress/ledger/qorelogic_soa_ledger.db"
   },
   "known_issues": [],
   "blockers": [],

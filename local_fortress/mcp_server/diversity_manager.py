@@ -1,5 +1,5 @@
 """
-Q-DNA Diversity Quorum Manager (Phase 9 - Track P3)
+QoreLogic Diversity Quorum Manager (Phase 9 - Track P3)
 Implements Multi-Model Consensus logic for L3 artifacts.
 
 Research: Diversity Quorum [ML-002]

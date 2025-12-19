@@ -5,7 +5,7 @@ import time
 from local_fortress.mcp_server.sentinel_engine import SentinelEngine
 
 # Configuration
-DB_PATH = "local_fortress/ledger/qdna_soa_ledger.db"
+DB_PATH = "local_fortress/ledger/qorelogic_soa_ledger.db"
 
 def get_keys(role):
     """Load keys from local JSON (Prototype only)."""

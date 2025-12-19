@@ -1,6 +1,6 @@
-# Q-DNA Risk Grading Policy (L1-L3)
+# QoreLogic Risk Grading Policy (L1-L3)
 
-This policy defines the mandatory risk assessment protocol for all Q-DNA artifacts.
+This policy defines the mandatory risk assessment protocol for all QoreLogic artifacts.
 
 ## 1. Risk Trigger Matrix
 

@@ -1,5 +1,5 @@
 """
-Q-DNA CBMC Verifier Module
+QoreLogic CBMC Verifier Module
 
 Phase 9: Real Bounded Model Checking Integration
 Spec Reference: §3.3.3 (Tier 3 Formal Verification)
@@ -56,7 +56,7 @@ class CBMCResult:
 
 class CBMCVerifier:
     """
-    Bounded Model Checking integration for Q-DNA Sentinel.
+    Bounded Model Checking integration for QoreLogic Sentinel.
     
     Uses CBMC to verify C code or transpiled Python-to-C code.
     Falls back to heuristic checks when CBMC is unavailable.

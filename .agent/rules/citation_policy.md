@@ -1,4 +1,4 @@
-# Q-DNA Evidence & Citation Policy
+# QoreLogic Evidence & Citation Policy
 
 This policy enforces the epistemic standards for all claims and code justifications.
 

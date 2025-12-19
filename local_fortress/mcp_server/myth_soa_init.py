@@ -5,7 +5,7 @@ import time
 import os
 
 # Configuration
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ledger', 'qdna_soa_ledger.db')
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ledger', 'qorelogic_soa_ledger.db')
 SCHEMA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ledger', 'schema.sql')
 
 def init_db():
@@ -40,7 +40,7 @@ def create_genesis_block(conn):
     # The Genesis Payload
     axiom_payload = {
         "axiom": "Truth is earned, not assumed.",
-        "project": "Q-DNA",
+        "project": "QoreLogic",
         "version": "1.0",
         "intent": "Establish a Root of Trust for Autonomous Accountability."
     }
@@ -72,6 +72,6 @@ if __name__ == "__main__":
         connection = init_db()
         create_genesis_block(connection)
         connection.close()
-        print("🚀 Q-DNA Sovereign Ledger is ready.")
+        print("🚀 QoreLogic Sovereign Ledger is ready.")
     except Exception as e:
         print(f"❌ Initialization failed: {e}")

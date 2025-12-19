@@ -311,7 +311,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 - Design by Contract provides runtime verification
 - Spec compliance: 100% (§3.3.2, §5.3, §12, §2.5.1)
 - No failure modes discovered
-- Implementation follows Q-DNA governance principles
+- Implementation follows QoreLogic governance principles
 - Shadow Genome: No entries (clean implementation)
 
 **Next Steps:**

@@ -1,4 +1,4 @@
-# Q-DNA Research Library: Gaps and Open Questions
+# QoreLogic Research Library: Gaps and Open Questions
 
 **Version:** 1.0
 **Created:** December 17, 2025
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This document catalogs the gaps between the current Q-DNA specification requirements and the available research documentation. Each gap is prioritized and linked to a comprehensive research prompt at the end of this document.
+This document catalogs the gaps between the current QoreLogic specification requirements and the available research documentation. Each gap is prioritized and linked to a comprehensive research prompt at the end of this document.
 
 ---
 
@@ -121,18 +121,18 @@ The following prompt is designed for deep research to fill all high-priority gap
 
 ---
 
-# Q-DNA Research Library: Comprehensive Gap-Filling Research
+# QoreLogic Research Library: Comprehensive Gap-Filling Research
 
 ## RESEARCH OBJECTIVE
 
-Conduct systematic literature review and empirical data collection to fill the identified gaps in the Q-DNA research library. This research will provide authoritative citations and validated parameters for the Q-DNA Specification.
+Conduct systematic literature review and empirical data collection to fill the identified gaps in the QoreLogic research library. This research will provide authoritative citations and validated parameters for the QoreLogic Specification.
 
 ---
 
 ## CONTEXT
 
 ```
-PROJECT: Q-DNA (Quality DNA Engine)
+PROJECT: QoreLogic (Quality DNA Engine)
 PURPOSE: AI agent verification framework with multi-agent accountability
 ARCHITECTURE:
   - Scrivener (Cloud LLM): Proposes code and claims
@@ -178,7 +178,7 @@ KEY MECHANISMS:
 
 ### Deliverables
 
-- Taxonomy of formal methods applicable to Q-DNA Sentinel
+- Taxonomy of formal methods applicable to QoreLogic Sentinel
 - Tractability analysis for real-time verification
 - Recommended methods by risk grade (L1/L2/L3)
 
@@ -215,7 +215,7 @@ KEY MECHANISMS:
 
 ### Deliverables
 
-- EigenTrust implementation parameters for Q-DNA
+- EigenTrust implementation parameters for QoreLogic
 - Recommended λ decay factor with justification
 - Trust repair formula with empirical calibration
 
@@ -323,7 +323,7 @@ KEY MECHANISMS:
 
 ### Deliverables
 
-- Regulatory compliance matrix for Q-DNA
+- Regulatory compliance matrix for QoreLogic
 - Required documentation checklist
 - Liability mitigation recommendations
 
@@ -429,7 +429,7 @@ For each section, provide:
 
 ### Specification Updates
 
-- [Specific changes to Q-DNA spec]
+- [Specific changes to QoreLogic spec]
 ```
 
 ---
@@ -446,4 +446,4 @@ For each section, provide:
 
 ---
 
-_This prompt is designed for comprehensive research. Results will be documented in the Q-DNA research library following METHODOLOGY.md citation standards._
+_This prompt is designed for comprehensive research. Results will be documented in the QoreLogic research library following METHODOLOGY.md citation standards._

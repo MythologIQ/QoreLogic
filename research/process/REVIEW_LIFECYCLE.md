@@ -1,6 +1,6 @@
-# Q-DNA Review Process
+# QoreLogic Review Process
 
-This diagram defines the **Recursive Verification Lifecycle** used by Q-DNA agents.
+This diagram defines the **Recursive Verification Lifecycle** used by QoreLogic agents.
 
 ## Flow
 
@@ -8,7 +8,7 @@ This diagram defines the **Recursive Verification Lifecycle** used by Q-DNA agen
 2.  **Risk Tagging (Scrivener):** Agent tags Risk (L1/L2/L3).
 3.  **The Filter (Sentinel):**
     - _Input:_ `Solution X` + `Risk Grade`.
-    - _Check:_ Runs `verify_q-dna_diff` workflow.
+    - _Check:_ Runs `verify_qorelogic_diff` workflow.
     - _Output:_ `PASS` or `FAIL` + `FailureContext`.
 4.  **Consensus (Judge):**
     - _Input:_ `Sentinel Result` + `Agent Identity`.
