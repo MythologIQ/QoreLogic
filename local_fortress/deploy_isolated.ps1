@@ -41,7 +41,7 @@ if (Test-Path $DashboardSource) {
 # 3. Build Container
 Write-Host "-> Building Sterile Container (qorelogic:latest)..." -ForegroundColor Yellow
 # Build context is the dist/ folder where the wheel is
-docker build -t qorelogic:latest $DistDir
+docker build --no-cache -t qorelogic:latest $DistDir
 
 # 4. Create Wrapper Scripts
 Write-Host "-> Creating Wrapper Scripts..." -ForegroundColor Yellow

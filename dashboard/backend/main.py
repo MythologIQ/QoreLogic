@@ -23,9 +23,18 @@ app.add_middleware(
 )
 
 # Multi-Workspace Configuration
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # We use the persistent QoreLogic home for the registry
 QORELOGIC_HOME = os.environ.get("QORELOGIC_HOME", "/app/ledger") 
+if not os.path.exists(QORELOGIC_HOME):
+    try:
+        os.makedirs(QORELOGIC_HOME, exist_ok=True)
+    except:
+        pass
+
 WORKSPACE_REGISTRY_PATH = os.path.join(QORELOGIC_HOME, "workspaces.json")
+STATIC_DIR = os.environ.get("QORELOGIC_STATIC_DIR", "/app/dashboard/dist")
+DB_PATH = os.environ.get("QORELOGIC_DB_PATH", os.path.join(BASE_DIR, "default_ledger.db"))
 
 class WorkspaceManager:
     def __init__(self):

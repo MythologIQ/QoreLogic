@@ -40,19 +40,25 @@ try {
             $Url = $Parts[1]
             
             # Response Headers
-            $Header = "HTTP/1.1 200 OK`r`nContent-Type: text/html; charset=utf-8`r`nConnection: close`r`n`r`n"
+            # We must allow CORS for the file:// based Launcher.html
+            $BaseHeaders = "Access-Control-Allow-Origin: *`r`nAccess-Control-Allow-Methods: POST, GET, OPTIONS`r`nAccess-Control-Allow-Headers: Content-Type`r`n"
+            $Header = "HTTP/1.1 200 OK`r`n${BaseHeaders}Content-Type: text/html; charset=utf-8`r`nConnection: close`r`n`r`n"
             $Body = ""
             
             # Router
-            if ($Url -eq "/" -or $Url -eq "/Launcher.html") {
+            if ($Method -eq "OPTIONS") {
+                # Handle CORS Preflight
+                $Header = "HTTP/1.1 204 No Content`r`n${BaseHeaders}Connection: close`r`n`r`n"
+            }
+            elseif ($Url -eq "/" -or $Url -eq "/Launcher.html") {
                 $Body = Get-Content $HtmlPath -Raw -Encoding UTF8
             }
             elseif ($Url -eq "/api/health") {
-                 $Header = "HTTP/1.1 200 OK`r`nContent-Type: application/json`r`nConnection: close`r`n`r`n"
+                 $Header = "HTTP/1.1 200 OK`r`n${BaseHeaders}Content-Type: application/json`r`nConnection: close`r`n`r`n"
                  $Body = '{"status": "ok"}'
             }
             elseif ($Url -eq "/api/launch" -and $Method -eq "POST") {
-                $Header = "HTTP/1.1 200 OK`r`nContent-Type: application/json`r`nConnection: close`r`n`r`n"
+                $Header = "HTTP/1.1 200 OK`r`n${BaseHeaders}Content-Type: application/json`r`nConnection: close`r`n`r`n"
                 
                 Write-Host "   [CMD] Launching QoreLogic Container..." -ForegroundColor Yellow
                 

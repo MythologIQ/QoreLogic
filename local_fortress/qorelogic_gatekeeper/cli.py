@@ -9,8 +9,9 @@ from pathlib import Path
 # or that PYTHONPATH includes the package root.
 
 def main():
+    print("DEBUG: CLI Starting...")
     parser = argparse.ArgumentParser(description="QoreLogic Gatekeeper - Active Hook")
-    parser.add_argument("file", nargs="?", help="Path to the file to audit (Optional if running dashboard)")
+    parser.add_argument("file", nargs="*", help="Path to the file to audit (Optional if running dashboard)")
     parser.add_argument("--monitor", action="store_true", help="Run in silent monitoring mode (Audit Only, do not block)")
     parser.add_argument("--dashboard", action="store_true", help="Launch the QoreLogic Dashboard Server")
     args = parser.parse_args()
@@ -41,7 +42,7 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    file_path = Path(args.file)
+    file_path = Path(args.file[0])
     if not file_path.exists():
         print(f"Error: File not found: {file_path}")
         sys.exit(1)

@@ -198,6 +198,21 @@
         display: none;
       }
     </style>
+    <script>
+        // Automatic Redirection for file:// usage
+        // This ensures the user gets the served (functional) version instantly.
+        if (window.location.protocol === 'file:') {
+            // First check if server is up to avoid dead page
+            fetch('http://localhost:5500/api/health')
+                .then(() => {
+                    window.location.href = 'http://localhost:5500/Launcher.html';
+                })
+                .catch(() => {
+                    console.warn("Server not reachable yet. Please run Launch_QoreLogic.bat");
+                    // We stay here and show the error message in the UI eventually
+                });
+        }
+    </script>
   </head>
   <body>
     <div class="sidebar">
@@ -280,8 +295,8 @@
         log("Sending launch command to host...");
 
         try {
-          // Call the PowerShell host listener
-          const res = await fetch("/api/launch", { method: "POST" });
+          // Call the PowerShell host listener (Absolute URL for file:// access)
+          const res = await fetch("http://localhost:5500/api/launch", { method: "POST" });
           const data = await res.json();
 
           if (data.status === "ok") {
@@ -337,7 +352,7 @@
       }
 
       // Initial Health Check
-      fetch("/api/health")
+      fetch("http://localhost:5500/api/health")
         .then(() => {
           document.getElementById("docker-status").className =
             "status-indicator";
