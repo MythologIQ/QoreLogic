@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="qorelogic-gatekeeper",
-    version="2.1.0",
+    version="2.1.2",
     description="QoreLogic Sovereign Gatekeeper - MCP Server & Active Governance Hook",
     packages=find_packages(),
     install_requires=[

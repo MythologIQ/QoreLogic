@@ -11,10 +11,30 @@
 
 QoreLogic is available as a standard Python package.
 
-```bash
-# Standard Install
-pip install qorelogic-gatekeeper
-```
+### 1.1. Native App (Recommended)
+
+The cleanest way to use QoreLogic is as a Docker Sidecar.
+
+1.  **Build the Engine:**
+
+    ```powershell
+    .\bin\qorelogic.ps1 build
+    ```
+
+2.  **Attach to Workspace:**
+    Navigate to your project root and run:
+
+    ```powershell
+    ..\path\to\Q-DNA\bin\qorelogic.ps1 attach my-project
+    ```
+
+    - This starts a dedicated daemon (`qorelogic-my-project`).
+    - Creates `.\qorelogic-check.bat` in your folder.
+
+3.  **Usage:**
+    ```powershell
+    .\qorelogic-check.bat --monitor src/main.py
+    ```
 
 ### 1.2. Automated Setup (IDE / Agent)
 

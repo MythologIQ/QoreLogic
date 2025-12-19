@@ -1,0 +1,31 @@
+# Dockerfile.native
+# The "Native App" image.
+# Builds from source (local_fortress) to create the engine.
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# System Deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Package
+COPY . /tmp/pkg
+RUN pip install /tmp/pkg && rm -rf /tmp/pkg
+
+# Create User
+RUN groupadd -r qorelogic && useradd -r -g qorelogic qorelogic \
+    && mkdir -p /app/ledger /src \
+    && chown -R qorelogic:qorelogic /app /src
+
+USER qorelogic
+
+# Env
+ENV QORELOGIC_DB_PATH=/app/ledger/qorelogic_soa_ledger.db
+ENV PYTHONUNBUFFERED=1
+
+# Default Command (Daemon)
+# Can be overridden by the controller to just 'sleep' if we only need the CLI
+CMD ["qorelogic-server"]

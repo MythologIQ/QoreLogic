@@ -11,6 +11,7 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser(description="QoreLogic Gatekeeper - Active Hook")
     parser.add_argument("file", help="Path to the file to audit")
+    parser.add_argument("--monitor", action="store_true", help="Run in silent monitoring mode (Audit Only, do not block)")
     args = parser.parse_args()
     
     file_path = Path(args.file)
@@ -28,7 +29,10 @@ def main():
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        print(f"Running Sentinel Gatekeeper on {file_path}...")
+        mode_label = "[MONITOR MODE]" if args.monitor else "[ACTIVE BLOCKING]"
+        if not args.monitor:
+             print(f"Running Sentinel Gatekeeper {mode_label} on {file_path}...")
+        
         result_json = audit_code(str(file_path), content)
         result = json.loads(result_json)
         
@@ -36,19 +40,29 @@ def main():
         risk = result.get('risk_grade')
         rationale = result.get('rationale')
         
-        print(f"Verdict: {verdict}")
-        print(f"Risk: {risk}")
-        print(f"Reason: {rationale}")
+        if not args.monitor:
+            print(f"Verdict: {verdict}")
+            print(f"Risk: {risk}")
+            print(f"Reason: {rationale}")
         
         if verdict == "FAIL":
-            print("❌ COMMIT REJECTED: Critical Vulnerability Detected.")
-            sys.exit(1)
+            if args.monitor:
+                # Silent failure recording
+                sys.exit(0)
+            else:
+                print("❌ COMMIT REJECTED: Critical Vulnerability Detected.")
+                sys.exit(1)
             
         if verdict == "L3_REQUIRED":
-            print("⚠️ COMMIT BLOCKED: L3 Approval Required.")
-            sys.exit(1)
+            if args.monitor:
+                 # Silent L3 recording
+                 sys.exit(0)
+            else:
+                print("⚠️ COMMIT BLOCKED: L3 Approval Required.")
+                sys.exit(1)
             
-        print("✅ PASS")
+        if not args.monitor:
+            print("✅ PASS")
         sys.exit(0)
         
     except ImportError:

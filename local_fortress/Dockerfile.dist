@@ -1,0 +1,28 @@
+# QoreLogic Gatekeeper - External Distribution Dockerfile
+# Usage:
+# 1. Copy this file and the .whl file from dist/ to your build context.
+# 2. docker build -t qorelogic-gatekeeper:latest .
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Create user
+RUN groupadd -r qorelogic && useradd -r -g qorelogic qorelogic
+
+# Copy and install the wheel
+# Expects the wheel to be in the build context
+COPY dist/qorelogic_gatekeeper-*.whl /tmp/
+RUN pip install /tmp/qorelogic_gatekeeper-*.whl && rm /tmp/*.whl
+
+# Setup directories
+RUN mkdir -p /app/ledger && chown -R qorelogic:qorelogic /app
+
+USER qorelogic
+
+# Default Configuration
+ENV QORELOGIC_DB_PATH=/app/ledger/qorelogic_soa_ledger.db
+
+# Default Entrypoint (Daemon)
+# Override with ["qorelogic-check", ...] for CLI Monitor
+ENTRYPOINT ["qorelogic-server"]
