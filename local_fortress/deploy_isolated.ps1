@@ -91,7 +91,7 @@ echo '🛡️  QoreLogic Gatekeeper Scanning...'
 
 # Escape backslashes for bash compatibility if needed, or invoke via cmd
 # We invoke the .bat wrapper directly
-`"$WrapperPath`" --monitor ."
+`"$WrapperPath`" ."
 
 Set-Content -Path `$HookPath -Value `$HookContent
 # No chmod needed on Windows usually, but good practice if using WSL interaction

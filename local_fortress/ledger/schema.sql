@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS soa_ledger (
     payload JSON NOT NULL,
     verification_method TEXT CHECK(verification_method IN ('TIER_1', 'TIER_2', 'TIER_3', NULL)),  -- v2.4
     verification_result TEXT CHECK(verification_result IN ('PASS', 'FAIL', NULL)),                -- v2.4
+    workspace_id TEXT DEFAULT 'default',         -- v2.5: Multi-tenant isolation
     gdpr_art22_trigger INTEGER DEFAULT 0,        -- v2.4: 1 if legal effect detected
     human_approver TEXT,                         -- v2.4: DID of human approver if escalated
     entry_hash TEXT NOT NULL UNIQUE,
@@ -75,6 +76,7 @@ CREATE TABLE IF NOT EXISTS shadow_genome (
     context JSON NOT NULL,            -- Environment, dependencies, etc.
     failure_mode TEXT NOT NULL,       -- Category of failure (e.g., INJECTION, HALLUCINATION)
     causal_vector TEXT,               -- Why it failed (Sentinel rationale)
+    workspace_id TEXT DEFAULT 'default', -- v2.5: Multi-tenant isolation
     remediation_status TEXT DEFAULT 'UNRESOLVED' CHECK(remediation_status IN ('UNRESOLVED', 'RESOLVED', 'WONT_FIX')),
     resolved_by_entry_id INTEGER,     -- Link to the fix
     FOREIGN KEY (resolved_by_entry_id) REFERENCES soa_ledger(entry_id)
@@ -87,6 +89,7 @@ CREATE TABLE IF NOT EXISTS l3_approval_queue (
     artifact_hash TEXT NOT NULL,       -- Hash of the artifact awaiting approval
     requesting_agent TEXT NOT NULL,
     reason TEXT NOT NULL,
+    workspace_id TEXT DEFAULT 'default', -- v2.5: Multi-tenant isolation
     status TEXT DEFAULT 'PENDING' CHECK(status IN ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED')),
     overseer_did TEXT,                 -- Who approved/rejected
     decision_timestamp TIMESTAMP,
@@ -128,6 +131,7 @@ CREATE TABLE IF NOT EXISTS trust_updates (
         'MANUAL_ADJUSTMENT'    -- Human override
     )),
     context TEXT,              -- Risk context or reason for update
+    workspace_id TEXT DEFAULT 'default', -- v2.5: Multi-tenant isolation
     ledger_ref_id INTEGER,     -- Link to triggering SOA event
     FOREIGN KEY (agent_did) REFERENCES agent_registry(did),
     FOREIGN KEY (ledger_ref_id) REFERENCES soa_ledger(entry_id)
@@ -137,6 +141,7 @@ CREATE TABLE IF NOT EXISTS trust_updates (
 CREATE INDEX IF NOT EXISTS idx_ledger_timestamp ON soa_ledger(timestamp);
 CREATE INDEX IF NOT EXISTS idx_ledger_agent ON soa_ledger(agent_did);
 CREATE INDEX IF NOT EXISTS idx_ledger_event ON soa_ledger(event_type);
+CREATE INDEX IF NOT EXISTS idx_ledger_workspace ON soa_ledger(workspace_id); -- v2.5
 CREATE INDEX IF NOT EXISTS idx_shadow_failure ON shadow_genome(failure_mode);
 CREATE INDEX IF NOT EXISTS idx_l3_status ON l3_approval_queue(status);
 CREATE INDEX IF NOT EXISTS idx_trust_updates_agent ON trust_updates(agent_did);

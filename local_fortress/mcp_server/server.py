@@ -242,6 +242,32 @@ def audit_code(file_path: str, content: str) -> str:
     
     # Check backpressure (Phase 8.5)
     try:
+        # Extract workspace_id from query params or context if possible, 
+        # but FastMCP argument is cleanest for now.
+        # We'll assume the client sends it. Since we can't change signature easily without client update,
+        # we'll look for it in the file_path if encoded like "ws::workspace_id::file_path" 
+        # OR just add the argument. Adding arg is better.
+        pass
+    except Exception:
+        pass
+        
+@mcp.tool()
+def audit_code_v2(file_path: str, content: str, workspace_id: str = "default") -> str:
+    """
+    Run the Sentinel L-Module against a code artifact (Multi-Tenant Aware).
+    
+    Args:
+        file_path: Relative path of the file being audited
+        content: The full content or diff to audit
+        workspace_id: The logical workspace identifier
+        
+    Returns:
+        JSON string containing {verdict, risk_grade, rationale, failure_modes, requires_approval}
+    """
+    from .sentinel_engine import SentinelEngine
+    
+    # Check backpressure (Phase 8.5)
+    try:
         with get_traffic_monitor().request_access():
             sentinel = SentinelEngine()
             result = sentinel.audit(file_path, content)
@@ -251,7 +277,8 @@ def audit_code(file_path: str, content: str) -> str:
                 agent_role="Scrivener",
                 event_type="AUDIT_REQUEST",
                 risk_grade=result.risk_grade,
-                payload=json.dumps({"file": file_path, "content_length": len(content)})
+                payload=json.dumps({"file": file_path, "content_length": len(content)}),
+                workspace_id=workspace_id
             )
             
             # Log the verdict
@@ -261,14 +288,16 @@ def audit_code(file_path: str, content: str) -> str:
                 # Add to approval queue
                 request_l3_approval(
                     artifact_hash=compute_entry_hash(str(time.time()), "sentinel", content, ""),
-                    reason=result.rationale
+                    reason=result.rationale,
+                    workspace_id=workspace_id
                 )
             
             entry_hash = log_event(
                 agent_role="Sentinel",
                 event_type=verdict_event,
                 risk_grade=result.risk_grade,
-                payload=result.to_json()
+                payload=result.to_json(),
+                workspace_id=workspace_id
             )
             
             # Archive failures to Shadow Genome
@@ -276,8 +305,9 @@ def audit_code(file_path: str, content: str) -> str:
                 archive_failure(
                     input_vector=content[:500],  # Truncate for storage
                     failure_mode=result.failure_modes[0].split(":")[0],
-                    context=json.dumps({"file": file_path, "risk_grade": result.risk_grade}),
-                    causal_vector=result.rationale
+                    context=json.dumps({"file": file_path, "risk_grade": result.risk_grade, "workspace": workspace_id}),
+                    causal_vector=result.rationale,
+                    workspace_id=workspace_id
                 )
             
             response = result.to_dict()
@@ -293,6 +323,11 @@ def audit_code(file_path: str, content: str) -> str:
             "failure_modes": ["SERVICE_UNAVAILABLE"],
             "requires_approval": False
         })
+
+@mcp.tool()
+def audit_code(file_path: str, content: str) -> str:
+    """Legacy wrapper for v2."""
+    return audit_code_v2(file_path, content, "default")
 
 @mcp.tool()
 def audit_claim(text: str) -> str:
@@ -320,7 +355,7 @@ def audit_claim(text: str) -> str:
     return result.to_json()
 
 @mcp.tool()
-def log_event(agent_role: str, event_type: str, risk_grade: str, payload: str) -> str:
+def log_event(agent_role: str, event_type: str, risk_grade: str, payload: str, workspace_id: str = "default") -> str:
     """
     Log an event to the Sovereign Ledger with Merkle chaining.
     
@@ -329,6 +364,7 @@ def log_event(agent_role: str, event_type: str, risk_grade: str, payload: str) -
         event_type: Type of event (PROPOSAL, AUDIT_PASS, etc.)
         risk_grade: L1, L2, or L3
         payload: JSON string of event data
+        workspace_id: Logical workspace identifier
         
     Returns:
         The SHA256 hash of the new entry
@@ -348,9 +384,9 @@ def log_event(agent_role: str, event_type: str, risk_grade: str, payload: str) -
         try:
             cursor.execute("""
                 INSERT INTO soa_ledger 
-                (timestamp, agent_did, event_type, risk_grade, payload, entry_hash, prev_hash, signature)
-                VALUES (datetime('now'), ?, ?, ?, ?, ?, ?, ?)
-            """, (did, event_type, risk_grade, payload, entry_hash, prev_hash, signature))
+                (timestamp, agent_did, event_type, risk_grade, payload, entry_hash, prev_hash, signature, workspace_id)
+                VALUES (datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (did, event_type, risk_grade, payload, entry_hash, prev_hash, signature, workspace_id))
             conn.commit()
         except sqlite3.Error as e:
             return f"Database Error: {e}"
@@ -358,7 +394,7 @@ def log_event(agent_role: str, event_type: str, risk_grade: str, payload: str) -
     return entry_hash
 
 @mcp.tool()
-def archive_failure(input_vector: str, failure_mode: str, context: str, causal_vector: str, decision_rationale: str = None) -> str:
+def archive_failure(input_vector: str, failure_mode: str, context: str, causal_vector: str, decision_rationale: str = None, workspace_id: str = "default") -> str:
     """
     Archive a failure to the Shadow Genome for Fail Forward training.
     
@@ -368,6 +404,7 @@ def archive_failure(input_vector: str, failure_mode: str, context: str, causal_v
         context: JSON of environmental context
         causal_vector: Why it failed (Sentinel rationale)
         decision_rationale: The agent's intent/reasoning for choosing this solution
+        workspace_id: Logical workspace identifier
         
     Returns:
         The genome_id of the archived failure
@@ -376,22 +413,23 @@ def archive_failure(input_vector: str, failure_mode: str, context: str, causal_v
         cursor = conn.cursor()
         try:
             cursor.execute("""
-                INSERT INTO shadow_genome (input_vector, decision_rationale, context, failure_mode, causal_vector)
-                VALUES (?, ?, ?, ?, ?)
-            """, (input_vector, decision_rationale, context, failure_mode, causal_vector))
+                INSERT INTO shadow_genome (input_vector, decision_rationale, context, failure_mode, causal_vector, workspace_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (input_vector, decision_rationale, context, failure_mode, causal_vector, workspace_id))
             conn.commit()
             return str(cursor.lastrowid)
         except sqlite3.Error as e:
             return f"Error: {e}"
 
 @mcp.tool()
-def request_l3_approval(artifact_hash: str, reason: str) -> str:
+def request_l3_approval(artifact_hash: str, reason: str, workspace_id: str = "default") -> str:
     """
     Submit an L3 artifact for Overseer approval.
     
     Args:
         artifact_hash: Hash of the artifact requiring approval
         reason: Why approval is needed
+        workspace_id: Logical workspace identifier
         
     Returns:
         The queue_id for tracking
@@ -400,13 +438,13 @@ def request_l3_approval(artifact_hash: str, reason: str) -> str:
         cursor = conn.cursor()
         try:
             cursor.execute("""
-                INSERT INTO l3_approval_queue (artifact_hash, requesting_agent, reason)
-                VALUES (?, ?, ?)
-            """, (artifact_hash, "did:myth:sentinel:active", reason))
+                INSERT INTO l3_approval_queue (artifact_hash, requesting_agent, reason, workspace_id)
+                VALUES (?, ?, ?, ?)
+            """, (artifact_hash, "did:myth:sentinel:active", reason, workspace_id))
             conn.commit()
             
             log_event("Sentinel", "L3_APPROVAL_REQUEST", "L3", 
-                     json.dumps({"artifact_hash": artifact_hash, "reason": reason}))
+                     json.dumps({"artifact_hash": artifact_hash, "reason": reason}), workspace_id=workspace_id)
             
             return str(cursor.lastrowid)
         except sqlite3.Error as e:
@@ -446,21 +484,29 @@ def approve_l3(queue_id: int, approved: bool, overseer_notes: str = "") -> str:
             return f"Error: {e}"
 
 @mcp.tool()
-def get_pending_approvals() -> str:
+def get_pending_approvals(workspace_id: Optional[str] = None) -> str:
     """
     Get all pending L3 approvals for the Overseer.
+    
+    Args:
+        workspace_id: Optional filter for multi-tenant isolation
     
     Returns:
         JSON array of pending approval requests
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("""
-            SELECT queue_id, timestamp, artifact_hash, reason 
-            FROM l3_approval_queue 
-            WHERE status = 'PENDING'
-            ORDER BY timestamp ASC
-        """)
+        
+        query = "SELECT queue_id, timestamp, artifact_hash, reason FROM l3_approval_queue WHERE status = 'PENDING'"
+        params = []
+        
+        if workspace_id:
+            query += " AND workspace_id = ?"
+            params.append(workspace_id)
+            
+        query += " ORDER BY timestamp ASC"
+            
+        cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         return json.dumps([dict(row) for row in rows])
 
@@ -596,20 +642,48 @@ def submit_user_feedback(event_id: str, rating: int, comments: str) -> str:
 # ============================================================================
 
 @mcp.resource("ledger://recent")
-def get_recent_ledger_entries() -> str:
-    """Get the 10 most recent ledger entries."""
+def get_recent_ledger_entries(workspace_id: Optional[str] = None) -> str:
+    """
+    Get the 10 most recent ledger entries.
+    
+    Args:
+        workspace_id: Optional filter
+    """
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM soa_ledger ORDER BY entry_id DESC LIMIT 10")
+        
+        query = "SELECT * FROM soa_ledger"
+        params = []
+        
+        if workspace_id:
+            query += " WHERE workspace_id = ?"
+            params.append(workspace_id)
+            
+        query += " ORDER BY entry_id DESC LIMIT 10"
+        
+        cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         return json.dumps([dict(row) for row in rows])
 
 @mcp.resource("genome://unresolved")
-def get_unresolved_failures() -> str:
-    """Get all unresolved Shadow Genome entries."""
+def get_unresolved_failures(workspace_id: Optional[str] = None) -> str:
+    """
+    Get all unresolved Shadow Genome entries.
+    
+    Args:
+        workspace_id: Optional filter
+    """
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM shadow_genome WHERE remediation_status = 'UNRESOLVED'")
+        
+        query = "SELECT * FROM shadow_genome WHERE remediation_status = 'UNRESOLVED'"
+        params = []
+        
+        if workspace_id:
+            query += " AND workspace_id = ?"
+            params.append(workspace_id)
+            
+        cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         return json.dumps([dict(row) for row in rows])
 

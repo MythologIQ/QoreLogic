@@ -101,12 +101,18 @@ class TrustManager:
                 # Check if in probation
                 in_probation = self.engine.is_in_probation(created_timestamp, verification_count)
 
-                # Calculate new score using EWMA
-                new_score = self.engine.calculate_ewma_update(
-                    current_score,
-                    outcome_score,
-                    context
-                )
+                # Calculate new score
+                if outcome_score < 0.5:
+                    # [P1] Critical: Enforce stage demotion on failure (Spec §5.3.6)
+                    self.logger.warning(f"Trust Violation (Outcome={outcome_score}). Enforcing demotion.")
+                    new_score = self.engine.calculate_violation_penalty(current_score)
+                else:
+                    # Standard EWMA update
+                    new_score = self.engine.calculate_ewma_update(
+                        current_score,
+                        outcome_score,
+                        context
+                    )
 
                 # Apply probation floor if needed
                 if in_probation:

@@ -2,6 +2,8 @@
 
 **Version:** 2.1.0 ("Sterile Fortress")
 **Scope:** Installation, Configuration, Integration, and Architecture.
+**Phase:** 9.0 (Formal Verification Active)
+**Last Updated:** December 20, 2025
 
 ---
 

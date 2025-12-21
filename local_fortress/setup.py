@@ -10,7 +10,9 @@ setup(
         "cryptography>=41.0.0",
         "pydantic>=2.0.0",
         "requests",
-        "typing_extensions"
+        "typing_extensions",
+        "z3-solver>=4.12.0",
+        "deal>=4.23.0"
     ],
     entry_points={
         'console_scripts': [

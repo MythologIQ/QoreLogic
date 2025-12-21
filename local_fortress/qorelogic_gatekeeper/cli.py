@@ -15,7 +15,33 @@ def main():
     parser.add_argument("--monitor", action="store_true", help="Run in silent monitoring mode (Audit Only, do not block)")
     parser.add_argument("--dashboard", action="store_true", help="Launch the QoreLogic Dashboard Server")
     args = parser.parse_args()
+
+    # Load persistent configuration
+    # The ledger volume is mounted at /app/ledger
+    CONFIG_PATH = Path("/app/ledger/system_mode")
+    system_mode = "normal" # Default
     
+    if CONFIG_PATH.exists():
+        try:
+            system_mode = CONFIG_PATH.read_text().strip().lower()
+        except:
+            pass
+
+    # CLI args override config, but config sets default
+    if args.monitor:
+        system_mode = "silent"
+
+    # Handle 'Invisible' Mode (Suppress stdout)
+    if system_mode == "invisible":
+        sys.stdout = open(os.devnull, 'w')
+    
+    # Logic Map
+    # normal -> blocking, verbose
+    # silent -> non-blocking, verbose
+    # invisible -> non-blocking, quiet
+
+    is_monitoring = (system_mode in ["silent", "invisible"]) or args.monitor
+
     if args.dashboard:
         print("🚀 Starting QoreLogic Dashboard on http://0.0.0.0:8000")
         try:
@@ -57,8 +83,8 @@ def main():
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        mode_label = "[MONITOR MODE]" if args.monitor else "[ACTIVE BLOCKING]"
-        if not args.monitor:
+        mode_label = f"[{system_mode.upper()} MODE]"
+        if not is_monitoring:
             # Branch Protection Policy
             try:
                 import subprocess
@@ -94,13 +120,13 @@ def main():
         risk = result.get('risk_grade')
         rationale = result.get('rationale')
         
-        if not args.monitor:
+        if not is_monitoring:
             print(f"Verdict: {verdict}")
             print(f"Risk: {risk}")
             print(f"Reason: {rationale}")
         
         if verdict == "FAIL":
-            if args.monitor:
+            if is_monitoring:
                 # Silent failure recording
                 sys.exit(0)
             else:
@@ -108,14 +134,14 @@ def main():
                 sys.exit(1)
             
         if verdict == "L3_REQUIRED":
-            if args.monitor:
+            if is_monitoring:
                  # Silent L3 recording
                  sys.exit(0)
             else:
                 print("⚠️ COMMIT BLOCKED: L3 Approval Required.")
                 sys.exit(1)
             
-        if not args.monitor:
+        if not is_monitoring:
             print("✅ PASS")
         sys.exit(0)
         

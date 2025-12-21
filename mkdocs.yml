@@ -21,13 +21,39 @@ plugins:
 
 nav:
   - Home: index.md
+  - Getting Started:
+      - Developer Manual: DEVELOPER_MANUAL.md
+      - Installation: README.md
   - Specification:
       - Core Spec: QoreLogic_SPECIFICATION.md
+      - Development Plan: DEVELOPMENT_PLAN.md
   - Architecture: ARCHITECTURE.md
   - Research Library:
       - Index: research/INDEX.md
+      - Research vs Reality: RESEARCH_VS_REALITY_v2.md
       - Foundations:
           - Information Theory: research/foundations/INFORMATION_THEORY.md
           - Trust Dynamics: research/foundations/TRUST_DYNAMICS.md
-  - Security: SECURITY_AUDIT.md
-  - API Reference: API_CONTRACT_VERIFICATION.md
+          - Formal Methods: research/foundations/FORMAL_METHODS.md
+          - Behavioral Economics: research/foundations/BEHAVIORAL_ECONOMICS.md
+      - Technologies:
+          - LLM Reliability: research/technologies/LLM_RELIABILITY.md
+          - Cryptographic Standards: research/technologies/CRYPTOGRAPHIC_STANDARDS.md
+          - Multi-Agent Coordination: research/technologies/MULTI_AGENT_COORDINATION.md
+          - Privacy Engineering: research/technologies/PRIVACY_ENGINEERING.md
+      - Compliance:
+          - AI Governance: research/compliance/AI_GOVERNANCE.md
+          - Data Protection: research/compliance/DATA_PROTECTION.md
+          - Disclosure Standards: research/compliance/DISCLOSURE_STANDARDS.md
+  - Security:
+      - Security Audit: SECURITY_AUDIT.md
+      - API Contract Verification: API_CONTRACT_VERIFICATION.md
+      - Agent Accountability: AGENT_ACCOUNTABILITY_CONTRACT.md
+  - Testing & Validation:
+      - Testing Strategy: TESTING_STRATEGY.md
+      - Test Coverage Analysis: TEST_COVERAGE_ANALYSIS.md
+      - E2E Architecture Review: E2E_ARCHITECTURE_REVIEW.md
+      - Formal Verification Status: FORMAL_VERIFICATION_STATUS.md
+  - Pilots & Scenarios:
+      - EchoHealth PRD: scenarios/EchoHealth_PRD.md
+      - Genesis Vault Pilot: pilot/genesis_vault/PILOT_REPORT.md

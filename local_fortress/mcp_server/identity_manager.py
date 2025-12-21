@@ -63,16 +63,49 @@ class IdentityManager:
                        then falls back to default (NOT SECURE for production).
         """
         env_pass = os.environ.get("QORELOGIC_IDENTITY_PASSPHRASE")
+        
+        # Secure storage path
+        user_profile = os.environ.get("USERPROFILE") or os.environ.get("HOME")
+        self.secret_dir = Path(user_profile) / ".qorelogic" / "security"
+        self.secret_path = self.secret_dir / "identity.secret"
+        
         if passphrase:
             self.passphrase = passphrase
         elif env_pass:
             self.passphrase = env_pass
         else:
-            print("⚠️ WARNING: Using insecure default passphrase. Set QORELOGIC_IDENTITY_PASSPHRASE for production.")
-            self.passphrase = "qorelogic-development-key"
+            # Try load or generate
+            if self.secret_path.exists():
+                try:
+                    with open(self.secret_path, 'r') as f:
+                        self.passphrase = f.read().strip()
+                except Exception as e:
+                    print(f"❌ Error reading identity secret: {e}")
+                    raise
+            else:
+                print("🔒 Initializing Identity Fortress...")
+                self._generate_and_save_secret()
             
         # Ensure keystore exists
         KEYSTORE_DIR.mkdir(parents=True, exist_ok=True)
+
+    def _generate_and_save_secret(self):
+        """Generate a strong random passphrase and save it securely."""
+        import secrets
+        new_phrase = secrets.token_hex(32)
+        
+        try:
+            self.secret_dir.mkdir(parents=True, exist_ok=True)
+            # Set restrictive permissions if possible (Windows/Linux vary)
+            with open(self.secret_path, 'w') as f:
+                f.write(new_phrase)
+            
+            self.passphrase = new_phrase
+            print(f"✅ Secure identity key generated at {self.secret_path}")
+        except Exception as e:
+            print(f"❌ Failed to save identity secret: {e}")
+            # Fallback to in-memory only (ephemeral)
+            self.passphrase = new_phrase
     
     def _get_cipher(self, salt: bytes) -> Fernet:
         """Create Fernet cipher from passphrase and specific salt."""

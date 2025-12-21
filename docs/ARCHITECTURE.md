@@ -1,8 +1,9 @@
 # QoreLogic Architecture Specification (Sovereign Fortress)
 
-**Version:** 2.0
-**Last Updated:** December 17, 2025
+**Version:** 2.1
+**Last Updated:** December 20, 2025
 **Scope:** Hardware, Software, Network, and Trust topology for QoreLogic governance
+**Phase:** 9.0 (Formal Verification Active)
 **Research Foundation:** See [Research Library](./research/INDEX.md)
 
 ---
@@ -92,11 +93,11 @@ graph TD
 
 #### 3.2.1 Multi-Tier Verification Pipeline
 
-| Tier  | Method              | Tools                       | Latency | Scope    |
-| :---- | :------------------ | :-------------------------- | :------ | :------- |
-| **1** | Static Analysis     | Pylint, Flake8, MyPy        | <0.5s   | All code |
-| **2** | Design by Contract  | `deal` library              | <1.0s   | All code |
-| **3** | Formal Verification | PyVeritas → CBMC, CrossHair | <5.0s   | L3 only  |
+| Tier  | Method              | Tools                      |  Status   | Latency | Scope    |
+| :---- | :------------------ | :------------------------- | :-------: | :------ | :------- |
+| **1** | Static Analysis     | Pylint, Flake8, MyPy       | ✅ Active | <0.5s   | All code |
+| **2** | Design by Contract  | `deal` library             | ✅ Active | <1.0s   | All code |
+| **3** | Formal Verification | Z3 Solver, CBMC, CrossHair | ⚠️ Hybrid | <5.0s   | L3 only  |
 
 #### 3.2.2 Model Options
 
@@ -237,12 +238,12 @@ signature = Ed25519_Sign(private_key, hash(n))
 
 ### 5.1 The "Clean Room" Protocol
 
-| Mechanism         | Implementation                 |
-| :---------------- | :----------------------------- |
+| Mechanism         | Implementation                     |
+| :---------------- | :--------------------------------- |
 | Port Separation   | QoreLogic: 8001, Hearthlink: 8002+ |
-| File Lock         | SQLite exclusive lock          |
-| Process Isolation | Separate process space         |
-| No Shared Memory  | No RAG vector overlap          |
+| File Lock         | SQLite exclusive lock              |
+| Process Isolation | Separate process space             |
+| No Shared Memory  | No RAG vector overlap              |
 
 ### 5.2 Access Control
 
@@ -348,3 +349,4 @@ See [Research Library](./research/INDEX.md) for full citations.
 | :------ | :------------- | :-------------------------------------------------------------- |
 | 1.0     | 2025-12        | Initial topology                                                |
 | **2.0** | **2025-12-17** | **Full research integration, trust engine, verification tiers** |
+| **2.1** | **2025-12-20** | **Phase 9.0 Z3 integration, formal verification status update** |

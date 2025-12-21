@@ -6,6 +6,7 @@ import sqlite3
 import os
 import json
 import logging
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -14,9 +15,12 @@ logger = logging.getLogger("DashboardAPI")
 app = FastAPI()
 
 # Enable CORS for local dev
+# We use regex to allow any localhost port (Launcher might shift if 5500 is taken)
+origin_regex = r"http://(localhost|127\.0\.0\.1)(:\d+)?"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origin_regex=origin_regex, 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -69,8 +73,11 @@ class WorkspaceManager:
             "name": name,
             "path": path, # Host path for reference
             "env_type": env_type,
-            "created_at": str(os.time.time()),
-            "db_path": os.path.join(QORELOGIC_HOME, f"{ws_id}.db")
+            "id": ws_id,
+            "name": name,
+            "path": path, # Host path for reference
+            "env_type": env_type,
+            "created_at": str(time.time())
         }
         
         # If no active workspace, set this one
@@ -88,30 +95,19 @@ class WorkspaceManager:
 
 ws_manager = WorkspaceManager()
 
-# Helper to get DB connection for a specific workspace (or active one)
-def get_db_connection(ws_id=None):
-    if ws_id:
-        reg = ws_manager.get_registry()
-        ws = reg["workspaces"].get(ws_id)
-        db_path = ws["db_path"] if ws else None
-    else:
-        # Default to legacy path or active workspace
-        active = ws_manager.get_active_workspace()
-        if active:
-            db_path = active["db_path"]
-        else:
-             # Fallback for single-mode
-            db_path = os.environ.get("QORELOGIC_DB_PATH", os.path.join(BASE_DIR, "..", "..", "local_fortress", "ledger", "qorelogic_soa_ledger.db"))
-            
-    if not db_path:
-        raise ValueError("No database path determined")
+# Helper to get DB connection (Single DB Architecture)
+def get_db_connection():
+    # Use the global QORELOGIC_DB_PATH
+    if not DB_PATH:
+        raise ValueError("No global database path configured")
         
-    # Auto-init DB if missing (for new workspaces)
-    if not os.path.exists(db_path):
-        # In real impl, we'd copy a schema template here
-        pass
+    # Auto-init DB directory if missing
+    db_dir = os.path.dirname(DB_PATH)
+    if not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
         
-    return sqlite3.connect(db_path)
+    # Connect to the SINGLE shared ledger
+    return sqlite3.connect(DB_PATH)
 
 
 @app.get("/api/health")
@@ -139,11 +135,11 @@ def activate_workspace(data: dict):
 @app.get("/api/status")
 def get_status(ws_id: str = None):
     try:
-        conn = get_db_connection(ws_id)
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
-        # System State
+        # System State (GLOBAL)
         try:
             cursor.execute("SELECT * FROM system_state WHERE state_id = 1")
             row = cursor.fetchone()
@@ -151,9 +147,12 @@ def get_status(ws_id: str = None):
         except:
             state = {"current_mode": "Allocating..."}
         
-        # Ledger Count
+        # Ledger Count (SCOPED to Workspace if provided)
         try:
-            cursor.execute("SELECT COUNT(*) FROM soa_ledger")
+            if ws_id:
+                cursor.execute("SELECT COUNT(*) FROM soa_ledger WHERE workspace_id = ?", (ws_id,))
+            else:
+                cursor.execute("SELECT COUNT(*) FROM soa_ledger")
             state["total_ledger_entries"] = cursor.fetchone()[0]
         except:
             state["total_ledger_entries"] = 0
@@ -166,10 +165,21 @@ def get_status(ws_id: str = None):
 @app.get("/api/ledger")
 def get_ledger(limit: int = 50, ws_id: str = None):
     try:
-        conn = get_db_connection(ws_id)
+        conn = get_db_connection()
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM soa_ledger ORDER BY entry_id DESC LIMIT ?", (limit,))
+        
+        query = "SELECT * FROM soa_ledger"
+        params = []
+        
+        if ws_id:
+            query += " WHERE workspace_id = ?"
+            params.append(ws_id)
+            
+        query += " ORDER BY entry_id DESC LIMIT ?"
+        params.append(limit)
+        
+        cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         return [dict(row) for row in rows]
     except Exception as e:
