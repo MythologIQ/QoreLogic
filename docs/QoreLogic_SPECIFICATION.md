@@ -163,27 +163,32 @@ Transforming a speculative Code Diff into a Verified Asset:
 
 > ² _Datadog engineering reports LLM-based SAST triage reduces false positives by ~90% while maintaining detection rates._
 
-### 3.3. Multi-Tier Verification Pipeline
+### 3.3. Progressive Formalization & Certainty Levels
 
-Per LLM Reliability research [LLM-001], verification uses a **defense-in-depth** approach with three tiers:
+Instead of a "defense-in-depth" screening model, QoreLogic employs **Progressive Formalization**. Verification provides **Certainty Escalation**, moving an artifact from a probabilistic guess to a proven fact.
 
-| Tier  | Method              | Tools                                | Latency | Scope    |
-| :---- | :------------------ | :----------------------------------- | :------ | :------- |
-| **1** | Static Analysis     | Pylint, Flake8, MyPy                 | <0.5s   | All code |
-| **2** | Design by Contract  | `deal` library (pre/post conditions) | <1.0s   | All code |
-| **3** | Formal Verification | PyVeritas → CBMC, CrossHair          | <5.0s   | L3 only  |
+| Certainty   | Name            | Definition                                  | Tooling (Tier)               |
+| :---------- | :-------------- | :------------------------------------------ | :--------------------------- |
+| **Level 0** | **Unverified**  | Raw, high-entropy LLM output.               | _None_                       |
+| **Level 1** | **Heuristic**   | Syntactically valid; static rules passed.   | Static Analysis (Tier 1)     |
+| **Level 2** | **Constrained** | Functionally bounded by runtime contracts.  | Design by Contract (Tier 2)  |
+| **Level 3** | **Verified**    | Formally proven correct (bounded).          | Formal Verification (Tier 3) |
+| **Level 4** | **Robust**      | Proven compatible with known failure modes. | Shadow Genome Regression     |
+| **Level 5** | **Attested**    | Immutable, signed, and production-ready.    | Ledger Commit                |
 
-#### 3.3.1. Tier-by-Risk-Grade
+#### 3.3.1. Certainty Requirements by Impact
 
-| Risk   |         Tier 1         | Tier 2 | Tier 3 |
-| :----- | :--------------------: | :----: | :----: |
-| **L1** | ✓ (10% sample in LEAN) |   -    |   -    |
-| **L2** |           ✓            |   ✓    |   -    |
-| **L3** |           ✓            |   ✓    |   ✓    |
+The system mandates minimum Certainty Levels based on the criticality of the code:
 
-#### 3.3.2. Tier 2: Design by Contract
+| Impact Class   | Former "L-Grade" | Minimum Certainty | Required Tiers        |
+| :------------- | :--------------- | :---------------- | :-------------------- |
+| **Routine**    | L1               | **Level 1**       | Tier 1 (Static)       |
+| **Functional** | L2               | **Level 2**       | Tier 1 + Tier 2 (DbC) |
+| **Critical**   | L3               | **Level 3**       | Tier 1-3 (Full Proof) |
 
-The `deal` library enforces formal contracts on Python functions:
+#### 3.3.2. Tier 2: Design by Contract (Logic Constraints)
+
+The `deal` library enforces formal contracts, bridging Level 1 (Structure) to Level 3 (Proof):
 
 ```python
 import deal
@@ -194,32 +199,27 @@ def heavy_compute(x):
     ...
 ```
 
-- **Pre-conditions:** Input requirements
-- **Post-conditions:** Output guarantees
-- **Invariants:** Class-level constraints
-- **Integration:** Connects to Z3 for formal verification
+#### 3.3.3. Tier 3: Formal Verification (Mathematical Proof)
 
-#### 3.3.3. Tier 3: Formal Verification
+For Critical (Level 3) artifacts, we prove correctness via transpilation or symbolic execution:
 
-For L3 code, mathematical proof is required:
-
-| Tool          | Method                            | Accuracy |
-| :------------ | :-------------------------------- | :------- |
-| **PyVeritas** | Python → C transpilation + CBMC   | ~80-90%  |
-| **CrossHair** | Symbolic execution on Python (Z3) | Backup   |
-| **CBMC**      | Bounded Model Checking            | External |
-
-> _PyVeritas achieves 80-90% accuracy on formal verification by transpiling Python to C and running CBMC._
+| Tool          | Method                | Target                |
+| :------------ | :-------------------- | :-------------------- |
+| **PyVeritas** | Python → C → CBMC     | Bounded Correctness   |
+| **CrossHair** | Z3 Symbolic Execution | Counterexample Search |
+| **Z3 Solver** | Logic Satisfiability  | Contract Validation   |
 
 ---
 
-## 4. Risk Grading and Classification
+## 4. Impact Classification & Certainty Targets
 
-| Grade  | Description                | Trigger Examples               | Verification Strategy         | SLA     |
-| :----- | :------------------------- | :----------------------------- | :---------------------------- | :------ |
-| **L1** | Low impact, routine        | Typos, variable renames, docs  | Lean Mode (sampling)          | <1 min  |
-| **L2** | Medium impact, uncertainty | API integration, UI refactor   | Balanced (full Sentinel pass) | <5 min  |
-| **L3** | High impact, critical      | Auth, DB migration, encryption | High Assurance (BMC + Human)  | <24 hrs |
+The system classifies changes by potential impact (Grade) to determine the required Certainty Level (Target).
+
+| Impact Grade        | Description                 | Examples                   | Target Certainty          | Verification Strategy         |
+| :------------------ | :-------------------------- | :------------------------- | :------------------------ | :---------------------------- |
+| **L1 (Routine)**    | Low impact, non-functional  | Typos, docs, whitespace    | **Level 1** (Heuristic)   | Lean Mode (Sampling)          |
+| **L2 (Functional)** | Medium impact, logic change | API integration, UI tweaks | **Level 2** (Constrained) | Full Sentinel Pass (Tier 1+2) |
+| **L3 (Critical)**   | High impact, security risk  | Auth, Encryption, Schema   | **Level 3** (Verified)    | High Assurance (BMC + Proof)  |
 
 ### 4.1. Auto-Classification Rules
 

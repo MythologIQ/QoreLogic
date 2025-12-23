@@ -106,13 +106,111 @@ def get_db_connection():
     if not os.path.exists(db_dir):
         os.makedirs(db_dir, exist_ok=True)
         
-    # Connect to the SINGLE shared ledger
+# Connect to the SINGLE shared ledger
     return sqlite3.connect(DB_PATH)
+
+def init_db_schema():
+    """Initialize DB schema if tables are missing."""
+    # Resolve path relative to this file (in /qorelogic_system/dashboard/backend)
+    # Target: /qorelogic_system/local_fortress/ledger/schema.sql
+    schema_path = os.path.join(BASE_DIR, "..", "..", "local_fortress", "ledger", "schema.sql")
+    
+    # If redundant check needed for different mount structure
+    if not os.path.exists(schema_path):
+        # Try local dev path
+        schema_path = os.path.join(BASE_DIR, "..", "..", "local_fortress", "ledger", "schema.sql")
+    
+    if not os.path.exists(schema_path):
+        logger.warning(f"Schema SQL not found at {schema_path}. DB Init skipped.")
+        return
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if master table exists
+        cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='soa_ledger'")
+        if cursor.fetchone()[0] == 0:
+            logger.info(f"Applying schema from {schema_path}...")
+            with open(schema_path, 'r') as f:
+                schema_sql = f.read()
+                cursor.executescript(schema_sql)
+            conn.commit()
+            logger.info("✅ Database schema initialized successfully.")
+        else:
+            logger.info("Database schema already exists.")
+            
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize database: {e}")
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+@app.on_event("startup")
+async def startup_event():
+    init_db_schema()
 
 
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "db_path": DB_PATH, "db_exists": os.path.exists(DB_PATH)}
+
+# ============================================================================
+# AGENT CONFIGURATION API
+# ============================================================================
+AGENT_CONFIG_PATH = os.path.join(QORELOGIC_HOME, "config", "agents.json")
+
+def ensure_agent_config_dir():
+    """Ensure the agent config directory exists."""
+    config_dir = os.path.dirname(AGENT_CONFIG_PATH)
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir, exist_ok=True)
+
+@app.get("/api/agents/config")
+def get_agent_config():
+    """Load agent configuration from persistent storage."""
+    ensure_agent_config_dir()
+    if os.path.exists(AGENT_CONFIG_PATH):
+        try:
+            with open(AGENT_CONFIG_PATH, 'r', encoding='utf-8') as f:
+                return {"status": "ok", "config": json.load(f)}
+        except Exception as e:
+            logger.warning(f"Failed to load agent config: {e}")
+            return {"status": "error", "error": str(e)}
+    # Return defaults if no config file exists
+    return {
+        "status": "ok",
+        "config": {
+            "provider": "ollama",
+            "endpoint": "http://localhost:11434",
+            "models": {
+                "sentinel": "default",
+                "judge": "default", 
+                "overseer": "default",
+                "scrivener": "default"
+            },
+            "prompts": {
+                "sentinel": "You are SENTINEL, a security-focused code auditor.",
+                "judge": "You are JUDGE, the final arbiter of code compliance.",
+                "overseer": "You are OVERSEER, a project manager and strategist.",
+                "scrivener": "You are SCRIVENER, the technical documentation engine."
+            },
+            "agents": {}
+        }
+    }
+
+@app.post("/api/agents/config")
+def save_agent_config(data: dict):
+    """Save agent configuration to persistent storage."""
+    ensure_agent_config_dir()
+    try:
+        with open(AGENT_CONFIG_PATH, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+        logger.info(f"Agent config saved to {AGENT_CONFIG_PATH}")
+        return {"status": "ok", "path": AGENT_CONFIG_PATH}
+    except Exception as e:
+        logger.error(f"Failed to save agent config: {e}")
+        return {"status": "error", "error": str(e)}
 
 @app.get("/api/workspaces")
 def list_workspaces():
@@ -130,6 +228,27 @@ def activate_workspace(data: dict):
         reg["active"] = data["id"]
         ws_manager.save_registry(reg)
         return {"status": "ok", "active": data["id"]}
+    return {"error": "Workspace not found"}
+
+@app.post("/api/workspaces/deactivate")
+def deactivate_workspace():
+    """Clear the active workspace, returning user to selector."""
+    reg = ws_manager.get_registry()
+    reg["active"] = None
+    ws_manager.save_registry(reg)
+    return {"status": "ok", "active": None}
+
+@app.delete("/api/workspaces/{ws_id}")
+def delete_workspace(ws_id: str):
+    """Remove a workspace from the registry (doesn't delete files on disk)."""
+    reg = ws_manager.get_registry()
+    if ws_id in reg.get("workspaces", {}):
+        del reg["workspaces"][ws_id]
+        # If this was the active workspace, clear it
+        if reg.get("active") == ws_id:
+            reg["active"] = None
+        ws_manager.save_registry(reg)
+        return {"status": "ok", "deleted": ws_id}
     return {"error": "Workspace not found"}
 
 @app.get("/api/status")
@@ -187,19 +306,59 @@ def get_ledger(limit: int = 50, ws_id: str = None):
         return []
 
 @app.get("/api/files")
-def list_files(path: str = ""):
-    """List files in the workspace (read-only for now)"""
-    # In Docker, workspace root might be /app/workspace
-    workspace_root = os.environ.get("QORELOGIC_WORKSPACE_ROOT", os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")))
+def list_files(path: str = "", ws_id: str = None):
+    """List files in the workspace (scoped to active workspace if ws_id provided)"""
+    
+    # Default workspace root
+    default_root = os.environ.get("QORELOGIC_WORKSPACE_ROOT", "/src")
+    workspace_root = default_root
+    
+    # Determine the workspace root based on ws_id
+    if ws_id:
+        reg = ws_manager.get_registry()
+        ws = reg.get("workspaces", {}).get(ws_id)
+        if ws and ws.get("path"):
+            stored_path = ws["path"]
+            
+            # The stored_path is a host path (like G:\MythologIQ\Project)
+            # Inside Docker, /src is mounted to the host project root
+            # We need to find where this workspace actually lives
+            
+            # Check if it's a Windows-style path
+            if "\\" in stored_path or (len(stored_path) > 1 and stored_path[1] == ":"):
+                # Extract the directory name from the Windows path
+                dir_name = os.path.basename(stored_path.rstrip("\\/"))
+                potential_path = os.path.join("/src", dir_name)
+                
+                if os.path.exists(potential_path):
+                    workspace_root = potential_path
+                else:
+                    # Maybe the workspace IS the /src mount itself
+                    workspace_root = default_root
+            elif stored_path.startswith("/"):
+                # It's already a Unix path - use it if it exists
+                if os.path.exists(stored_path):
+                    workspace_root = stored_path
+                else:
+                    # Try it as relative to /src
+                    potential_path = os.path.join("/src", stored_path.lstrip("/"))
+                    if os.path.exists(potential_path):
+                        workspace_root = potential_path
+            else:
+                # Relative path - join with /src
+                workspace_root = os.path.join(default_root, stored_path)
+    
     target_dir = os.path.join(workspace_root, path)
     
-    # Security check is trickier in container with mounts, but let's keep basic traversal check
-    if not os.path.abspath(target_dir).startswith(workspace_root):
-        # Allow if it's within the safe root
-        pass 
+    # Normalize to prevent traversal  
+    target_dir = os.path.abspath(target_dir)
+    workspace_root = os.path.abspath(workspace_root)
+    
+    if not target_dir.startswith(workspace_root):
+        return {"error": "Access denied - path traversal detected"}
         
     if not os.path.exists(target_dir):
-         return {"error": "Path not found"}
+         return {"error": f"Path not found", "workspace_root": workspace_root, "items": []}
          
     if os.path.isfile(target_dir):
         return {"type": "file", "name": os.path.basename(target_dir)}
@@ -215,7 +374,7 @@ def list_files(path: str = ""):
     except Exception as e:
         return {"error": str(e)}
         
-    return {"path": path, "items": sorted(items, key=lambda x: (not x['is_dir'], x['name'].lower()))}
+    return {"path": path, "workspace_root": workspace_root, "items": sorted(items, key=lambda x: (not x['is_dir'], x['name'].lower()))}
 
 # Serve Static Files (must be last to avoid catching API routes)
 if os.path.exists(STATIC_DIR):

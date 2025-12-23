@@ -59,27 +59,74 @@ def handle_get_trust_status(args):
         "stage_multiplier": stage_info[1] if stage_info else 1.0
     }
 
+from mcp_server.trust_manager import get_trust_manager
+
 def handle_list_identities(args):
-    # Scan keystore
+    """
+    List identities enriched with Trust Dynamics data (Score, Stage, Weight).
+    """
+    # Scan keystore for physical keys
     keystore_dir = Path(__file__).parent / "keystore"
-    identities = []
+    identities = {}
     
     if keystore_dir.exists():
         for keyfile in keystore_dir.glob("*.key"):
             try:
                 with open(keyfile, 'r') as f:
                     data = json.load(f)
-                    identities.append({
-                        "did": data.get("did"),
-                        "role": data.get("role"),
-                        "created_at": data.get("created_at"),
-                        "expires_at": data.get("expires_at"),
-                        "algorithm": data.get("kdf_algorithm", "pbkdf2")
-                    })
+                    did = data.get("did")
+                    if did:
+                        identities[did] = {
+                            "did": did,
+                            "role": data.get("role", "Unknown"),
+                            "created_at": data.get("created_at"),
+                            "algorithm": data.get("kdf_algorithm", "pbkdf2"),
+                            "is_local": True
+                        }
             except:
                 pass
+
+    # Enrich with Trust Registry Data (SQL)
+    try:
+        db_path = Path(__file__).parent / "ledger" / "qorelogic_soa_ledger.db"
+        tm = get_trust_manager(str(db_path))
+        
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.execute(
+                """
+                SELECT did, trust_score, trust_stage, influence_weight, 
+                       verification_count, daily_penalty_sum, status
+                FROM agent_registry
+                """
+            )
+            rows = cursor.fetchall()
+            
+            for row in rows:
+                did = row["did"]
+                # If agent exists in DB but not keystore (e.g. remote agent?), add it
+                if did not in identities:
+                    identities[did] = {
+                        "did": did,
+                        "role": "Remote Agent", # Default fallback
+                        "is_local": False
+                    }
                 
-    return {"success": True, "identities": identities}
+                # Merge trust data
+                identities[did].update({
+                    "trust_score": row["trust_score"],
+                    "trust_stage": row["trust_stage"],
+                    "influence_weight": row["influence_weight"],
+                    "verification_count": row["verification_count"],
+                    "daily_penalty_sum": row["daily_penalty_sum"],
+                    "status": row["status"]
+                })
+
+    except Exception as e:
+        # Fallback if DB is inaccessible
+        print(f"Stats enrichment failed: {e}", file=sys.stderr)
+
+    return {"success": True, "identities": list(identities.values())}
 
 def handle_rotate_key(args):
     payload = json.loads(args.payload)

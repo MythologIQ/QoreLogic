@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
-import { HostAPI } from './api';
+import { ContainerAPI } from './api';
 
-export default function LedgerView() {
+export default function LedgerView({ workspaceId }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
 
   const fetchLedger = async () => {
     setLoading(true);
-    // Use the Host Bridge to get deeper history directly from SQLite
-    const res = await HostAPI.queryHostLedger();
-    if (res.success && res.events) {
-      setEvents(res.events);
+    // Use ContainerAPI to get workspace-scoped history
+    const res = await ContainerAPI.ledger(100, workspaceId);
+    if (res.success && Array.isArray(res.data)) {
+      setEvents(res.data);
     }
     setLoading(false);
   };
 
   useEffect(() => {
     fetchLedger();
-  }, []);
+  }, [workspaceId]);
 
   const filteredEvents = events.filter(e => 
     e.event_type?.toLowerCase().includes(filter.toLowerCase()) ||
@@ -59,36 +59,85 @@ export default function LedgerView() {
           <tbody>
             {loading ? (
               <tr><td colSpan="6" style={{ padding: '40px', textAlign: 'center' }}>Loading Ledger...</td></tr>
-            ) : filteredEvents.length === 0 ? (
-              <tr><td colSpan="6" style={{ padding: '40px', textAlign: 'center' }}>No matching events found.</td></tr>
             ) : (
-              filteredEvents.map(entry => (
-                <tr key={entry.entry_hash} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <td style={{ padding: '12px 16px', color: 'var(--text-primary)' }}>{entry.event_type}</td>
-                  <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
-                    {entry.agent_did?.split(':')[2] || 'System'}
-                  </td>
-                  <td style={{ padding: '12px 16px' }}>
-                     {/* Risk logic might need adjusting if fields differ in DB vs container API */}
-                     <span style={{ 
-                        padding: '2px 6px', borderRadius: '4px', fontSize: '11px',
-                        background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)' 
-                     }}>
-                       N/A
-                     </span>
-                  </td>
-                  <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
-                    {entry.workspace_id || 'default'}
-                  </td>
-                  <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
-                    {new Date(entry.timestamp * 1000).toLocaleString()}
-                  </td>
-                  <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    {entry.entry_hash?.substring(0, 8)}...
-                  </td>
-                </tr>
-              ))
-            )}
+                filteredEvents.map(entry => {
+                // Certainty Logic (Progressive Formalization)
+                // Mapping old "Risk" fields to certainties if needed, or using direct certainty if available
+                let certainty = 'L0';
+                if (entry.risk_grade === 'L1') certainty = 'L1'; 
+                if (entry.risk_grade === 'L2') certainty = 'L2';
+                if (entry.risk_grade === 'L3') certainty = 'L3';
+                
+                // Visuals for Certainty Levels
+                const levelRaw = parseInt(certainty.replace('L', '')) || 0;
+                let certColor = '#9ca3af'; // L0 Gray
+                if (levelRaw >= 1) certColor = '#3b82f6'; // L1 Blue
+                if (levelRaw >= 2) certColor = '#f59e0b'; // L2 Amber
+                if (levelRaw >= 3) certColor = '#10b981'; // L3 Green
+                if (levelRaw >= 4) certColor = '#8b5cf6'; // L4 Purple
+                if (levelRaw >= 5) certColor = '#ec4899'; // L5 Pink
+
+                // Event Type Logic
+                const isFail = entry.event_type?.includes('FAIL');
+                const isPass = entry.event_type?.includes('PASS');
+                const isL3 = entry.event_type?.includes('L3');
+                
+                let icon = '•';
+                if (isPass) icon = '✓';
+                if (isFail) icon = '✕';
+                if (isL3) icon = '⚖️';
+
+                // Parse Payload for Summary
+                let summary = "";
+                try {
+                  const pl = JSON.parse(entry.payload);
+                  if (pl.verdict) summary += `Verdict: ${pl.verdict} `;
+                  if (pl.failure_modes?.length) summary += `| FM: ${pl.failure_modes.join(', ')} `;
+                  if (pl.reason) summary += `| ${pl.reason} `;
+                } catch (e) {}
+
+                return (
+                  <tr key={entry.entry_hash} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '12px 16px', color: 'var(--text-primary)' }}>
+                      <span style={{ 
+                        marginRight: '8px', 
+                        color: isFail ? '#ef4444' : isPass ? '#10b981' : 'var(--text-secondary)',
+                        fontWeight: 'bold'
+                      }}>
+                        {icon}
+                      </span>
+                      {entry.event_type}
+                    </td>
+                    <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
+                      {entry.agent_did?.split(':')[2] || 'System'}
+                      <div style={{ fontSize: '10px', opacity: 0.6 }}>{entry.agent_did}</div>
+                    </td>
+                    <td style={{ padding: '12px 16px' }}>
+                       <span style={{ 
+                          padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold',
+                          background: `${certColor}20`, color: certColor, border: `1px solid ${certColor}40`
+                       }}>
+                         LEVEL {levelRaw}
+                       </span>
+                    </td>
+                    <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
+                      {entry.workspace_id || 'default'}
+                    </td>
+                    <td style={{ padding: '12px 16px' }}>
+                      <div style={{ color: 'var(--text-secondary)' }}>{new Date(entry.timestamp * 1000).toLocaleString()}</div>
+                      {summary && (
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', opacity: 0.8, maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {summary}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      {entry.entry_hash?.substring(0, 8)}...
+                    </td>
+                  </tr>
+                );
+            })
+          )}
           </tbody>
         </table>
       </div>

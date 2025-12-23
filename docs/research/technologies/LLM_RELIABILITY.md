@@ -47,71 +47,35 @@ Research indicates an **inverse correlation** in some models: highly capable mod
 
 ---
 
-## 2. The QoreLogic Verification Pipeline
+## 2. Progressive Formalization & Proof Escalation
 
-The pipeline employs a "Swiss Cheese" model—multiple overlapping defenses to catch errors that slip through any single layer.
+Instead of a defensive "safety net" (or Swiss Cheese model) which assumes failure persistence, QoreLogic employs **Progressive Formalization**. This architecture treats uncertainty as a temporary state to be systematically eliminated through proof escalation.
 
-### 2.1 Tier 1: Static Analysis (Hygiene)
+We define a **Formal Taxonomy of Certainty** for all AI-generated artifacts:
 
-**Purpose:** Catch 60-70% of trivial errors at low cost.
+| Level       | Name                    | Definition                                                          | Tools                        |
+| :---------- | :---------------------- | :------------------------------------------------------------------ | :--------------------------- |
+| **Level 0** | **Unverified**          | Raw, probabilistic LLM output. High entropy.                        | Scrivener (LLM)              |
+| **Level 1** | **Heuristic**           | Syntactically valid and compliant with static rules.                | Pylint, Flake8, MyPy         |
+| **Level 2** | **Constrained**         | Functionally constrained by runtime contracts (Design by Contract). | `deal`, Runtime Assertions   |
+| **Level 3** | **Verified**            | Formally proven correct within bounded model limits.                | PyVeritas (CBMC), Z3         |
+| **Level 4** | **Historically Robust** | Proven compatible with known failure modes (Shadow Genome).         | Sentinel (Regression Checks) |
+| **Level 5** | **Attested**            | Immutable, cryptographically signed, and regression-proof.          | Sovereign Ledger (Ed25519)   |
 
-| Tool   | Function           | Speed  |
-| ------ | ------------------ | ------ |
-| Pylint | Style, conventions | Fast   |
-| Flake8 | Syntax, imports    | Fast   |
-| MyPy   | Type checking      | Medium |
+### 2.1 The Philosophy: Architecture Constraints vs. Policy Constraints
 
-**Limitation:** Cannot detect deep logical flaws.
+Traditional governance relies on policies ("Do not write bad code"). QoreLogic relies on architectural constraints ("It is impossible to commit code that contradicts the Shadow Genome").
 
-### 2.2 Tier 2: Design by Contract (Runtime Logic)
+**Key Thesis:**
 
-**Purpose:** Formalize intent; catch violations at runtime.
+> Traditional safety models assume failure persistence. QoreLogic assumes failure elimination through constraint accumulation.
 
-**Mandated Library:** `deal` (Python)
+### 2.2 From Defensive Redundancy to Proof Escalation
 
-```python
-import deal
+In this model, verification is not about "catching bugs" (a defensive posture); it is about **elevating the epistemic status** of a code artifact from Level 0 (Guess) to Level 5 (Fact).
 
-@deal.pre(lambda x: x > 0)
-@deal.post(lambda res: res > x)
-def heavy_compute(x):
-    ...
-```
-
-**Benefits:**
-
-- Pre-conditions: Requirements for input
-- Post-conditions: Guarantees of output
-- Invariants: Class-level constraints
-- Integration with Z3 for formal verification
-
-> [VERIF-001] Shpilka, I. (2024). "deal: Design by Contract for Python." github.com/life4/deal
-
-### 2.3 Tier 3: Formal Verification (Mathematical Proof)
-
-**Purpose:** Proof of correctness for high-risk components.
-
-**Primary Tool:** PyVeritas
-
-**Architecture:**
-
-1. **Transpilation:** LLM translates Python to C
-2. **Bounded Model Checking:** CBMC symbolically executes C code
-3. **Property Checking:** Buffer overflows, pointer errors, assertion violations
-4. **Result:** PASS/FAIL with counterexample if applicable
-
-> [VERIF-002] PyVeritas Team. (2024). "Python Verification via Transpilation to C." arXiv.
-
-| Metric   | Value              | Source               |
-| -------- | ------------------ | -------------------- |
-| Accuracy | 80-90%             | PyVeritas benchmarks |
-| Latency  | ~0.17s per snippet | ACCA system          |
-
-**Backup Tool:** CrossHair
-
-CrossHair uses symbolic execution directly on Python (via Z3) to find counterexamples. Acts as a "logic fuzzer."
-
-> [VERIF-003] CrossHair Documentation. github.com/pschanely/CrossHair
+- **Fail Forward** is redefined: It is the deliberate construction of future impossibilities. When a Sentinel rejects code, it records the failure in the **Shadow Genome**, converting a transient error into a permanent negative constraint.
+- **Certainty Escalation**: An artifact cannot move to Production until it reaches the required Certainty Level (typically Level 3 for Logic, Level 5 for Release).
 
 ---
 

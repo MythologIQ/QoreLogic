@@ -30,10 +30,81 @@ if (-not $Started) {
     exit 1
 }
 
-Write-Host "🚀 QoreLogic Launcher listening on http://localhost:$Port/" -ForegroundColor Cyan
+Write-Host "🚀 QoreLogic Control Plane listening on http://localhost:$Port/" -ForegroundColor Cyan
+Write-Host "   [AUTO] Starting Docker container..." -ForegroundColor Yellow
 
-# Open Browser
-Start-Process "http://localhost:$Port/"
+# Auto-Launch Docker Container (inline the launch logic)
+$DeployScript = Join-Path $ProjectRoot "local_fortress\deploy_isolated.ps1"
+$LedgerPath = "$env:USERPROFILE\.qorelogic\ledger"
+
+# Ensure Ledger Path Exists
+if (-not (Test-Path $LedgerPath)) { 
+    New-Item -ItemType Directory -Force -Path $LedgerPath | Out-Null 
+}
+
+# Check if Image Exists
+$ImageExists = docker images -q qorelogic:latest
+if (-not $ImageExists) {
+    Write-Host "   [CMD] Docker image missing. Building (this may take a minute)..." -ForegroundColor Yellow
+    Start-Process -FilePath "powershell.exe" -ArgumentList "-File `"$DeployScript`"" -Wait
+}
+
+# Clean up existing container
+Write-Host "   [CMD] Clearing runtime application..." -ForegroundColor Gray
+docker rm -f qorelogic-runtime 2>&1 | Out-Null
+Start-Sleep -Milliseconds 500
+
+# Determine what to mount as /src
+# Check if there's an active workspace in the registry
+$WorkspacePath = Join-Path $LedgerPath "workspaces.json"
+$SourceMount = (Resolve-Path $ProjectRoot).Path  # Default: Q-DNA root
+
+if (Test-Path $WorkspacePath) {
+    try {
+        $Registry = Get-Content $WorkspacePath -Raw | ConvertFrom-Json
+        if ($Registry.active) {
+            $ActiveWs = $Registry.workspaces.($Registry.active)
+            if ($ActiveWs -and $ActiveWs.path -and (Test-Path $ActiveWs.path)) {
+                $SourceMount = $ActiveWs.path
+                Write-Host "   [WS] Mounting workspace: $($ActiveWs.name)" -ForegroundColor Magenta
+                Write-Host "        Path: $SourceMount" -ForegroundColor Gray
+            }
+        }
+    } catch {
+        Write-Warning "Failed to read workspace registry, using default mount"
+    }
+}
+
+$SystemMount = (Resolve-Path $ProjectRoot).Path
+$DockerArgs = "run -d --rm --name qorelogic-runtime -v `"$SourceMount`:/src`" -v `"$SystemMount`:/qorelogic_system`" -v `"$LedgerPath`:/app/ledger`" -p 8000:8000 -e QORELOGIC_DB_PATH=/app/ledger/qorelogic_soa_ledger.db -e PYTHONPATH=/app/site-packages:/qorelogic_system -e QORELOGIC_WORKSPACE_ROOT=/src -e QORELOGIC_STATIC_DIR=/qorelogic_system/dashboard/frontend/dist -w /src qorelogic:latest /qorelogic_system/dashboard/backend/main.py"
+
+Write-Host "   [CMD] Launching QoreLogic container..." -ForegroundColor Green
+Invoke-Expression "docker $DockerArgs"
+
+# Wait for container to be ready
+Start-Sleep -Seconds 2
+$ContainerReady = $false
+for ($i = 0; $i -lt 10; $i++) {
+    try {
+        $response = Invoke-WebRequest -Uri "http://localhost:8000/api/health" -UseBasicParsing -TimeoutSec 2 -ErrorAction SilentlyContinue
+        if ($response.StatusCode -eq 200) {
+            $ContainerReady = $true
+            break
+        }
+    } catch {}
+    Start-Sleep -Seconds 1
+}
+
+if ($ContainerReady) {
+    Write-Host "   [OK] Dashboard ready at http://localhost:8000/" -ForegroundColor Green
+    # Open Dashboard directly (not Launcher)
+    Start-Process "http://localhost:8000/"
+} else {
+    Write-Warning "Container may not be ready. Opening Dashboard anyway..."
+    Start-Process "http://localhost:8000/"
+}
+
+Write-Host "   [CTRL] Control Plane running. Press Ctrl+C to stop." -ForegroundColor Gray
 
 try {
     while ($true) {
@@ -277,7 +348,7 @@ try {
                 # CRITICAL FIX: We must include /app/site-packages (where libraries actally live) 
                 # AND /qorelogic_system (where our patched source lives).
                 # Linux path separator is ':'
-                $DockerArgs = "run --rm --name qorelogic-runtime -v `"$SourceMount`:/src`" -v `"$SystemMount`:/qorelogic_system`" -v `"$LedgerPath`:/app/ledger`" -p 8000:8000 -e QORELOGIC_DB_PATH=/app/ledger/qorelogic_soa_ledger.db -e PYTHONPATH=/app/site-packages:/qorelogic_system -e QORELOGIC_WORKSPACE_ROOT=/src -w /src qorelogic:latest /qorelogic_system/dashboard/backend/main.py"
+                $DockerArgs = "run --rm --name qorelogic-runtime -v `"$SourceMount`:/src`" -v `"$SystemMount`:/qorelogic_system`" -v `"$LedgerPath`:/app/ledger`" -p 8000:8000 -e QORELOGIC_DB_PATH=/app/ledger/qorelogic_soa_ledger.db -e PYTHONPATH=/app/site-packages:/qorelogic_system -e QORELOGIC_WORKSPACE_ROOT=/src -e QORELOGIC_STATIC_DIR=/qorelogic_system/dashboard/frontend/dist -w /src qorelogic:latest /qorelogic_system/dashboard/backend/main.py"
                 
                 # Use -NoExit so the window stays open if Python crashes
                 Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit -Command docker $DockerArgs"

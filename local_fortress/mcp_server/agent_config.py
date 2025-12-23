@@ -18,22 +18,25 @@ logger = logging.getLogger(__name__)
 
 # Configuration paths (in order of priority)
 CONFIG_PATHS = [
-    # 1. Docker container mount point
+    # 1. Dashboard-saved config (via /api/agents/config -> ledger volume)
+    "/app/ledger/config/agents.json",
+    # 2. Docker container mount point (legacy)
     "/config/agents.json",
-    # 2. Host user directory
+    # 3. Host user directory
     os.path.expanduser("~/.qorelogic/config/agents.json"),
-    # 3. Environment variable override
+    # 4. Environment variable override
     os.environ.get("QORELOGIC_AGENTS_CONFIG", ""),
 ]
 
-
 @dataclass
 class AgentConfig:
-    """Configuration for LLM-backed agents."""
+    """Configuration for LLM-backed agents with hybrid mode support."""
     provider: str = "ollama"
     endpoint: str = "http://localhost:11434/api/generate"
     models: Dict[str, str] = None
     prompts: Dict[str, str] = None
+    # Hybrid mode: resolved per-agent configs (from Dashboard)
+    agents: Dict[str, Dict[str, Any]] = None
     
     def __post_init__(self):
         if self.models is None:
@@ -45,23 +48,44 @@ class AgentConfig:
             }
         if self.prompts is None:
             self.prompts = {
-                "sentinel": "You are a security-focused code auditor.",
-                "judge": "You are a fairness-focused governance arbiter.",
-                "overseer": "You are a human-aligned safety monitor.",
-                "scrivener": "You are a high-quality code generator."
+                "sentinel": "You are SENTINEL, the Security Analysis Engine. Detect secrets, unsafe functions, injection vulnerabilities, and PII exposure. Return JSON: {verdict, findings, risk_grade}. Fast-fail on critical issues.",
+                "judge": "You are JUDGE, the Compliance Arbiter. Validate findings, apply Lewicki-Bunker trust model, enforce citation rules. Return: {verdict, rationale, trust_delta}. L3 requires human oversight.",
+                "overseer": "You are OVERSEER, the Strategic Coordinator. Manage multi-agent workflows, monitor trust scores, enforce operational modes. Return: {action, target, context}. Prioritize human alignment.",
+                "scrivener": "You are SCRIVENER, the Documentation Engine. Generate accurate docs, validate sources, detect echo content. Return Markdown with metadata: {sources, confidence}. Never fabricate citations."
             }
+        if self.agents is None:
+            self.agents = {}
     
     def get_model(self, agent_role: str) -> str:
-        """Get the model for a specific agent role."""
-        return self.models.get(agent_role.lower(), "default")
+        """Get the model for a specific agent role (checks hybrid mode first)."""
+        role = agent_role.lower()
+        # Hybrid mode: check agents dict first
+        if role in self.agents and self.agents[role].get("model"):
+            return self.agents[role]["model"]
+        return self.models.get(role, "default")
     
     def get_prompt(self, agent_role: str) -> str:
-        """Get the system prompt for a specific agent role."""
-        return self.prompts.get(agent_role.lower(), "")
+        """Get the system prompt for a specific agent role (checks hybrid mode first)."""
+        role = agent_role.lower()
+        if role in self.agents and self.agents[role].get("prompt"):
+            return self.agents[role]["prompt"]
+        return self.prompts.get(role, "")
     
-    def get_endpoint(self) -> str:
-        """Get the LLM API endpoint."""
+    def get_endpoint(self, agent_role: str = None) -> str:
+        """Get the LLM API endpoint (optionally per-agent in hybrid mode)."""
+        if agent_role:
+            role = agent_role.lower()
+            if role in self.agents and self.agents[role].get("endpoint"):
+                return self.agents[role]["endpoint"]
         return self.endpoint
+    
+    def get_provider(self, agent_role: str = None) -> str:
+        """Get the provider (optionally per-agent in hybrid mode)."""
+        if agent_role:
+            role = agent_role.lower()
+            if role in self.agents and self.agents[role].get("provider"):
+                return self.agents[role]["provider"]
+        return self.provider
 
 
 class AgentConfigLoader:
@@ -109,7 +133,8 @@ class AgentConfigLoader:
                         provider=data.get("provider", "ollama"),
                         endpoint=data.get("endpoint", "http://localhost:11434/api/generate"),
                         models=data.get("models", {}),
-                        prompts=data.get("prompts", {})
+                        prompts=data.get("prompts", {}),
+                        agents=data.get("agents", {})
                     )
                     self._config_path = path
                     self._last_mtime = os.path.getmtime(path)

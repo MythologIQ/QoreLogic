@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './index.css';
 import AgentsView from './AgentsView';
 import SystemControls from './SystemControls';
-import { ContainerAPI } from './api';
+import { ContainerAPI, HostAPI } from './api';
 
 const API_BASE = "http://localhost:8000/api";
 
@@ -26,16 +26,32 @@ function App() {
   const [status, setStatus] = useState(null);
   const [ledger, setLedger] = useState([]);
   const [connectionStatus, setConnectionStatus] = useState({ host: false, container: false });
+  const [activeWorkspace, setActiveWorkspace] = useState(null);
+  const [workspaces, setWorkspaces] = useState({});
 
   const fetchData = async () => {
     try {
-      const [statusRes, ledgerRes] = await Promise.all([
-        fetch(`${API_BASE}/status`).catch(() => null),
-        fetch(`${API_BASE}/ledger?limit=20`).catch(() => null)
+      const [statusRes, ledgerRes, wsRes] = await Promise.all([
+        fetch(`${API_BASE}/status${activeWorkspace ? `?ws_id=${activeWorkspace.id}` : ''}`).catch(() => null),
+        fetch(`${API_BASE}/ledger?limit=20${activeWorkspace ? `&ws_id=${activeWorkspace.id}` : ''}`).catch(() => null),
+        fetch(`${API_BASE}/workspaces`).catch(() => null)
       ]);
       
       if (statusRes && statusRes.ok) setStatus(await statusRes.json());
       if (ledgerRes && ledgerRes.ok) setLedger(await ledgerRes.json());
+      
+      if (wsRes && wsRes.ok) {
+        const wsData = await wsRes.json();
+        setWorkspaces(wsData.workspaces || {});
+        
+        // If we have an active workspace in state, ensure it matches backend, 
+        // BUT if backend has 'active' set and we don't, trust backend (initial load)
+        // If user explicitly "exits" workspace, we might need to handle that.
+        // For now, let's trust the backend's "Active" unless we explicitly unset it.
+        if (!activeWorkspace && wsData.active && wsData.workspaces[wsData.active]) {
+           setActiveWorkspace(wsData.workspaces[wsData.active]);
+        }
+      }
     } catch (e) {
       console.error("Fetch error", e);
     }
@@ -45,8 +61,183 @@ function App() {
     fetchData();
     const interval = setInterval(fetchData, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activeWorkspace?.id]);
 
+  const handleSwitchWorkspace = async (id) => {
+    const ws = workspaces[id];
+    if (!ws) return;
+    
+    // Show loading state
+    setActiveWorkspace({ ...ws, loading: true });
+    setActiveTab('overview');
+    
+    // 1. First activate in the container's registry
+    const activateRes = await ContainerAPI.activateWorkspace(id);
+    if (!activateRes.success) {
+      alert('Failed to activate workspace: ' + activateRes.error);
+      setActiveWorkspace(null);
+      return;
+    }
+    
+    // 2. Restart Docker with the workspace's path as /src
+    // This requires the HostAPI (Control Plane) to be running
+    const launchRes = await HostAPI.launch({ path: ws.path, workspace: id });
+    if (launchRes.success) {
+      // Wait a moment for container to restart, then reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } else {
+      // HostAPI isn't available - workspace is activated but mount won't change
+      console.warn('HostAPI not available - container not restarted');
+      setActiveWorkspace(ws);
+    }
+  };
+
+  const handleExitWorkspace = async () => {
+    await ContainerAPI.deactivateWorkspace();
+    setActiveWorkspace(null); // Return to selector
+  };
+
+  // --------------------------------------------------------------------------
+  // RENDER: WORKSPACE SELECTOR (Global Scope)
+  // --------------------------------------------------------------------------
+  if (!activeWorkspace) {
+    return (
+      <div style={{ height: '100vh', width: '100vw', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <div style={{ maxWidth: '900px', width: '100%', padding: '40px' }}>
+             
+             <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+                <h1 style={{ fontSize: '48px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', color: 'var(--text-primary)' }}>
+                  <span style={{ color: 'var(--accent-primary)' }}>⬢</span> QoreLogic
+                </h1>
+                <p style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>Sovereign Governance Gatekeeper</p>
+             </div>
+
+             <h2 style={{ fontSize: '20px', marginBottom: '24px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
+               Select Active Workspace
+             </h2>
+
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                
+                {/* Existing Workspaces */}
+                {Object.values(workspaces).map(ws => (
+                  <div 
+                    key={ws.id}
+                    onClick={() => handleSwitchWorkspace(ws.id)}
+                    className="glass-panel"
+                    style={{ 
+                      padding: '24px', 
+                      cursor: 'pointer', 
+                      border: '1px solid var(--border-subtle)',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.transform = 'none'; }}
+                  >
+                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '32px' }}>📂</div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                          <div style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', height: 'fit-content' }}>
+                            {ws.env_type?.toUpperCase()}
+                          </div>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (confirm(`Delete workspace "${ws.name}"? This removes it from the list but does not delete files.`)) {
+                                const res = await ContainerAPI.deleteWorkspace(ws.id);
+                                if (res.success) {
+                                  setWorkspaces(prev => {
+                                    const updated = { ...prev };
+                                    delete updated[ws.id];
+                                    return updated;
+                                  });
+                                } else {
+                                  alert('Failed to delete: ' + res.error);
+                                }
+                              }
+                            }}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontSize: '14px',
+                              padding: '4px',
+                              opacity: 0.5,
+                              transition: 'opacity 0.2s'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={e => e.currentTarget.style.opacity = '0.5'}
+                            title="Remove workspace"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                     </div>
+                     <h3 style={{ fontSize: '18px', marginBottom: '8px', color: 'var(--text-primary)' }}>{ws.name}</h3>
+                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{ws.path}</div>
+                     <div style={{ marginTop: '24px', fontSize: '12px', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        Open Workspace &rarr;
+                     </div>
+                  </div>
+                ))}
+
+                {/* Create New Card */}
+                <div 
+                    onClick={() => setActiveTab('new-workspace')} // This is hacky, we need a "mode" state. Let's just create a quick local toggle or render the View if specific key.
+                    className="glass-panel"
+                    style={{ 
+                      padding: '24px', 
+                      cursor: 'pointer', 
+                      border: '1px dashed var(--text-secondary)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minHeight: '200px',
+                      opacity: 0.7,
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.opacity = '1'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--text-secondary)'; e.currentTarget.style.opacity = '0.7'; }}
+                  >
+                     {activeTab === 'new-workspace' ? (
+                        <NewWorkspaceView /> /* In-place rendering logic needs cleaner separation, but for now... */
+                     ) : (
+                        <>
+                           <div style={{ fontSize: '32px', marginBottom: '16px', color: 'var(--accent-primary)' }}>+</div>
+                           <div style={{ fontSize: '16px', fontWeight: 600 }}>Create New Workspace</div>
+                        </>
+                     )}
+                  </div>
+             </div>
+             
+             {/* If we clicked create new, we need to show that view. 
+                 Actually, simpler: Let's make "NewWorkspaceView" a modal or a separate screen state.
+                 For speed: I will just render NewWorkspaceView if activeTab is 'new-workspace' and overlay it.
+             */}
+             {activeTab === 'new-workspace' && (
+               <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                  <div style={{ position: 'relative' }}>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setActiveTab('overview'); }}
+                      style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#fff', fontSize: '24px', cursor: 'pointer', zIndex: 101 }}
+                    >
+                      &times;
+                    </button>
+                    <NewWorkspaceView />
+                  </div>
+               </div>
+             )}
+
+        </div>
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // RENDER: DASHBOARD (Workspace Scope)
+  // --------------------------------------------------------------------------
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', background: 'var(--bg-primary)' }}>
       {/* Sidebar */}
@@ -63,23 +254,50 @@ function App() {
             <span style={{ fontSize: '24px' }}>⬢</span>
             QoreLogic
           </h2>
-          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', letterSpacing: '0.05em' }}>
-            SOVEREIGN GATEKEEPER
-          </div>
+          <div style={{ 
+               marginTop: '12px', 
+               padding: '8px 12px', 
+               background: 'rgba(255, 215, 0, 0.1)', 
+               borderRadius: '6px', 
+               border: '1px solid rgba(255, 215, 0, 0.2)'
+             }}>
+               <div style={{ fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>WORKSPACE</div>
+               <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{activeWorkspace.name}</div>
+             </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <NavItem icon={<Icons.Dashboard/>} label="Overview" active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
+          <NavItem icon={<Icons.List/>} label="Ledger Explorer" active={activeTab === 'ledger'} onClick={() => setActiveTab('ledger')} />
           <NavItem icon={<Icons.Activity/>} label="Deep Trust Analysis" active={activeTab === 'trust'} onClick={() => setActiveTab('trust')} />
           <NavItem icon={<Icons.Shield/>} label="Identity Fortress" active={activeTab === 'identity'} onClick={() => setActiveTab('identity')} />
-          <NavItem icon={<Icons.List/>} label="Ledger Explorer" active={activeTab === 'ledger'} onClick={() => setActiveTab('ledger')} />
-          <NavItem icon={<Icons.Folder/>} label="Workspace" active={activeTab === 'workspace'} onClick={() => setActiveTab('workspace')} />
-          <NavItem icon={<Icons.Brain/>} label="Agents" active={activeTab === 'agents'} onClick={() => setActiveTab('agents')} />
+          <NavItem icon={<Icons.Folder/>} label="File Browser" active={activeTab === 'workspace'} onClick={() => setActiveTab('workspace')} />
+          <NavItem icon={<Icons.Brain/>} label="Agent Intelligence" active={activeTab === 'agents'} onClick={() => setActiveTab('agents')} />
           <NavItem icon={<Icons.Settings/>} label="Environment" active={activeTab === 'environment'} onClick={() => setActiveTab('environment')} />
-          <NavItem icon={<Icons.Plus/>} label="New Workspace" active={activeTab === 'new-workspace'} onClick={() => setActiveTab('new-workspace')} />
         </div>
 
         <div style={{ marginTop: 'auto' }}>
+           <button 
+             onClick={handleExitWorkspace}
+             style={{
+               width: '100%',
+               padding: '12px',
+               marginBottom: '16px',
+               background: 'rgba(255,255,255,0.05)',
+               border: '1px solid var(--border-subtle)',
+               borderRadius: '6px',
+               color: 'var(--text-secondary)',
+               cursor: 'pointer',
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+               gap: '8px',
+               fontSize: '13px'
+             }}
+           >
+             &larr; Switch Workspace
+           </button>
+
           <div className="glass-panel" style={{ padding: '16px', fontSize: '12px', background: 'rgba(255, 215, 0, 0.03)', borderColor: 'rgba(255, 215, 0, 0.1)' }}>
             <div style={{ color: 'var(--accent-primary)', marginBottom: '8px', fontWeight: 600 }}>SYSTEM STATUS</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -111,7 +329,6 @@ function App() {
               {activeTab === 'workspace' && 'Manage files and security context.'}
               {activeTab === 'agents' && 'Configure LLM backends and agent personas.'}
               {activeTab === 'environment' && 'Configure global QoreLogic variables.'}
-              {activeTab === 'new-workspace' && 'Register a new isolated project environment.'}
             </div>
           </div>
           
@@ -127,11 +344,10 @@ function App() {
         {activeTab === 'overview' && <Overview status={status} ledger={ledger} />}
         {activeTab === 'trust' && <TrustMonitor />}
         {activeTab === 'identity' && <IdentityView />}
-        {activeTab === 'ledger' && <LedgerView />}
-        {activeTab === 'workspace' && <WorkspaceView />}
+        {activeTab === 'ledger' && <LedgerView workspaceId={activeWorkspace?.id} />}
+        {activeTab === 'workspace' && <WorkspaceView workspaceId={activeWorkspace?.id} workspacePath={activeWorkspace?.path} />}
         {activeTab === 'agents' && <AgentsView />}
         {activeTab === 'environment' && <EnvironmentView />}
-        {activeTab === 'new-workspace' && <NewWorkspaceView />}
       </main>
     </div>
   );
@@ -227,62 +443,40 @@ function MetricCard({ label, value, trend, color }) {
   )
 }
 
-function LedgerView({ ledger }) {
-  return (
-    <div className="glass-panel" style={{ overflow: 'hidden' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-        <thead>
-          <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--border-subtle)', textAlign: 'left' }}>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase' }}>Event</th>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase' }}>Agent</th>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase' }}>Risk</th>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase' }}>Time</th>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase' }}>Hash</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ledger.map(entry => (
-            <tr key={entry.entry_id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-              <td style={{ padding: '16px', color: 'var(--text-primary)' }}>{entry.event_type}</td>
-              <td style={{ padding: '16px', color: 'var(--text-secondary)' }}>
-                <span style={{ color: 'var(--accent-primary)' }}>●</span> {entry.agent_did.split(':')[2]}
-              </td>
-              <td style={{ padding: '16px' }}>
-                <span style={{ 
-                  padding: '4px 8px', 
-                  borderRadius: '4px', 
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  background: entry.risk_grade === 'L3' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.1)',
-                  color: entry.risk_grade === 'L3' ? '#ef4444' : '#10b981',
-                  border: `1px solid ${entry.risk_grade === 'L3' ? '#ef4444' : '#10b981'}40`
-                }}>
-                  {entry.risk_grade}
-                </span>
-              </td>
-              <td style={{ padding: '16px', color: 'var(--text-secondary)' }}>{new Date(entry.timestamp * 1000).toLocaleString()}</td>
-              <td style={{ padding: '16px', fontFamily: 'monospace', color: 'var(--text-secondary)', fontSize: '12px' }}>
-                {entry.entry_hash.substring(0, 8)}...
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
 
-function WorkspaceView() {
+
+function WorkspaceView({ workspaceId, workspacePath }) {
   const [path, setPath] = useState('');
   const [files, setFiles] = useState([]);
+  const [wsRoot, setWsRoot] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/files?path=${path}`)
+    setLoading(true);
+    setError('');
+    
+    let url = `${API_BASE}/files?path=${encodeURIComponent(path)}`;
+    if (workspaceId) url += `&ws_id=${workspaceId}`;
+    
+    fetch(url)
       .then(res => res.json())
       .then(data => {
-        if (data.items) setFiles(data.items);
+        if (data.error) {
+          setError(data.error);
+          setFiles([]);
+        } else {
+          setFiles(data.items || []);
+          setError('');
+        }
+        if (data.workspace_root) setWsRoot(data.workspace_root);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError('Failed to fetch files');
+        setLoading(false);
       });
-  }, [path]);
+  }, [path, workspaceId]);
 
   const handleNavigate = (itemName, isDir) => {
     if (isDir) {
@@ -297,14 +491,45 @@ function WorkspaceView() {
     setPath(parts.join('/'));
   };
 
+  // Display the actual workspace path, not the Docker mount point
+  const displayPath = workspacePath || wsRoot || '/src';
+
   return (
     <div className="glass-panel" style={{ padding: '24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-subtle)' }}>
         <button onClick={handleUp} disabled={!path} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', fontSize: '18px' }}>&uarr;</button>
-        <div style={{ fontFamily: 'monospace', color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.3)', padding: '4px 8px', borderRadius: '4px' }}>root/{path}</div>
+        <div style={{ fontFamily: 'monospace', color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.3)', padding: '4px 8px', borderRadius: '4px', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{displayPath}{path ? '/' + path : ''}</div>
       </div>
       
-      <div style={{ display: 'grid', gap: '4px' }}>
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>Loading...</div>
+      )}
+      
+      {error && !loading && (
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📁</div>
+          <div style={{ color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            {error === 'Path not found' ? 
+              "This workspace's directory is not accessible from the container." :
+              error
+            }
+          </div>
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto' }}>
+            The workspace may be located outside the mounted Docker volume. 
+            Files can only be browsed when the workspace path is inside the Q-DNA project directory.
+          </div>
+        </div>
+      )}
+      
+      {!loading && !error && files.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📂</div>
+          <div>This directory is empty</div>
+        </div>
+      )}
+      
+      {!loading && !error && files.length > 0 && (
+        <div style={{ display: 'grid', gap: '4px' }}>
         {files.map((item, i) => (
           <div key={i} 
             onClick={() => handleNavigate(item.name, item.is_dir)}
@@ -331,7 +556,8 @@ function WorkspaceView() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -378,6 +604,31 @@ function EnvironmentView() {
 }
 
 function NewWorkspaceView() {
+  const [name, setName] = useState('');
+  const [path, setPath] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleCreate = async () => {
+    if (!name || !path) return alert("Name and Path are required");
+    
+    setLoading(true);
+    // Register the workspace
+    const createRes = await ContainerAPI.createWorkspace({ name, path });
+    if (createRes.success) {
+      // Activate it
+      const activateRes = await ContainerAPI.activateWorkspace(createRes.data.id);
+      if (activateRes.success) {
+        alert(`Workspace '${name}' initialized and activated!`);
+        window.location.reload(); 
+      } else {
+        alert("Created but failed to activate: " + activateRes.error);
+      }
+    } else {
+      alert("Failed to create workspace: " + createRes.error);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="glass-panel" style={{ padding: '40px', maxWidth: '600px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -391,29 +642,27 @@ function NewWorkspaceView() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         <div>
           <label style={{ display: 'block', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>Project Name</label>
-          <input type="text" placeholder="e.g., Project Alpha" className="input-field" />
+          <input 
+            type="text" 
+            placeholder="e.g., Project Alpha" 
+            className="input-field"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
         </div>
 
         <div>
           <label style={{ display: 'block', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>Workspace Root</label>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <input type="text" placeholder="/src/projects/new-project" className="input-field" />
-            <button style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.1)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}>Browse</button>
+          <input 
+            type="text" 
+            placeholder="e.g., G:\Projects\MyApp or /home/user/projects/myapp" 
+            className="input-field" 
+            value={path}
+            onChange={e => setPath(e.target.value)}
+          />
+          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px' }}>
+            Enter the absolute path to your project directory.
           </div>
-        </div>
-
-        <div>
-           <label style={{ display: 'block', color: 'var(--text-primary)', fontSize: '14px', fontWeight: 500, marginBottom: '8px' }}>Environment Template</label>
-           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-             <button style={{ padding: '16px', border: '2px solid var(--accent-primary)', borderRadius: '8px', background: 'rgba(255, 215, 0, 0.1)', textAlign: 'left' }}>
-               <div style={{ fontWeight: 600, marginBottom: '4px', color: 'var(--text-primary)' }}>Standard</div>
-               <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Python 3.11 + L2 Audit</div>
-             </button>
-             <button style={{ padding: '16px', border: '1px solid var(--border-subtle)', borderRadius: '8px', background: 'transparent', textAlign: 'left', opacity: 0.6 }}>
-               <div style={{ fontWeight: 600, marginBottom: '4px', color: 'var(--text-primary)' }}>Strict</div>
-               <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>No Network + L3 Audit</div>
-             </button>
-           </div>
         </div>
 
         <div>
@@ -423,7 +672,14 @@ function NewWorkspaceView() {
           </label>
         </div>
 
-        <button className="btn-primary" style={{ marginTop: '16px', padding: '12px' }}>Initialize Workspace</button>
+        <button 
+          className="btn-primary" 
+          style={{ marginTop: '16px', padding: '12px', opacity: loading ? 0.7 : 1 }}
+          onClick={handleCreate}
+          disabled={loading}
+        >
+          {loading ? 'Initializing...' : 'Initialize Workspace'}
+        </button>
       </div>
     </div>
   )

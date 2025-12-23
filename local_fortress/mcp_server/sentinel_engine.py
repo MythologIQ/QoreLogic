@@ -106,14 +106,17 @@ class SentinelEngine:
         try:
             from .agent_config import get_agent_config
             config = get_agent_config()
-            self.model_url = model_url or config.get_endpoint()
+            # Use per-agent endpoint for hybrid mode (Sentinel can have different provider)
+            self.model_url = model_url or config.get_endpoint("sentinel")
             self.model_name = config.get_model("sentinel")
             self.system_prompt = config.get_prompt("sentinel")
+            self.provider = config.get_provider("sentinel")
         except ImportError:
             # Fallback if agent_config module not available
             self.model_url = model_url or "http://localhost:11434/api/generate"
             self.model_name = "qwen2.5-coder:7b"
             self.system_prompt = "You are a security-focused code auditor."
+            self.provider = "ollama"
         
         self.start_time = 0
     

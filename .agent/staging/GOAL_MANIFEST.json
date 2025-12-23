@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "lastSync": "2025-12-22T17:31:42-05:00",
+  "agents": {
+    "governor": { "status": "active", "model": "gemini-2.0", "role": "Core orchestrator" },
+    "executor": { "status": "ready", "model": "glm-4.6", "role": "Primary implementation via Kilo" },
+    "judge": { "status": "ready", "model": "claude", "role": "Architectural veto power via CLI" },
+    "scrivener": { "status": "ready", "model": "codex", "role": "Context synchronization via extension" }
+  },
+  "goals": [],
+  "context": {
+    "activeFiles": [],
+    "recentChanges": [],
+    "pendingTasks": []
+  },
+  "federatedConfig": {
+    "stagingPath": ".agent/staging/",
+    "locksPath": ".agent/locks/Personal/",
+    "qorelogicIntegration": {
+      "safeFileRewrite": ".agent/workflows/safe_file_rewrite.md",
+      "pristineGitSync": ".agent/workflows/pristine_git_sync.md"
+    }
+  }
+}

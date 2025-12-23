@@ -199,6 +199,36 @@ export const ContainerAPI = {
   activateWorkspace: (id) => safeFetch(`${CONTAINER_API}/workspaces/activate`, {
     method: 'POST',
     body: JSON.stringify({ id })
+  }),
+
+  /**
+   * Deactivate (clear) active workspace, returning to selector
+   */
+  deactivateWorkspace: () => safeFetch(`${CONTAINER_API}/workspaces/deactivate`, {
+    method: 'POST',
+    body: JSON.stringify({})
+  }),
+
+  /**
+   * Delete a workspace from registry (doesn't delete files)
+   * @param {string} id - Workspace ID to delete
+   */
+  deleteWorkspace: (id) => safeFetch(`${CONTAINER_API}/workspaces/${id}`, {
+    method: 'DELETE'
+  }),
+
+  /**
+   * Get agent configuration from persistent storage
+   */
+  getAgentConfig: () => safeFetch(`${CONTAINER_API}/agents/config`),
+
+  /**
+   * Save agent configuration to persistent storage
+   * @param {object} config - Agent configuration object
+   */
+  saveAgentConfig: (config) => safeFetch(`${CONTAINER_API}/agents/config`, {
+    method: 'POST',
+    body: JSON.stringify(config)
   })
 };
 

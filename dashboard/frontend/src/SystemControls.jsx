@@ -7,7 +7,6 @@ import { HostAPI, ContainerAPI, ConnectionState } from './api';
  * Provides lifecycle controls for the QoreLogic system:
  * - Start/Stop container
  * - Connection status indicators
- * - Auto-redirect handling when container comes online
  */
 export default function SystemControls({ onStatusChange }) {
   const [hostConnected, setHostConnected] = useState(false);
@@ -43,29 +42,28 @@ export default function SystemControls({ onStatusChange }) {
     setStopping(false);
   };
 
-  const handleReturnToLauncher = () => {
-    window.location.href = 'http://localhost:5500';
+  const handleStart = async () => {
+    setLaunching(true);
+    const result = await HostAPI.launch();
+    
+    if (result.success) {
+      // Wait a moment for container to come up
+      setTimeout(async () => {
+        const status = await ConnectionState.checkAll();
+        setContainerConnected(status.container);
+        setLaunching(false);
+      }, 3000);
+    } else {
+      alert(`Error starting: ${result.error || 'Control plane may be offline'}`);
+      setLaunching(false);
+    }
   };
 
   return (
     <div className="glass-panel" style={{ padding: '16px', marginBottom: '24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          {/* Host Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              background: hostConnected ? 'var(--success)' : 'var(--error)',
-              boxShadow: `0 0 8px ${hostConnected ? 'var(--success)' : 'var(--error)'}`
-            }} />
-            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-              Host {hostConnected ? 'Connected' : 'Offline'}
-            </span>
-          </div>
-
-          {/* Container Status */}
+          {/* Container Status - Primary Indicator */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
               width: '10px',
@@ -75,7 +73,7 @@ export default function SystemControls({ onStatusChange }) {
               boxShadow: `0 0 8px ${containerConnected ? 'var(--success)' : 'var(--warning)'}`
             }} />
             <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-              Container {containerConnected ? 'Running' : 'Stopped'}
+              System {containerConnected ? 'Online' : 'Offline'}
             </span>
           </div>
         </div>
@@ -101,20 +99,21 @@ export default function SystemControls({ onStatusChange }) {
             </button>
           ) : (
             <button
-              onClick={handleReturnToLauncher}
-              disabled={!hostConnected}
+              onClick={handleStart}
+              disabled={launching || !hostConnected}
               style={{
                 padding: '8px 16px',
-                background: 'var(--accent-primary)',
+                background: hostConnected ? 'var(--accent-primary)' : 'var(--text-secondary)',
                 color: '#000',
                 border: 'none',
                 borderRadius: '6px',
-                cursor: 'pointer',
+                cursor: launching || !hostConnected ? 'not-allowed' : 'pointer',
+                opacity: launching ? 0.6 : 1,
                 fontWeight: 600,
                 fontSize: '13px'
               }}
             >
-              🚀 Return to Launcher
+              {launching ? 'Starting...' : '🚀 Start System'}
             </button>
           )}
         </div>
