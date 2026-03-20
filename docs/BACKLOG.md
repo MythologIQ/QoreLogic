@@ -21,6 +21,8 @@
 - [x] [B11] Consolidate utility skills — archive, merge, distill (Complete)
 - [x] [B12] Wire ql-document → ql-technical-writer subagent dispatch (Complete)
 
+- [ ] [B13] Encode AI code quality doctrine into QoreLogic governance. Add explicit guidance for semantic vs pragmatic functions, stronger model-shaping rules, and anti-slop guardrails inspired by Ben Swerdlow's AI coding write-up at https://aicode.swerdlow.dev/
+
 ## Lifecycle Coverage
 
 ```
@@ -57,7 +59,10 @@ Cross-cutting: RESEARCH ✓, DEBUG ✓, STATUS ✓, VALIDATE ✓, ORGANIZE ✓, 
 
 **All original backlog items (B1-B12) and all blockers (D1-D3) are COMPLETE.**
 
-No outstanding work items. Repository is fully operational.
+Outstanding work items:
+- [ ] [B13] Encode AI code quality doctrine into QoreLogic governance
+
+Repository is operational, with one strategic governance enhancement queued.
 
 ---
 

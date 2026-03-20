@@ -289,6 +289,20 @@ SHA256(content_hash + previous_hash)
 
 ---
 
+### Entry #11: AI CODING DOCTRINE NOTE
+
+**Timestamp**: 2026-03-20T03:50:00Z
+**Phase**: ALIGN
+**Author**: Governor
+**Risk Grade**: L1
+
+**Files Modified**:
+- docs/BACKLOG.md
+
+**Decision**: Compared QoreLogic against Ben Swerdlow's AI coding write-up (https://aicode.swerdlow.dev/). Alignment is strong on intentionality, self-describing structure, and anti-entropy discipline. Gap identified: QoreLogic governs agent behavior and skill pipelines well, but does not yet explicitly encode semantic-vs-pragmatic function design, stricter model-shaping rules, or application-code anti-slop constraints. Added backlog item B13 to integrate those principles into governance standards.
+
+---
+
 *Chain integrity: VALID*
 *Session: SEALED*
 *Merkle seal: 1877524d...*
