@@ -1,105 +1,63 @@
-# AUDIT REPORT — plan-qor-migration-final.md (round 5)
+# AUDIT REPORT — research-brief-full-audit-2026-04-15.md
 
-**Timestamp**: 2026-04-15 (round 5)
-**Judge**: QoreLogic Judge (adversarial, solo)
-**Target**: docs/plan-qor-migration-final.md (amended)
-**Verdict**: **VETO**
-**Risk Grade**: L1
-
----
-
-## 1. Security Pass
-PASS.
-
-## 2. Ghost Handler Pass
-All handlers resolved. PASS.
-
-## 3. Section 4 Razor Pass
-PASS.
-
-## 4. Dependency Audit
-PASS.
-
-## 5. Macro-Level Architecture Pass
-
-**V-1**: **§2.B introduces destinations not declared in §2 main structure tree.** The amendment adds these paths without any corresponding declaration in §2:
-
-- `qor/experimental/` (target for `ingest/experimental/`)
-- `qor/templates/` (target for `ingest/templates/`)
-- `qor/skills/custom/` / `qor/vendor/skills/custom/` (target for `ingest/skills/custom/`, R-6)
-- `qor/scripts/utilities/` (target for `ingest/internal/utilities/`)
-
-§2's structural tree is the authoritative declaration. Destinations invented mid-plan create orphan-by-construction.
-
-## 6. Orphan Detection
-
-All declared artifacts have creating phases. But V-1 above implies four undeclared paths.
-
-## 7. Scope/Mapping Pass
-
-**V-2**: **Duplicate-item collision unresolved.** Verified (`comm -12` on `ingest/skills/` vs `ingest/scripts/`): **21 subdirectories exist in both locations** with identical names — `composition-patterns`, `custom`, `frontend-bridge-integration`, `marketplace-plugin-ops`, `playwright-e2e-mocks`, `react-best-practices`, `react-native-skills`, `rust-skills`, `security-permission-audit`, `skill-lifecycle-ops`, `tauri2-async-commands`, `tauri2-cicd-distribution`, `tauri2-error-handling`, `tauri2-performance-optimization`, `tauri2-plugin-integration`, `tauri2-security-permissions`, `tauri2-state-management`, `tauri2-testing-validation`, `tauri-ipc-wiring`, `technical-writing-narrative`, `web-design-guidelines`.
-
-- §3.B R-7 routes `ingest/skills/<name>` → `qor/vendor/skills/<name>/`
-- §2.B routes `ingest/scripts/<name>` → `qor/vendor/skills/<name>/`
-- Both target the same destination path for the same-named item. No merge/dedup/precedence rule specified.
-
-Implementation will either (a) have the second write overwrite the first silently, losing content, or (b) fail on collision. Neither is a specified behavior.
-
-**V-3**: **Merge-order ambiguity for `ingest/internal/scripts/` → `qor/scripts/`.** Phase 2 authors new scripts (`compile.py`, `check_variant_drift.py`, `session.py`, `validate_gate_artifact.py`, `create_shadow_issue.py`). §2.B routes `ingest/internal/scripts/` into the same `qor/scripts/`. No policy for: (a) phase ordering (does §2.B migration run before or after Phase 2 authorship?), (b) naming collisions if `ingest/internal/scripts/` contains overlapping filenames.
-
-**V-4**: **Deferred decisions in R-5 and R-6.** §3.B R-5 ("inspect each: qor-scoped vs vendor") and R-6 (same pattern) defer classification to Phase 1 execution time rather than plan time. Plan is the gate artifact for audit; deferring decisions to runtime violates gate semantics (the audit cannot verify what the plan does not specify).
-
-## 8. CI Guard Correctness Pass
-
-**V-5**: **Phase 7 post-migration grep is too aggressive — blocks legitimate historical references.**
-
-Amended form:
-```
-! grep -r "kilo-code/qor-\|deployable state\|processed/\|compiled/\|ingest/" docs/ --exclude-dir=archive
-```
-
-Verified: `docs/META_LEDGER.md` contains **11 references** to `ingest/` (across audit tribunal entries #12, #13, #14, #15); `docs/SHADOW_GENOME.md` contains **4 references** (across shadow genome entries #1, #2, #3, #4). These are historical audit records — immutable by design, not doc rot.
-
-The grep will match these and return exit code 0 → `!` inverts → CI exits 1 → fails. The guard cannot distinguish "forward-looking doc still uses old path" (should fail) from "historical audit cites old path" (should pass).
-
-Additionally: `kilo-code/qor-` and `deployable state` tokens have the same problem — both are cited in audit prose inside the ledger.
-
-## 9. Verdict
-
-**VETO** — Risk Grade L1
-
-| Category | Violations |
-|---|---|
-| Security/Ghost/Razor/Dep/Orphans | 0 |
-| Macro-level (§2/§2.B split) | 1 (V-1) |
-| Scope (duplicate collision) | 1 (V-2) |
-| Scope (merge order) | 1 (V-3) |
-| Scope (deferred decisions) | 1 (V-4) |
-| CI guard (over-aggressive) | 1 (V-5) |
-
-**Total: 5 violations.** Same count as round 4; different class. Previous round 4 violations are resolved but amendment introduced new scope/merge issues and a CI over-reach.
-
-## 10. Mandatory Remediation
-
-1. **V-1**: Add to §2 structure tree:
-   ```
-   qor/experimental/           (non-canonical research retention, Phase 1 §2.B)
-   qor/templates/              (doc templates, Phase 1 §2.B)
-   qor/scripts/utilities/      (internal utility scripts, Phase 1 §2.B)
-   qor/skills/custom/          (only if R-6 resolves qor-scoped — see V-4)
-   ```
-2. **V-2**: Add §2.B collision rule. Recommend: "For items appearing in both `ingest/skills/<name>` and `ingest/scripts/<name>` (verified: 21 duplicates), `ingest/skills/` wins; `ingest/scripts/` duplicate is discarded. Discarded items are logged to `.qor/migration-discards.log` for post-migration review."
-3. **V-3**: Explicit ordering rule. Recommend: "Phase 2 authorship runs BEFORE §2.B migration of `ingest/internal/scripts/` → `qor/scripts/`. If any migrated script has a name collision with a Phase 2 authored script, the Phase 2 version wins; `ingest/internal/scripts/` version is routed to `qor/scripts/vendored/` instead."
-4. **V-4**: Resolve R-5 and R-6 at plan time. Either (a) run inspection now and encode actual mapping in §3.B, or (b) declare upfront rule: "All content under `ingest/skills/custom/` and `ingest/skills/agents/` is qor-scoped; promote to `qor/skills/custom/` and merge-into-existing `qor/agents/` respectively. Collision within `qor/agents/` rule: already-migrated source wins; ingest duplicate goes to `.qor/migration-discards.log`."
-5. **V-5**: Narrow Phase 7 grep. Two mutually-exclusive fixes:
-   - (a) Exclude historical artifacts: `! grep -r "kilo-code/qor-\|deployable state\|processed/\|compiled/\|ingest/" docs/ --exclude-dir=archive --exclude=META_LEDGER.md --exclude=SHADOW_GENOME.md`
-   - (b) Scope to forward-looking docs only: `! grep "kilo-code/qor-\|deployable state\|ingest/" docs/SYSTEM_STATE.md docs/SKILL_REGISTRY.md README.md`
-
-   Option (b) is simpler and intent-aligned; recommend it.
+**Tribunal Date**: 2026-04-15
+**Target**: `docs/research-brief-full-audit-2026-04-15.md`
+**Risk Grade**: L1 (precision + completeness defects; brief is substantively sound)
+**Auditor**: The QorLogic Judge
 
 ---
 
-**Content Hash**: (computed at ledger entry)
-**Previous Chain Hash**: 741ecc9d93ae49d1b59fd46deb428e438ffb2252622607f84b035fa55e619397 (Entry #15)
+## VERDICT: **VETO**
 
-**Next action**: Governor amends in place. 5 items; all mechanical or rule-additions.
+---
+
+### Executive Summary
+
+Brief surfaces a real and consequential systemic gap (S-1 — gate_writes never executed) and a coherent set of doc-rot patterns. Substantively correct on most claims. **VETO** is for precision defects: count over-claims, conflations of doctrine with gaps, and one missing meta-finding the user has independently surfaced ("tests passed"). Brief is salvageable with targeted edits, not rewrite.
+
+### Audit Results
+
+#### Security Pass
+**Result**: PASS. No L3 violations (research doc, no auth/secrets surface).
+
+#### Ghost UI Pass
+**Result**: N/A (research doc).
+
+#### Section 4 Razor Pass
+**Result**: PASS. Brief is 233 lines; recommendations are scannable; no nested ternaries.
+
+#### Dependency Pass
+**Result**: PASS. No new code or deps proposed in scope.
+
+#### Macro-Level Coherence Pass
+**Result**: FAIL. See V-1 through V-3 below.
+
+#### Orphan Pass (evidence backing each finding)
+**Result**: FAIL. See V-4.
+
+### Violations Found
+
+| ID | Category | Location | Description |
+|---|---|---|---|
+| V-1 | Precision | brief §S-1 | Count claims 9 affected skills; verified actual count is **8**. `qor-shadow-process` declares `gate_writes: docs/PROCESS_SHADOW_GENOME.md(append-only)` — that's a free-form path to a JSONL log, not a `.qor/gates/<sid>/<phase>.json` artifact. Brief's filter swept it in incorrectly. |
+| V-2 | Doctrine conflation | brief §S-8 | "16 skills missing from delegation-table" treats cross-cutting and bundle skills as gaps. Brief later acknowledges this ("Some legitimately don't have a fixed handoff") but the headline count remains misleading. The actual gap is "table doesn't acknowledge cross-cutting skills exist", not "16 missing rows". |
+| V-3 | Doctrine over-claim | brief §S-12 | "Most agents have NO /qor-* refs" treats this as a defect. Whether agents should reference invoking skills is a doctrine choice, not a doctrine-violation. Brief should propose adopting the doctrine first; only then can absence be a gap. |
+| V-4 | Evidence | brief throughout | qor-research protocol Step 4a mandates "file:line for every finding". Brief cites file:line for ~6 of 24 findings; the rest say "many skills" or "X skills". Without citations, future readers can't verify or act precisely. |
+| V-5 | Missing meta-finding | brief omits | Tests pass with all these systemic gaps present — therefore test coverage doctrine doesn't include SKILL.md compliance. This is **Systemic Pattern S-14**: tests verify Python module behavior; nothing verifies SKILL.md doctrine compliance (no test asserts "if gate_writes declared, body contains write step"). User surfaced this independently; brief should have caught it. |
+| V-6 | Factual | brief §"qor-deep-audit (and sub-bundles)" | Verified `grep "Invoking .qor-deep-audit. directly" qor/skills/meta/qor-deep-audit/SKILL.md` returns 0 matches. Brief implies the prose exists ("§Decomposition mentions sequencing"); the finding-as-stated is correct (sequencing prose IS missing) but the brief's framing under "specific findings" suggests it merely needs polish, not authoring. |
+
+### Required Remediation
+
+1. **V-1**: Recount S-1 to 8 skills; remove `qor-shadow-process` from the affected list.
+2. **V-2**: Restructure S-8 — split "missing rows" (3-4 actual table additions: bundles, qor-organize, qor-shadow-process) from "doctrine extension" (cross-cutting acknowledgement section). Headline count drops from 16 to a real number.
+3. **V-3**: Either drop S-12 or convert it to a doctrine proposal: "Propose: agents declare 'invoked by /qor-*' line at bottom; affects 13 agents." Without the doctrine, it's not a gap.
+4. **V-4**: Add file:line citations for at least the systemic patterns. For S-1 cite one example file:line per affected skill (e.g., `qor-plan/SKILL.md:5`). Spot-check verified count, not full enumeration.
+5. **V-5**: Add **Systemic Pattern S-14 — Test coverage doctrine doesn't include SKILL.md compliance**. Recommend new test category: doctrine-compliance tests that grep SKILL.md bodies for required patterns based on frontmatter declarations. Recommendation slots into Phase 11D as item #6.
+6. **V-6**: Reword the deep-audit finding to clearly state: "Sequencing prose is absent (verified)." Move from "Specific findings" to either S-class systemic if it applies to other bundles, or keep as specific with the verification noted.
+
+### Verdict Hash
+
+(computed at ledger entry — see Entry #21)
+
+---
+_This verdict is binding._

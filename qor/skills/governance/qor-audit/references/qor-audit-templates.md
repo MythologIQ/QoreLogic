@@ -1,4 +1,4 @@
-# QL Audit Templates
+# QorLogic Audit Templates
 
 ## Audit Report Template
 

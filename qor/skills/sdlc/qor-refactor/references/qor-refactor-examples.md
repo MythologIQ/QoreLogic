@@ -1,4 +1,4 @@
-# QL Refactor Examples and Templates
+# QorLogic Refactor Examples and Templates
 
 This reference contains the example transformations and report templates used by /qor-refactor.
 

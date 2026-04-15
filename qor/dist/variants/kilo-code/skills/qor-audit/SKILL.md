@@ -3,11 +3,11 @@ name: qor-audit
 description: >-
   Adversarial audit of blueprint to generate mandatory PASS/VETO verdict. Use when Claude needs to review architecture plans before implementation for: (1) L2/L3 risk grade work, (2) Security-critical paths, (3) Architecture changes, or any work requiring formal approval before proceeding.
 metadata:
-  category: development
+  category: governance
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-audit
+    path: qor/skills/governance/qor-audit
 phase: audit
 gate_reads: plan
 gate_writes: audit

@@ -7,7 +7,7 @@ metadata:
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-research
+    path: qor/skills/sdlc/qor-research
 phase: research
 gate_reads: ""
 gate_writes: research

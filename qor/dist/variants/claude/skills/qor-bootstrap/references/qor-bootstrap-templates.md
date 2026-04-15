@@ -1,4 +1,4 @@
-# QL Bootstrap Templates
+# QorLogic Bootstrap Templates
 
 ## Privacy Configuration Report
 

@@ -1,4 +1,4 @@
-# QL Implement Patterns and Templates
+# QorLogic Implement Patterns and Templates
 
 This reference contains code patterns and templates used by /qor-implement.
 

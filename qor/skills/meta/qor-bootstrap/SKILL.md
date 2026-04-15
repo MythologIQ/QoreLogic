@@ -7,7 +7,7 @@ metadata:
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-bootstrap
+    path: qor/skills/meta/qor-bootstrap
 phase: bootstrap
 gate_reads: ""
 gate_writes: ""

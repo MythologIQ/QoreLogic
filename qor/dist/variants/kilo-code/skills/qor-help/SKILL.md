@@ -7,7 +7,7 @@ metadata:
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-help
+    path: qor/skills/meta/qor-help
 phase: help
 gate_reads: ""
 gate_writes: ""
@@ -43,7 +43,7 @@ If the user asks about a specific command, direct them to invoke it. If unsure, 
 | `/qor-debug` | Root-cause diagnosis (cross-cutting). | Regression / hallucination / degradation. |
 | `/qor-substantiate` | Seal session, record Merkle evidence. | End of completed work session. |
 | `/qor-validate` | Verify chain integrity + criteria. | Before delivery; on repeat failure → `/qor-remediate`. |
-| `/qor-remediate` | Process-level fix (NOT code). Absorbs `/qor-course-correct`. | Process Shadow Genome threshold breach or repeat failure. |
+| `/qor-remediate` | Process-level fix (NOT code). Absorbed the retired qor-course-correct skill. | Process Shadow Genome threshold breach or repeat failure. |
 
 ## Memory & Meta
 
@@ -63,6 +63,17 @@ If the user asks about a specific command, direct them to invoke it. If unsure, 
 | Command | Purpose | Typical When |
 |---|---|---|
 | `/qor-shadow-process` | Append a process-failure event to PROCESS_SHADOW_GENOME. | Auto-invoked by override paths; rarely called manually. |
+| `/qor-governance-compliance` | Verify workspace governance compliance (root hygiene, sensitive file checks, structure integrity). | Periodic governance audit; before release. |
+
+## Migrated qore-* skills
+
+These skills migrated from the qore-* prefix during the SSoT consolidation; names retain the "qor-" prefix per Phase 7 rename.
+
+| Command | Purpose | Typical When |
+|---|---|---|
+| `/qor-docs-technical-writing` | Author or revise technical writing under doctrine. | When documentation needs structured authoring. |
+| `/qor-meta-log-decision` | Append a structured decision record. | Major decision points; ADR-style logging. |
+| `/qor-meta-track-shadow` | Track shadow-genome-style failure patterns at the meta level. | When patterns of failure emerge across cycles. |
 
 ## Workflow Bundles (multi-skill orchestration)
 

@@ -7,7 +7,7 @@ metadata:
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-organize
+    path: qor/skills/memory/qor-organize
 phase: memory
 gate_reads: ""
 gate_writes: ""

@@ -7,7 +7,7 @@ metadata:
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-repo-release
+    path: qor/skills/meta/qor-repo-release
 phase: deliver
 gate_reads: validate
 gate_writes: deliver
@@ -197,6 +197,24 @@ Add META_LEDGER entry:
 ```
 
 Calculate and record content hash and chain hash per standard Merkle chain protocol.
+
+### Step Z: Write Gate Artifact (Phase 11D wiring)
+
+Persist the structured gate artifact at `.qor/gates/<session_id>/deliver.json` so downstream phases can read it via `gate_chain.check_prior_artifact`.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import gate_chain, shadow_process
+
+# Build payload conforming to qor/gates/schema/deliver.schema.json
+payload = {
+    "ts": shadow_process.now_iso(),
+    # ... phase-specific required fields (see schema)
+}
+gate_chain.write_gate_artifact(phase="deliver", payload=payload, session_id=sid)
+```
+
+Schema lives at `qor/gates/schema/deliver.schema.json`; the helper validates before write.
 
 ## Constraints
 

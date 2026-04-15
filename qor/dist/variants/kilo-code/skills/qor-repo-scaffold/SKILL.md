@@ -7,7 +7,7 @@ metadata:
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-repo-scaffold
+    path: qor/skills/meta/qor-repo-scaffold
 phase: implement
 gate_reads: ""
 gate_writes: implement
@@ -100,6 +100,24 @@ git add [created files]
 3. Commit: `git commit -m "docs: add community governance files"`
 4. Verify: `/qor-repo-audit`
 ```
+
+### Step Z: Write Gate Artifact (Phase 11D wiring)
+
+Persist the structured gate artifact at `.qor/gates/<session_id>/implement.json` so downstream phases can read it via `gate_chain.check_prior_artifact`.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import gate_chain, shadow_process
+
+# Build payload conforming to qor/gates/schema/implement.schema.json
+payload = {
+    "ts": shadow_process.now_iso(),
+    # ... phase-specific required fields (see schema)
+}
+gate_chain.write_gate_artifact(phase="implement", payload=payload, session_id=sid)
+```
+
+Schema lives at `qor/gates/schema/implement.schema.json`; the helper validates before write.
 
 ## Constraints
 

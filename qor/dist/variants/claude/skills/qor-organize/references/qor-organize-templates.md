@@ -1,4 +1,4 @@
-# QL Organize Templates and Archetype Definitions
+# QorLogic Organize Templates and Archetype Definitions
 
 ## Workspace Isolation Rules
 

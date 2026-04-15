@@ -7,7 +7,7 @@ metadata:
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-implement
+    path: qor/skills/sdlc/qor-implement
 phase: implement
 gate_reads: audit
 gate_writes: implement
@@ -146,10 +146,6 @@ Template: `references/qor-implement-patterns.md`.
 
 **Constraint**: Define exactly ONE success condition that proves Reality matches Promise.
 
-### Step 5.5: Reliability Interdictions (B49/B50/B51)
-
-> Deferred — Intent Lock, Skill Admission, and Gate-to-Skill Matrix not yet implemented. No-op until `tools/reliability/` scripts are created.
-
 ### Step 6: Precision Build
 
 Apply the Section 4 Razor to EVERY function and file.
@@ -242,6 +238,24 @@ IF CHANGELOG.md not updated AND changes are user-facing:
 - WARN: "Consider updating CHANGELOG.md for user-facing changes"
 
 REPORT: "Implementation verified. X files staged. Ready for commit."
+
+### Step Z: Write Gate Artifact (Phase 11D wiring)
+
+Persist the structured gate artifact at `.qor/gates/<session_id>/implement.json` so downstream phases can read it via `gate_chain.check_prior_artifact`.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import gate_chain, shadow_process
+
+# Build payload conforming to qor/gates/schema/implement.schema.json
+payload = {
+    "ts": shadow_process.now_iso(),
+    # ... phase-specific required fields (see schema)
+}
+gate_chain.write_gate_artifact(phase="implement", payload=payload, session_id=sid)
+```
+
+Schema lives at `qor/gates/schema/implement.schema.json`; the helper validates before write.
 
 ## Delegation
 

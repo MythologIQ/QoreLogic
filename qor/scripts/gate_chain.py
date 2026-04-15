@@ -98,3 +98,20 @@ def emit_gate_override(
         "source_entry_id": None,
     }
     return shadow_process.append_event(event)
+
+
+def write_gate_artifact(
+    phase: str,
+    payload: dict,
+    session_id: str | None = None,
+) -> "Path":
+    """Write a gate artifact to .qor/gates/<session_id>/<phase>.json after schema validation.
+
+    Skills with `gate_writes: <phase>` in frontmatter call this at end of execution
+    so downstream phases can find the artifact via check_prior_artifact.
+
+    `payload` should include the schema-required fields for the given phase
+    (the helper injects `phase` and `session_id` if missing).
+    """
+    sid = session_id or session.get_or_create()
+    return vga.write_artifact(phase, payload, session_id=sid)

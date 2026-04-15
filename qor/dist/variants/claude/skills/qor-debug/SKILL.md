@@ -9,7 +9,7 @@ metadata:
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-debug
+    path: qor/skills/sdlc/qor-debug
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Edit, Write, Bash
 phase: debug

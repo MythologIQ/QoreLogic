@@ -125,4 +125,27 @@ Record of rejected artifacts and failure patterns to prevent repetition.
 
 ---
 
+---
+
+### Entry #6: VETO — research-brief-full-audit
+
+**Timestamp**: 2026-04-15
+**Target**: `docs/research-brief-full-audit-2026-04-15.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #21
+
+**Failure Pattern**: Count inflation. Brief reported "9 affected skills" for S-1; verified count is 8. The grep filter caught a non-applicable item (qor-shadow-process declares a free-form log path, not a gate artifact). Counts in research briefs must be re-verified after the filter step, not reported from the raw filter.
+
+**Failure Pattern**: Doctrine conflation. S-8 ("16 missing from delegation-table") and S-12 ("agents lack /qor-* refs") treat doctrine choices as gaps. A finding requires (a) a doctrine that says "X must hold" and (b) evidence "X does not hold". Without (a), it's a doctrine proposal, not a gap.
+
+**Failure Pattern**: Citation drift. Research protocol mandates file:line for every finding. Brief cites for ~25%; the rest say "many skills" or "X skills". Without citations, future readers can't verify or act precisely.
+
+**Failure Pattern**: Self-blind to test coverage. Brief surfaces 24 systemic gaps but doesn't ask "why didn't tests catch any of these?". User asked the question independently. The omission is itself a gap — the meta-finding (S-14: SKILL.md compliance not test-covered) is more consequential than several specific findings the brief did surface.
+
+**Lesson**: Audits-of-research-briefs need a "verification round" before publication: re-run grep filters with the per-finding edge cases checked; make every finding cite at least one file:line; ask "why didn't the existing test/audit infra catch this?" — that meta-question usually surfaces an additional systemic gap.
+
+**Remediation**: 6 mandatory items issued in audit report. Brief revises to v2 OR Phase 11D plan absorbs the corrections directly (skipping a brief revision since the headline findings are correct).
+
+---
+
 *Shadow integrity: ACTIVE*

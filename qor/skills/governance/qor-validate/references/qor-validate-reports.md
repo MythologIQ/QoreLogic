@@ -1,4 +1,4 @@
-# QL Validate Reports
+# QorLogic Validate Reports
 
 This reference contains report templates used by /qor-validate.
 

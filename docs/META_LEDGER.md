@@ -623,3 +623,35 @@ SHA256(content_hash + previous_hash)
 *Chain integrity: VALID*
 *Session: SEALED*
 *Merkle seal: 6d52c2d1...*
+
+---
+
+### Entry #21: GATE TRIBUNAL — research-brief-full-audit
+
+**Timestamp**: 2026-04-15
+**Phase**: GATE (audit on a research artifact)
+**Author**: Judge
+**Verdict**: **VETO**
+**Risk Grade**: L1
+
+**Target**: `docs/research-brief-full-audit-2026-04-15.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+
+**Content Hash** (AUDIT_REPORT.md):
+`ec0e2a39cf93ddfc426413bd81edeb0e547c8a7234b8633f295f3c1074374c5f`
+
+**Previous Hash**:
+`6d52c2d168097c59bc2a22bc50e94bd6d8bb85b83d8a9318b61095a0b53e4d23`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= 17a7ab5f8011c7c5ef2f65452ca2d0b2d6361a90874930b59da2e500246eda4e
+```
+
+**Verdict Summary**: 6 violations — V-1 over-count (S-1 is 8 not 9), V-2 doctrine conflation in S-8 count, V-3 over-claim in S-12 (no doctrine to violate), V-4 missing file:line citations per qor-research protocol, V-5 missing meta-finding S-14 (test coverage doctrine excludes SKILL.md compliance — user surfaced "tests passed" independently), V-6 deep-audit finding framed weakly. Brief is substantively sound and salvageable with targeted edits.
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN (audit tribunal active)*

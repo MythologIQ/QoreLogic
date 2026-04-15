@@ -3,11 +3,11 @@ name: qor-validate
 description: >-
   Merkle Chain Validator that recalculates and verifies cryptographic integrity of the project's Meta Ledger. Use when: (1) Verifying chain integrity before handoff, (2) Detecting tampering or corruption, (3) Auditing decision history, or (4) Validating after manual ledger edits.
 metadata:
-  category: development
+  category: governance
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-validate
+    path: qor/skills/governance/qor-validate
 phase: validate
 gate_reads: substantiate
 gate_writes: validate
@@ -114,6 +114,24 @@ Template: `references/qor-validate-reports.md`.
 ## Final Report Summary
 
 Template: `references/qor-validate-reports.md`.
+
+### Step Z: Write Gate Artifact (Phase 11D wiring)
+
+Persist the structured gate artifact at `.qor/gates/<session_id>/validate.json` so downstream phases can read it via `gate_chain.check_prior_artifact`.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import gate_chain, shadow_process
+
+# Build payload conforming to qor/gates/schema/validate.schema.json
+payload = {
+    "ts": shadow_process.now_iso(),
+    # ... phase-specific required fields (see schema)
+}
+gate_chain.write_gate_artifact(phase="validate", payload=payload, session_id=sid)
+```
+
+Schema lives at `qor/gates/schema/validate.schema.json`; the helper validates before write.
 
 ## Delegation
 

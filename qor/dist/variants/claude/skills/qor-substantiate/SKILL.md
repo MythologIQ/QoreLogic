@@ -3,11 +3,11 @@ name: qor-substantiate
 description: >-
   S.H.I.E.L.D. Substantiation and Session Seal that verifies implementation against blueprint and cryptographically seals the session. Use when: (1) Implementation is complete, (2) Ready to verify Reality matches Promise, (3) Need to seal session with Merkle hash, or (4) Preparing to hand off completed work.
 metadata:
-  category: development
+  category: governance
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
-    path: processed/skills-output/qor-substantiate
+    path: qor/skills/governance/qor-substantiate
 phase: substantiate
 gate_reads: implement
 gate_writes: substantiate
@@ -151,7 +151,25 @@ If any skill files (`.claude/commands/qor-*.md`) were modified during this sessi
 
 1. List modified skill files from git diff
 2. For each modified skill:
-   - Verify it still has required sections: `<skill>` block, `## Execution Protocol`, `## Constraints`, `## Next Step`
+   - Verify it still has required sections: `<skill>` block, `## Execution Protocol`, `### Step Z: Write Gate Artifact (Phase 11D wiring)
+
+Persist the structured gate artifact at `.qor/gates/<session_id>/substantiate.json` so downstream phases can read it via `gate_chain.check_prior_artifact`.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import gate_chain, shadow_process
+
+# Build payload conforming to qor/gates/schema/substantiate.schema.json
+payload = {
+    "ts": shadow_process.now_iso(),
+    # ... phase-specific required fields (see schema)
+}
+gate_chain.write_gate_artifact(phase="substantiate", payload=payload, session_id=sid)
+```
+
+Schema lives at `qor/gates/schema/substantiate.schema.json`; the helper validates before write.
+
+## Constraints`, `## Next Step`
    - Verify the `## Next Step` section references valid successor skills
    - Log in ledger: "Skill file [name] modified — structure verified"
 
@@ -161,10 +179,6 @@ If any skill is missing required sections after modification:
 PAUSE
 Report: "Skill [name] missing required section: [section]. Fix before sealing."
 ```
-
-### Step 4.6: Reliability Interdictions (B49/B50/B51)
-
-> Deferred — Skill Admission, Gate-to-Skill Matrix, and Reliability Integrity not yet implemented. No-op until `tools/reliability/` scripts are created.
 
 ### Step 5: Section 4 Razor Final Check
 
