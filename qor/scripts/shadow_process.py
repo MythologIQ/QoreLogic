@@ -51,8 +51,10 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def append_event(event: dict, log_path: Path = LOG_PATH) -> str:
+def append_event(event: dict, log_path: Path | None = None) -> str:
     """Validate, id, append JSONL line. Returns computed id."""
+    if log_path is None:
+        log_path = LOG_PATH
     validate(event)
     event_id = compute_id(event)
     event_with_id = {"id": event_id, **event}
@@ -74,8 +76,10 @@ def _atomic_append(path: Path, line: str) -> None:
     os.replace(tmp_path, path)
 
 
-def read_events(log_path: Path = LOG_PATH) -> list[dict]:
+def read_events(log_path: Path | None = None) -> list[dict]:
     """Parse JSONL lines from log; skip markdown prose."""
+    if log_path is None:
+        log_path = LOG_PATH
     if not log_path.exists():
         return []
     events: list[dict] = []
@@ -90,11 +94,13 @@ def read_events(log_path: Path = LOG_PATH) -> list[dict]:
     return events
 
 
-def write_events(events: list[dict], log_path: Path = LOG_PATH) -> None:
+def write_events(events: list[dict], log_path: Path | None = None) -> None:
     """Rewrite log preserving prose header + replacing JSONL section.
 
     Reads the current file, keeps all non-JSON lines, then appends re-serialized events.
     """
+    if log_path is None:
+        log_path = LOG_PATH
     if not log_path.exists():
         log_path.parent.mkdir(parents=True, exist_ok=True)
         prose = ""

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qor-logic.mythologiq/schemas/gates/validate.schema.json",
+  "title": "Validate Gate Artifact",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["phase", "ts", "session_id", "overall", "criteria_results"],
+  "properties": {
+    "phase": { "const": "validate" },
+    "ts": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "session_id": { "type": "string", "minLength": 3 },
+    "overall": { "type": "string", "enum": ["PASS", "FAIL"] },
+    "criteria_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["criterion", "status"],
+        "properties": {
+          "criterion": { "type": "string" },
+          "status": { "type": "string", "enum": ["pass", "fail", "skip"] },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qor-logic.mythologiq/schemas/gates/research.schema.json",
+  "title": "Research Gate Artifact",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["phase", "ts", "session_id", "questions", "findings"],
+  "properties": {
+    "phase": { "const": "research" },
+    "ts": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "session_id": { "type": "string", "minLength": 3 },
+    "questions": { "type": "array", "items": { "type": "string" } },
+    "findings": { "type": "array", "items": { "type": "object" } },
+    "sources": { "type": "array", "items": { "type": "string" } }
+  }
+}
