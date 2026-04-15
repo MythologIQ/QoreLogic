@@ -772,3 +772,61 @@ SHA256(content_hash + previous_hash)
 *Chain integrity: VALID*
 *Session: SEALED*
 *Merkle seal: 8eef606d...*
+
+---
+
+### Entry #25: GATE TRIBUNAL — plan-qor-phase13-governance-enforcement
+
+**Timestamp**: 2026-04-15
+**Phase**: GATE (pre-implementation audit)
+**Author**: Judge
+**Verdict**: **VETO**
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase13-governance-enforcement.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+
+**Content Hash**: `599e82e541bea7de60a96af055a7bb2a41b1b403577220aa8becb9fe1ce893ba`
+**Previous Hash**: `8eef606d1366d48b359c128b96bd0a771b53c2454d5ae826635cb34abe0b3e8b`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= ffcd94f8458c51354315a85ac7be9c6bbcd9b6f2b64f9aada688116cd65d0452
+```
+
+**Verdict Summary**: 10 violations — V-1 change_class rule has no doctrine test (S-1 pattern recurrence), V-2 substantiate doesn't know how to read change_class (no plan-discovery spec), V-3 missing parse_change_class helper + tests, V-4 filename scheme doesn't handle 11d/12-v2 letter suffixes, V-5 dirty-tree checkout unhandled, V-6 tag collision unhandled (Step 2.5 not integrated), V-7 plan's own header missing change_class field (self-contradiction), V-8 tag message format unspecified, V-9 local-merge no safety checks, V-10 Step 9.6 replacement doesn't quote current text per /qor-plan grounding protocol.
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN (audit tribunal active)*
+
+---
+
+### Entry #26: GATE TRIBUNAL — plan-qor-phase13-v2
+
+**Timestamp**: 2026-04-15
+**Phase**: GATE (pre-implementation audit, round 2)
+**Author**: Judge
+**Verdict**: **VETO**
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase13-v2.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+
+**Content Hash**: `20b3c3fde446b2f2eb954a4d440ea7ce0e877e33a7dfaddbeec403d8dad8c7e8`
+**Previous Hash**: `ffcd94f8458c51354315a85ac7be9c6bbcd9b6f2b64f9aada688116cd65d0452`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= a2813438015ec88805ef5e99951b5c39c29818ec73423eacd72dc471ab83d008
+```
+
+**Verdict Summary**: 7 violations. V-1 (CRITICAL): operator hint surfaces YAGNI — PHASE_HISTORY.md duplicates GitHub-native machinery (issues+labels+PRs+branches+tags); replace with GitHub hygiene doctrine. V-2 change_class format ambiguity. V-3 V-9-recurrence test count mismatch (8 stated, 9 actual). V-4 InterdictionError undefined. V-5 mtime-based tiebreak filesystem-dependent. V-6 citation inaccuracy in Rule 4 elevation. V-7 PHASE_HISTORY historical rows risk fabrication (auto-resolves if V-1 accepted).
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN (audit tribunal active, round 2)*

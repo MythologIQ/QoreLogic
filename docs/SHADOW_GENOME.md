@@ -196,4 +196,50 @@ Record of rejected artifacts and failure patterns to prevent repetition.
 
 ---
 
+---
+
+### Entry #9: VETO — plan-qor-phase13-governance-enforcement
+
+**Timestamp**: 2026-04-15
+**Target**: `docs/plan-qor-phase13-governance-enforcement.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #25
+
+**Failure Pattern**: S-1 recurrence at meta-level. Plan introduces `change_class:` requirement for plan headers but provides no doctrine test enforcing it. This is the same defect class as `gate_writes` declared without execution (Phase 11D S-1). Whenever a phase declares a rule, the same phase must add the test. "Rule without test = optional" — and the plan itself doesn't follow its own rule (V-7).
+
+**Failure Pattern**: Spec-by-implication. Plan wired substantiate to `bump_version(change_class)` but never specified how substantiate KNOWS the change_class. Reading the plan from the implementer's seat, there's no parser spec, no plan-discovery spec, no fallback. The wiring is real; the input is hand-waved.
+
+**Failure Pattern**: Filename scheme drift unaddressed. Plan's parser regex assumes `\d+` after "phase" but verified history shows letter suffixes (11d, 12-v2). Plan needs to either grandfather older naming or extend the parser; silently breaking on existing files is not a choice.
+
+**Failure Pattern**: Operational gaps in branching/tagging. `git checkout -b` doesn't address dirty trees. `git tag -a` doesn't address collisions. Substantiate already has Step 2.5 version-validation interdiction but plan doesn't integrate. Real-world git operations have failure modes; plans must address them or specify "out of scope".
+
+**Failure Pattern**: Self-contradiction. Plan's own header lacks the `change_class:` field that the plan introduces as mandatory. The doctrine-V-1 test would catch this — and would also have caught it during plan authoring if the test had been written first.
+
+**Lesson**: Phase 11D's S-1 ("rule without test") wasn't actually generalized into the doctrine. It was recorded as a one-time finding. Should be elevated to a meta-doctrine: every plan that introduces a new rule MUST add a corresponding test in the SAME phase. Add to `qor/references/doctrine-test-discipline.md` Rule 4 "Rule = Test".
+
+**Remediation**: 10 mandatory items issued in audit report.
+
+### Entry #10: VETO — plan-qor-phase13-v2
+
+**Timestamp**: 2026-04-15
+**Target**: `docs/plan-qor-phase13-v2.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #26
+
+**Failure Pattern**: Parallel infrastructure to native machinery. Plan v2 proposed `docs/PHASE_HISTORY.md` to index every phase. Operator pointed out: GitHub already provides this via labeled issues + branches + PR descriptions + tags. Building parallel infrastructure is a YAGNI violation when the platform supplies the machinery for free. Doctrine doc should describe the *practice*, not author the index.
+
+**Failure Pattern**: Format ambiguity. Plan introduced `change_class:` requirement but oscillated between `**change_class**:` (bold) and `change_class:` (plain) across versions. A new format must be canonical from introduction; rule + parser + doctrine test must all agree on one syntax.
+
+**Failure Pattern**: V-9 recurrence (test count mismatch). v1 had this defect; v2 audit caught it in v1; v2 plan introduced it again with a different count. Test counts must be derived (count test functions in the file body) not asserted (header says N). Recurrence shows the count was authored by hand without verification.
+
+**Failure Pattern**: Filesystem-dependent ordering. Plan used mtime as tiebreaker for multi-version plans. Git operations dont preserve mtime; CI checkouts produce arbitrary mtime ordering. Deterministic ordering must be content-addressable (filename suffix, lexicographic order) not metadata-dependent.
+
+**Failure Pattern**: Citation drift. Rule 4 elevation cited 'Phase 11D S-1' but the actual location is `docs/research-brief-full-audit-2026-04-15.md §S-1`. /qor-plan grounding protocol requires verified file paths for every named mechanism.
+
+**Lesson**: Operator hints often surface architecture-altering simplifications. The agents first instinct ('build the doc') competes with the operators bigger view ('the platform already does this'). When operator suggests a hint, audit the v2 plan against the hint as a primary lens, not as an afterthought.
+
+**Remediation**: 7 mandatory items issued in audit report.
+
+---
+
 *Shadow integrity: ACTIVE*
