@@ -35,6 +35,10 @@ For **code-level** failures (runtime errors, test failures, broken behavior), us
 
 ## Execution Protocol
 
+### Step 0: Chain position (Phase 8 wiring)
+
+This skill is **cross-cutting** — invoked when the Process Shadow Genome threshold breaches or by explicit user request. It reads `docs/PROCESS_SHADOW_GENOME.md` directly rather than a prior gate artifact.
+
 ### Step 1 — Read context
 
 - Parse `docs/PROCESS_SHADOW_GENOME.md` (JSONL) filtering `addressed=false`.

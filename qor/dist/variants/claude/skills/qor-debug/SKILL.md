@@ -44,6 +44,10 @@ Bring surgical precision to debugging. AI coding agents typically pull a thread 
 
 ## Execution Protocol
 
+### Step 0: Chain position (Phase 8 wiring)
+
+This skill is **cross-cutting** — invokable from implement, substantiate, or validate phases when regression / hallucination / degradation is detected. No prior-phase gate artifact is required.
+
 ### Step 1: Describe the Problem
 
 Provide the Fixer with:

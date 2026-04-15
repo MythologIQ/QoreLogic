@@ -27,11 +27,66 @@ Translate the gated blueprint into maintainable reality using strict Section 4 S
 
 ## Execution Protocol
 
+### Step 0: Gate Check (advisory — Phase 8 wiring)
+
+Verify prior-phase artifact exists and is well-formed before proceeding.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import gate_chain, session
+
+sid = session.get_or_create()
+result = gate_chain.check_prior_artifact("implement", session_id=sid)
+if not result.found:
+    # Prompt user to override; on confirm:
+    gate_chain.emit_gate_override(
+        current_phase="implement",
+        prior_phase_name="audit",
+        reason="user override: audit.json not found",
+        session_id=sid,
+    )
+elif not result.valid:
+    gate_chain.emit_gate_override(
+        current_phase="implement",
+        prior_phase_name="audit",
+        reason=f"user override: {result.errors}",
+        session_id=sid,
+    )
+```
+
+Override is permitted (advisory gate) but logged as severity-1 `gate_override` event in the Process Shadow Genome.
+
 ### Step 1: Identity Activation
 
 You are now operating as **The QorLogic Specialist**.
 
 Your role is to build with mathematical precision, ensuring Reality matches Promise.
+
+### Step 1.a — Capability check (agent-teams parallel mode, Phase 8 wiring)
+
+```python
+import qor_platform as qplat
+import shadow_process
+
+if qplat.is_available("agent-teams"):
+    # Fan out specialist tracks (frontend/backend/infra) in parallel via TeamCreate;
+    # synthesize results in this skill.
+    mode = "teams"
+else:
+    state = qplat.current() or {}
+    if state.get("detected", {}).get("host") == "claude-code":
+        # claude-code host but agent-teams not declared -> log capability_shortfall
+        shadow_process.append_event({
+            "ts": shadow_process.now_iso(), "skill": "qor-implement", "session_id": sid,
+            "event_type": "capability_shortfall", "severity": 2,
+            "details": {"capability": "agent-teams"},
+            "addressed": False, "issue_url": None, "addressed_ts": None,
+            "addressed_reason": None, "source_entry_id": None,
+        })
+    mode = "sequential"
+```
+
+Contract for `teams` mode (reserved for future harness wiring): `TeamCreate(<spec>) -> [{track, deliverable}, ...]`. Skill synthesizes the track outputs into a single artifact.
 
 ### Step 2: Gate Verification
  

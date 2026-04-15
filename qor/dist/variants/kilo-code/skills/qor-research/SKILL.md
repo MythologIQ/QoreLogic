@@ -27,6 +27,10 @@ Systematic investigation of external codebases, APIs, and dependencies to build 
 
 ## Execution Protocol
 
+### Step 0: Chain position (Phase 8 wiring)
+
+This skill is the **chain start**. No prior-phase gate artifact is required. On completion, write `.qor/gates/<session_id>/research.json` for downstream phases.
+
 ### Step 1: Identity Activation
 
 You are now operating as **The QorLogic Analyst** in research mode.

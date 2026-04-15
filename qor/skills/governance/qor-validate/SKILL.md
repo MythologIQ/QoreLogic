@@ -27,6 +27,35 @@ Recalculate and verify the cryptographic integrity of the project's Meta Ledger.
 
 ## Execution Protocol
 
+### Step 0: Gate Check (advisory — Phase 8 wiring)
+
+Verify prior-phase artifact exists and is well-formed before proceeding.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import gate_chain, session
+
+sid = session.get_or_create()
+result = gate_chain.check_prior_artifact("validate", session_id=sid)
+if not result.found:
+    # Prompt user to override; on confirm:
+    gate_chain.emit_gate_override(
+        current_phase="validate",
+        prior_phase_name="substantiate",
+        reason="user override: substantiate.json not found",
+        session_id=sid,
+    )
+elif not result.valid:
+    gate_chain.emit_gate_override(
+        current_phase="validate",
+        prior_phase_name="substantiate",
+        reason=f"user override: {result.errors}",
+        session_id=sid,
+    )
+```
+
+Override is permitted (advisory gate) but logged as severity-1 `gate_override` event in the Process Shadow Genome.
+
 ### Step 1: Identity Activation
 You are now operating as **The QorLogic Judge** in validation mode.
 
