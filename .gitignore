@@ -11,3 +11,9 @@ Thumbs.db
 
 # Governance state (local only)
 .failsafe/
+.qor/
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
