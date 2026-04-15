@@ -981,3 +981,32 @@ SHA256(content_hash + previous_hash)
 *Chain integrity: VALID*
 *Session: SEALED*
 *Merkle seal: 8b2a94f3...*
+
+---
+
+### Entry #31: GATE TRIBUNAL — plan-qor-phase14-shadow-attribution
+
+**Timestamp**: 2026-04-15
+**Phase**: GATE (pre-implementation audit)
+**Author**: Judge
+**Verdict**: **VETO**
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase14-shadow-attribution.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+
+**Content Hash**: `64e47b223beb7157f47a241b8f85837a55ce8ddc580f461ffec3aeadb74e9b9a`
+**Previous Hash**: `8b2a94f300881845c097cacbebf00648da87fa8e427f8d77cea6e866102b63dd`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= 54ef6a4281b361dea2f5c704d5b962caf4d278a87272ba87654b3317674a7d1b
+```
+
+**Verdict Summary**: 5 violations. V-1 (SG-021 recurrence): plan surveys 1 of 5 shadow-pipeline scripts; `shadow_process.py` writes to a hardcoded `LOG_PATH` constant (not attribution-aware), leaving the pipeline internally inconsistent post-edit — required: Track C.1–C.5 per-script disposition + classification-aware `append_event()`. V-2 skill scope: 2 shadow-tracking skills (`track-shadow-genome.md`, `qor-meta-track-shadow/SKILL.md`) reference the single-file model and are not in the plan's Affected Files. V-3 self-contradiction in Track C (single-line edit vs. conditional legacy fallback + warning — pick one; tests). V-4 doctrine §5 omits `docs/SHADOW_GENOME.md` narrative out-of-scope declaration. V-5 `gate_writes:` `OR` syntax is non-convention; must verify existing frontmatter pattern.
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN (audit tribunal active)*
