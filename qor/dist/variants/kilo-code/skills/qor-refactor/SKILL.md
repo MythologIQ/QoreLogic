@@ -217,6 +217,13 @@ Template: `references/qor-refactor-examples.md`.
 
 Template: `references/qor-refactor-examples.md`.
 
+## Delegation
+
+Per `qor/gates/delegation-table.md`:
+
+- **Refactor complete** → `/qor-audit` (re-audit) when invoked from outside the SDLC chain, or `/qor-substantiate` when invoked from a substantiate-driven Section 4 cleanup.
+- **File-internal refactor surfaces project-level structural issues** (e.g., a refactor reveals two modules that should be one, or a directory boundary that's wrong) → escalate to `/qor-organize`. Refactor owns file-internal logic shape; project topology belongs to organize.
+
 ## Constraints
 
 - **NEVER** change behavior during refactor (only structure)

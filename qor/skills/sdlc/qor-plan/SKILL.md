@@ -200,6 +200,14 @@ A reader unfamiliar with code should be able to:
 - Replace a part without breaking other parts
 - See the complete scope of work
 
+## Delegation
+
+Per `qor/gates/delegation-table.md`:
+
+- **Plan complete** → `/qor-audit` (next phase).
+- **Plan needs architectural restructuring** (changing where things live, splitting modules across boundaries) → `/qor-organize` (project topology is its domain). The plan should reference the organize step explicitly, not embed restructuring instructions.
+- **Re-research needed** for an open question that emerges during planning → return to `/qor-research`.
+
 ## Constraints
 
 - **NEVER** worry about backwards compatibility (prefer streamlined, clean codebase)

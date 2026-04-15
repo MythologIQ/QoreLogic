@@ -133,7 +133,7 @@ Verify KISS compliance in proposed design:
 | Nested ternaries   | 0     | [count]            | [OK/FAIL] |
 ```
 
-**Any violation -> VETO**
+**Any violation -> VETO**. **Mandated next action**: `/qor-refactor` (file-internal logic shape is its domain). Per `qor/gates/delegation-table.md`, never inline a refactor process inside an audit report — name the skill.
 
 #### Dependency Audit
 
@@ -165,7 +165,7 @@ Verify system-level coherence and module organization:
 - [ ] Build path is intentional (entry points are explicit)
 ```
 
-**Any violation -> VETO**
+**Any violation -> VETO**. **Mandated next action**: `/qor-organize` (project-level structure is its domain). Per `qor/gates/delegation-table.md`.
 
 #### Orphan Detection
 
@@ -179,7 +179,9 @@ Verify all proposed files connect to build path:
 | [file]        | [traced import chain]  | [Connected/ORPHAN] |
 ```
 
-**Any orphan -> VETO**
+**Any orphan -> VETO**. **Mandated next action**: `/qor-organize`.
+
+**On PASS verdict overall**: next phase is `/qor-implement`. Per `qor/gates/chain.md`.
 
 ### Step 4: Generate Verdict
 

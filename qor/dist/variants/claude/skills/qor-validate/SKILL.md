@@ -115,6 +115,14 @@ Template: `references/qor-validate-reports.md`.
 
 Template: `references/qor-validate-reports.md`.
 
+## Delegation
+
+Per `qor/gates/delegation-table.md`:
+
+- **Validation complete + PASS** → `/qor-repo-release` or session is sealed (depending on workflow).
+- **Validation FAIL with single defect** → return to `/qor-implement` with scoped fix.
+- **Repeat validation failure across cycles** (3+ same root cause) → `/qor-remediate`. Do NOT keep re-implementing — the issue is process-level, not code-level.
+
 ## Constraints
 
 - **NEVER** modify any files during validation

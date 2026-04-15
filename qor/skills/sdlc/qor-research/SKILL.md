@@ -224,6 +224,13 @@ SHA256(content_hash + previous_hash)
 _Research phase complete. Findings incorporated into project knowledge base._
 ```
 
+## Delegation
+
+Per `qor/gates/delegation-table.md`:
+
+- **Research complete** → `/qor-plan` (next phase).
+- **Project-structure questions surface** (e.g., "where should X live?") → `/qor-organize` (directory topology is its domain); do NOT propose restructuring inside a research artifact.
+
 ## Constraints
 
 - **NEVER** assume an API — verify against source code

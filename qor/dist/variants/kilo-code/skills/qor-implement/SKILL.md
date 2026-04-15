@@ -243,6 +243,14 @@ IF CHANGELOG.md not updated AND changes are user-facing:
 
 REPORT: "Implementation verified. X files staged. Ready for commit."
 
+## Delegation
+
+Per `qor/gates/delegation-table.md`:
+
+- **Implementation complete** → `/qor-substantiate` (next phase).
+- **Mid-implement Razor bloat detected** (a function or file is growing past Section 4 limits during implementation) → pause and `/qor-refactor`. Do NOT inline a refactor process; refactor owns the file-internal logic shape.
+- **Regression / hallucination / degradation detected** during implement → `/qor-debug` for root-cause analysis; do NOT keep iterating on the same code without diagnosing why prior iterations regressed.
+
 ## Constraints
 
 - **NEVER** implement without PASS verdict
