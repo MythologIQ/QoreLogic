@@ -555,3 +555,71 @@ SHA256(content_hash + previous_hash)
 *Chain integrity: VALID*
 *Session: SSOT MIGRATION SEALED*
 *Merkle head: c055ac75...*
+
+---
+
+### Entry #20: SUBSTANTIATE — Reality == Promise
+
+**Timestamp**: 2026-04-15
+**Phase**: SUBSTANTIATE
+**Author**: Judge (substantiation mode)
+**Verdict**: **PASS**
+
+**Target**: SSoT migration per `docs/plan-qor-ssot-minimal.md`
+**Manifest**: `docs/substantiate-manifest-2026-04-15.json` (3670 paths — full post-migration state including archive)
+
+**Reality audit** (file-by-file vs plan §Target Structure):
+
+| Planned artifact | Status |
+|---|---|
+| `qor/skills/governance/{qor-audit, qor-validate, qor-substantiate, qor-shadow-process}` | EXISTS |
+| `qor/skills/sdlc/{qor-research, qor-plan, qor-implement, qor-refactor, qor-debug, qor-remediate}` | EXISTS |
+| `qor/skills/memory/{qor-status, qor-document, qor-organize, log-decision, track-shadow-genome}` | EXISTS |
+| `qor/skills/meta/{qor-bootstrap, qor-help, qor-repo-audit, qor-repo-release, qor-repo-scaffold}` | EXISTS |
+| `qor/agents/{governance, sdlc, memory, meta}/` with 13 qor-scoped | EXISTS |
+| `qor/vendor/{agents, skills}/` with 7 agents + 65 skills + third-party collection | EXISTS |
+| `qor/scripts/ledger_hash.py` + `utilities/` | EXISTS |
+| `qor/experimental/`, `qor/templates/` | EXISTS |
+| `docs/migration-manifest-{pre, post}.json` | EXISTS |
+| `docs/PROCESS_SHADOW_GENOME.md` with gate override event | EXISTS |
+| `docs/archive/2026-04-15/` with 5 legacy snapshots | EXISTS |
+| `pyproject.toml`, `.gitignore` updates | EXISTS |
+| Deletions: `kilo-code/`, `deployable state/`, `processed/`, `compiled/`, `ingest/` | CONFIRMED |
+
+**Unplanned-but-created** (documented; not failures):
+- `docs/cutover-manifest-2026-04-15.json` — Phase 7 content subject for Entry #19
+- `docs/substantiate-manifest-2026-04-15.json` — this entry's content subject
+- `qor/references/` (consolidated, vs plan's per-skill references/ suggestion — pragmatic choice preserved)
+- `qor/scripts/legacy/` — preserves 7 pre-migration pipeline scripts
+- `qor/vendor/skills/tauri/`, `qor/vendor/skills/chrome-devtools/` — nested vendor groupings for related clusters
+- `.qor/migration-discards.log` — first-source-wins discard record (gitignored, but present)
+
+**Section 4 Razor**: `qor/scripts/ledger_hash.py` — 153 lines (≤250); longest function `main()` 36 lines (≤40); nesting ≤2; zero nested ternaries. PASS.
+
+**Test audit**: No tests authored. Plan scope deferred test infrastructure to `plan-qor-tooling-deferred.md` Phase 8. Substantiation records this as scope-compliant, not a defect.
+
+**Visual silence / console.log**: N/A (no frontend code).
+
+**Skill file integrity**: 2 skill files authored (qor-remediate, qor-shadow-process). Both marked STUB; contain required sections (skill block, Execution Protocol, Constraints). Full implementation deferred per plan.
+
+**Audit-verdict context**: PASS verdict not present in `.agent/staging/AUDIT_REPORT.md`; last verdict was VETO (round 5 / Ledger #16). User-approved override recorded as sev-1 `gate_override` event in `docs/PROCESS_SHADOW_GENOME.md`. Substantiation proceeded on the minimal plan surface (`plan-qor-ssot-minimal.md`) which incorporates resolutions for the 5 carried violations. Reality matches this minimal-plan Promise.
+
+**Content Hash** (substantiate-manifest-2026-04-15.json):
+`5c32bc02816faa3e240b7dccb2c9bb3a7ea40de769ebe989cd94841c8d3b64b7`
+
+**Previous Hash**:
+`c055ac75bd7496ac88b436fa4a97c3517b3e1f92b795354a23e805408dc5d9ca`
+
+**Chain Hash** (Merkle seal):
+```
+SHA256(content_hash + previous_hash)
+= 6d52c2d168097c59bc2a22bc50e94bd6d8bb85b83d8a9318b61095a0b53e4d23
+```
+
+**Decision**: SSoT migration session sealed. Reality == Promise on `plan-qor-ssot-minimal.md`. Chain intact from Entry #12 through #20 (8 machine-verifiable entries). Deferred tooling tracked in `plan-qor-tooling-deferred.md` for future scope-limited iterations.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED*
+*Merkle seal: 6d52c2d1...*
