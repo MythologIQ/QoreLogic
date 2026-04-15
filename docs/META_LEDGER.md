@@ -493,3 +493,65 @@ SHA256(content_hash + previous_hash)
 
 *Chain integrity: VALID*
 *Session: MIGRATION IN PROGRESS*
+
+---
+
+### Entry #18: MIGRATION-COMPLETE — post-move manifest
+
+**Timestamp**: 2026-04-15
+**Phase**: MIGRATE (SSoT, Phase 1.5 post-move)
+**Author**: Governor
+**Purpose**: Record content-hash state of all migrated paths under `qor/` after Phase 1 execution.
+
+**Manifest**: `docs/migration-manifest-post.json` (1458 paths under `qor/`)
+
+**Content Hash** (migration-manifest-post.json):
+`8cf68f0549db3f11b844c0be31e709b8c3be0621a285760d367a1f9d9e3c5106`
+
+**Previous Hash**:
+`37d3fc0a51af3c071a31c918afe1f2653716148df0b9d9df9f0cd660b5d1453d`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= 7c41dbc944f53a2663de190ba14bdbc2c5fa5b81ecb8f5d3dffc67d32d9a8b18
+```
+
+**Path delta**: pre-manifest 2176 paths → post-manifest 1458 paths. Difference (718) accounts for: 5 hearthlink deletions, 10 ql-*.md deletions under ingest/skills/, _quarantine contents, ingest/workflows/ contents, ingest/internal/agents/ + governance/ duplicates (discarded per first-source-wins), ingest/scripts/ subdirs (duplicates discarded), ingest/lessons-learned duplicates, archive/ snapshots excluded from post-manifest (kept under docs/archive/2026-04-15/ but not part of qor/ SSoT).
+
+**Chain rebase**: old paths → new paths derivable by content-hash equality between pre and post manifests. Files with identical sha256 between pre-path and post-path were moves; deletions are recorded in `.qor/migration-discards.log`.
+
+---
+
+*Chain integrity: VALID*
+*Session: MIGRATION COMPLETE (awaiting Phase 7 cutover)*
+
+---
+
+### Entry #19: CUTOVER — legacy roots removed
+
+**Timestamp**: 2026-04-15
+**Phase**: CUTOVER (Phase 7 complete)
+**Author**: Governor
+
+**Manifest**: `docs/cutover-manifest-2026-04-15.json`
+
+**Content Hash**:
+`3f5c09fefb836427bc81c85c13bc1adb70b0a9bfb1bef22afeee4aa76ad71624`
+
+**Previous Hash**:
+`7c41dbc944f53a2663de190ba14bdbc2c5fa5b81ecb8f5d3dffc67d32d9a8b18`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= c055ac75bd7496ac88b436fa4a97c3517b3e1f92b795354a23e805408dc5d9ca
+```
+
+**Decision**: Legacy pipeline directories (`ingest/`, `kilo-code/`, `deployable state/`, `processed/`, `compiled/`, top-level `scripts/`) removed. Canonical content consolidated under `qor/` SSoT. `docs/archive/2026-04-15/` retains pre-migration snapshot. `docs/SYSTEM_STATE.md` and `docs/SKILL_REGISTRY.md` rewritten to reflect new layout. Legacy pipeline scripts moved to `qor/scripts/legacy/`. Phase 1 SSoT migration complete. Tooling (compile pipeline, gate runtime, shadow automation, platform detect, test suite) deferred per `docs/plan-qor-tooling-deferred.md`.
+
+---
+
+*Chain integrity: VALID*
+*Session: SSOT MIGRATION SEALED*
+*Merkle head: c055ac75...*

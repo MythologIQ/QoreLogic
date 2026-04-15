@@ -1,79 +1,111 @@
 # Qorelogic System State
 
-**Snapshot**: 2026-03-20T00:00:00Z
-**Chain Status**: ACTIVE (8 entries + this seal)
-**Backlog**: ALL COMPLETE (D1-D3, B1-B12)
+**Snapshot**: 2026-04-15
+**Chain Status**: ACTIVE (18 entries)
+**Phase**: SSoT migration complete; tooling (compile, gates, shadow automation, platform detect, test suite) deferred per `docs/plan-qor-tooling-deferred.md`
 
-## Pipeline
+## Authoritative source
 
-```
-ingest/ -> process-skills.py -> processed/ -> compile-claude.py -> compiled/.claude/skills/
-                                            -> compile-agent.py  -> compiled/.agent/workflows/
-```
+All canonical Qor content lives under `qor/`. Variant outputs (`claude`, `kilo-code`, `codex`) are deferred until Phase 2 re-introduces the compile pipeline.
 
 ## File Tree
 
 ```
 G:/MythologIQ/Qorelogic/
+├── qor/                                   Single source of truth
+│   ├── skills/
+│   │   ├── governance/                    Gate & audit authority
+│   │   │   ├── qor-audit/
+│   │   │   ├── qor-validate/
+│   │   │   ├── qor-substantiate/
+│   │   │   ├── qor-shadow-process/        (stub — full impl deferred)
+│   │   │   └── qore-governance-compliance/
+│   │   ├── sdlc/                          Research → implement cycle
+│   │   │   ├── qor-research/
+│   │   │   ├── qor-plan/
+│   │   │   ├── qor-implement/
+│   │   │   ├── qor-refactor/
+│   │   │   ├── qor-debug/
+│   │   │   └── qor-remediate/             (stub — absorbs qor-course-correct)
+│   │   ├── memory/                        State tracking & documentation
+│   │   │   ├── qor-status/
+│   │   │   ├── qor-document/
+│   │   │   ├── qor-organize/
+│   │   │   ├── log-decision.md
+│   │   │   ├── track-shadow-genome.md
+│   │   │   └── qore-docs-technical-writing/
+│   │   ├── meta/                          Bootstrapping & repo management
+│   │   │   ├── qor-bootstrap/
+│   │   │   ├── qor-help/
+│   │   │   ├── qor-repo-audit/
+│   │   │   ├── qor-repo-release/
+│   │   │   ├── qor-repo-scaffold/
+│   │   │   ├── qore-meta-log-decision/
+│   │   │   └── qore-meta-track-shadow/
+│   │   └── custom/                        (reserved; empty until qor-scoped custom content identified)
+│   │
+│   ├── agents/
+│   │   ├── governance/                    qor-governor, qor-judge
+│   │   ├── sdlc/                          qor-specialist, qor-strategist, qor-fixer,
+│   │   │                                  qor-ux-evaluator, project-planner
+│   │   ├── memory/                        qor-technical-writer, documentation-scribe,
+│   │   │                                  learning-capture
+│   │   └── meta/                          agent-architect, system-architect, build-doctor
+│   │
+│   ├── vendor/
+│   │   ├── agents/                        7 generic specialists + third-party/ (wshobson-agents)
+│   │   └── skills/                        ~65 third-party skills (frameworks, integrations,
+│   │                                      tauri/, chrome-devtools/, custom/, _system/, agents/)
+│   │
+│   ├── scripts/
+│   │   ├── ledger_hash.py                 Content/chain hashing + manifest generation + verify
+│   │   ├── calculate-session-seal.py      Session seal utility
+│   │   ├── legacy/                        Pre-migration pipeline (process-skills.py,
+│   │   │                                  compile-*.py, admit-skill.py, gate-skill-matrix.py,
+│   │   │                                  intent-lock.py)
+│   │   └── utilities/                     Assorted utility scripts
+│   │
+│   ├── references/                        Doctrine + patterns + ql-* examples
+│   ├── experimental/                      Non-canonical research (tauri2-state, tauri-launcher, etc.)
+│   └── templates/                         Doc templates (ARCHITECTURE_PLAN, CONCEPT, SYSTEM_STATE, etc.)
+│
 ├── docs/
-│   ├── CONCEPT.md
+│   ├── META_LEDGER.md                     Hash-chained governance ledger (18 entries)
+│   ├── SHADOW_GENOME.md                   Audit-verdict failure records (5 entries)
+│   ├── PROCESS_SHADOW_GENOME.md           Process-level failure log (JSONL append-only)
+│   ├── SYSTEM_STATE.md                    This file
+│   ├── SKILL_REGISTRY.md                  Category-organized skill index
 │   ├── ARCHITECTURE_PLAN.md
-│   ├── META_LEDGER.md
-│   ├── BACKLOG.md (ALL COMPLETE)
-│   ├── SYSTEM_STATE.md
-│   ├── SKILL_REGISTRY.md
+│   ├── BACKLOG.md
+│   ├── CONCEPT.md
 │   ├── SKILL_AUDIT_CHECKLIST.md
-│   ├── plan-b5-b8-navigator-fixer.md
-│   ├── plan-skill-consolidation.md
-│   └── plan-compilation-pipeline.md
-├── scripts/ (7 scripts)
-│   ├── process-skills.py
-│   ├── compile-claude.py
-│   ├── compile-agent.py
-│   ├── compile-all.py
-│   ├── intent-lock.py
-│   ├── admit-skill.py
-│   └── gate-skill-matrix.py
-├── ingest/
-│   ├── internal/
-│   │   ├── governance/ (17 skills — ALL COMPLIANT)
-│   │   ├── agents/ (6 personas)
-│   │   ├── references/ (14 docs)
-│   │   └── utilities/ (4 meta-skills)
-│   ├── third-party/agents/ (229 — 3 enhanced)
-│   ├── experimental/ (5 archived)
-│   └── scripts/ (402 rule files)
-├── processed/ (17 skills + 14 references)
-├── compiled/
-│   ├── .claude/skills/ (17 SKILL.md files)
-│   └── .agent/workflows/ (17 workflow files)
-└── .agent/staging/AUDIT_REPORT.md
+│   ├── Lessons-Learned/
+│   ├── plan-qor-*.md                      Migration plan iterations (v1, v2, v3, final, minimal, deferred)
+│   ├── migration-manifest-pre.json        Phase 1.5 pre-move manifest (2176 paths)
+│   ├── migration-manifest-post.json       Phase 1.5 post-move manifest (1458 paths)
+│   ├── MERKLE_ITERATION_GUIDE.md
+│   ├── SHIELD_SELF_AUDIT.md
+│   └── archive/2026-04-15/                Pre-migration snapshots (ingest, processed, compiled,
+│                                          deployable_state, kilo-code)
+│
+├── .qor/                                  Runtime state (gitignored)
+│   └── migration-discards.log             First-source-wins discard record
+│
+├── pyproject.toml                         Python 3.11+, pytest config, jsonschema runtime dep
+├── .gitignore
+└── README.md
 ```
 
-## Module Summary
+## Ledger chain head
 
-| Module | Count | Status |
-|--------|-------|--------|
-| Governance Skills | 17 | ALL S.H.I.E.L.D. COMPLIANT |
-| Agent Personas | 6 | Governor, Judge, Specialist, Fixer, Technical Writer, UX Evaluator |
-| Reference Docs | 14 | 7 skill templates + 7 pattern libraries |
-| Pipeline Scripts | 7 | process, compile-claude, compile-agent, compile-all, intent-lock, admit-skill, gate-skill-matrix |
-| Compiled (Claude) | 17 | All skills with YAML frontmatter |
-| Compiled (Agent) | 17 | All skills with workflow headers |
-| Third-Party Agents | 229 | 3 enhanced (code-reviewer, accessibility-tester, documentation-engineer) |
-| Archived | 5 | Project-specific utilities preserved |
+- Entry #18 MIGRATION-COMPLETE
+- Chain hash: `7c41dbc944f53a2663de190ba14bdbc2c5fa5b81ecb8f5d3dffc67d32d9a8b18`
+- Verification: `python qor/scripts/ledger_hash.py verify docs/META_LEDGER.md` → all 18 entries OK
 
-## Full Session Deliverables
+## Deferred
 
-1. Bootstrapped repo with ingest -> process -> compile pipeline
-2. Imported 43 internal skills + 229 third-party agents from FailSafe ecosystem
-3. Normalized all 17 governance skills to S.H.I.E.L.D. compliance
-4. Created 3 new skills: ql-document, ql-course-correct, ql-fixer
-5. Built processing pipeline (process-skills.py)
-6. Built compilation pipeline (compile-claude.py, compile-agent.py, compile-all.py)
-7. Consolidated 19 legacy utilities: 5 archived, 3 merged, 7 distilled, 4 kept
-8. Created SKILL_REGISTRY.md with overlap detection + subagent pairing
-9. Wired ql-document -> ql-technical-writer dispatch
-10. Added collaborative design dialogue to ql-plan
-11. Created SKILL_AUDIT_CHECKLIST.md
-12. Implemented reliability scripts (intent-lock, admit-skill, gate-skill-matrix)
+Tooling phases (compile pipeline, gate chain runtime, shadow threshold automation, cross-repo collector, platform detect, full validation suite) are tracked in `docs/plan-qor-tooling-deferred.md` for subsequent, scope-limited plans.
+
+## Advisory-gate overrides carried
+
+One sev-1 `gate_override` event logged in `docs/PROCESS_SHADOW_GENOME.md` against the 5-round audit loop verdicts on the full plan. User-approved per `/qor-debug` analysis. Remaining violations (V-1..V-5) are addressed in `plan-qor-ssot-minimal.md` or explicitly carried as known risk.

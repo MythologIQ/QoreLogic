@@ -5,45 +5,50 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-BSL--1.1-orange" alt="License: BSL-1.1">
-  <img src="https://img.shields.io/badge/Skills-17-blue" alt="Skills: 17">
-  <img src="https://img.shields.io/badge/Agents-8-green" alt="Agents: 8">
+  <img src="https://img.shields.io/badge/SSoT-qor/-blue" alt="SSoT: qor/">
+  <img src="https://img.shields.io/badge/Ledger-Entry%20%2319-green" alt="Ledger: Entry #19">
 </p>
 
 ---
 
-Single source of truth for all governance skills used by LLM agents across MythologIQ projects. Skills are authored once, validated through a structured pipeline, and compiled to proprietary deployable formats for Claude Code and Kilocode.
+## SSoT layout (as of 2026-04-15)
+
+All canonical content lives under **`qor/`**. Legacy pipeline directories (`ingest/`, `kilo-code/`, `deployable state/`, `processed/`, `compiled/`) have been retired; snapshots preserved under `docs/archive/2026-04-15/`.
+
+```
+qor/
+  skills/<category>/     governance, sdlc, memory, meta, custom
+  agents/<category>/     governance, sdlc, memory, meta
+  vendor/                third-party skills and agents (~65 + wshobson)
+  scripts/               ledger_hash.py, utilities/, legacy/
+  references/            doctrine + patterns + ql-* examples
+  experimental/          non-canonical research
+  templates/             doc templates
+```
+
+See `docs/SYSTEM_STATE.md` for the full tree and `docs/SKILL_REGISTRY.md` for the category-organized skill index.
 
 ## Quick Start
 
 ### Claude Code
 
-Copy the deployable skills and agents into your project's `.claude/` directory:
+Hand-copy any skill directory you want from `qor/skills/<category>/<skill>/` into your project's `.claude/skills/`:
 
-```
-deployable state/claude/
-  skills/    ->  your-project/.claude/skills/
-  agents/    ->  your-project/.claude/agents/
+```bash
+cp -r qor/skills/governance/qor-audit /path/to/your-project/.claude/skills/
 ```
 
-Each skill is a self-contained `SKILL.md` file inside a named directory (e.g. `qor-plan/SKILL.md`). Each agent is a single `.md` file (e.g. `qor-governor.md`). Claude Code discovers and loads these files automatically.
+Each skill is a self-contained `SKILL.md` file (with optional `references/` subdirectory). Claude Code discovers and loads these automatically.
 
-See [`deployable state/claude/`](deployable%20state/claude/) for the full 17-skill, 8-agent suite ready to drop in.
+Agents live at `qor/agents/<category>/<name>.md` — copy into `.claude/agents/` similarly.
 
 ### Kilocode
 
-Copy the deployable skills and agents into your project's `.kilo/` directory:
+Same source; hand-copy `qor/skills/<category>/<skill>/` into your project's `.kilo/skills/`.
 
-```
-deployable state/kilo-code/
-  qor-*/      ->  your-project/.kilo/skills/qor-*/
-  agents/     ->  your-project/.kilo/agents/
-```
+### Automated variant output (coming)
 
-Alternatively, the same compiled output lives at [`kilo-code/`](kilo-code/) in the repository root.
-
-Each skill directory contains a `SKILL.md` (with optional `references/` subdirectory for bundled reference material). Each agent is a single `.md` file. Kilocode discovers and loads these files via its skill resolution system.
-
-See [`deployable state/kilo-code/`](deployable%20state/kilo-code/) for the full 17-skill, 8-agent suite ready to drop in.
+A compile pipeline that re-emits `qor/dist/variants/{claude,kilo-code,codex}/` from the `qor/skills/` SSoT is tracked in `docs/plan-qor-tooling-deferred.md` (Phase 2). Until then, consume directly from `qor/`.
 
 ## Proprietary Formats
 

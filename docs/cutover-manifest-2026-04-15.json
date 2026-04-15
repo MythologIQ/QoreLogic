@@ -1,0 +1,15 @@
+{
+  "schema_version": "1",
+  "generated_ts": "2026-04-15T14:00:00Z",
+  "action": "CUTOVER",
+  "deleted_roots": [
+    "ingest/",
+    "kilo-code/",
+    "deployable state/",
+    "processed/",
+    "compiled/",
+    "scripts/"
+  ],
+  "ssot_root": "qor/",
+  "notes": "Legacy pipeline dirs removed. Canonical content consolidated under qor/. docs/archive/2026-04-15/ retains pre-migration snapshots. Legacy scripts preserved at qor/scripts/legacy/. Advisory audit-loop VETO overridden per user direction; sev-1 event in docs/PROCESS_SHADOW_GENOME.md."
+}
