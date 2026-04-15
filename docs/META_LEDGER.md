@@ -716,3 +716,59 @@ SHA256(content_hash + previous_hash)
 
 *Chain integrity: VALID*
 *Session: OPEN (audit tribunal active, round 2)*
+
+---
+
+### Entry #24: SUBSTANTIATE — Phase 12 (override-Promise verified)
+
+**Timestamp**: 2026-04-15
+**Phase**: SUBSTANTIATE
+**Author**: Judge (substantiation mode)
+**Verdict**: **PASS** (against override-Promise; v2 audit VETO carried as sev-1 override)
+
+**Target**: Phase 12 (CI budget doctrine + ledger/gate test coverage + test discipline doctrine)
+**Manifest**: `docs/substantiate-manifest-2026-04-15-phase12.json` (3886 paths)
+
+**Override context**: v2 plan VETO at Entry #23 (7 violations). User-approved skip-v3 + execute-with-fixes-inline path. Sev-1 `gate_override` event logged in PROCESS_SHADOW_GENOME. Reality verified against the override-Promise (apply 7 v2 fixes during execution).
+
+**Reality vs override-Promise (file:line evidence)**:
+
+| Promise | Reality | Status |
+|---|---|---|
+| V-A: count math honest in commit | 187 passed + 6 skipped disclosed in commit body | PASS |
+| V-B: V-10 split into 3 tests | `tests/test_ledger_hash.py`: test_verify_handles_non_monotonic_entry_numbers, _missing_hash_markers_gracefully, _malformed_numeric_id (3 tests) | PASS |
+| V-C: rule 4 single-sentence scope-aligned | `qor/references/doctrine-ci-budget.md` Rule 4 single sentence with explicit scope | PASS |
+| V-D: explicit session_id test | `tests/test_gates.py::test_write_gate_artifact_respects_explicit_session_id` | PASS |
+| V-E: no stale callers of renamed test | Only pyc cache binary matches (gitignored); no source callers | PASS |
+| V-F + V-G: skipped (no v3 plan written per override) | N/A | N/A |
+
+**Test discipline doctrine ratification**:
+- `CLAUDE.md` gained 3 mandatory rules (tests-before-code, definition-of-done=green-tests, tests-must-be-reliable)
+- `qor/references/doctrine-test-discipline.md` codifies full discipline + anti-patterns table from Phase 1-12 failure history
+- Reliability check: `pytest tests/` ran 2x consecutively, identical 187/187 results
+
+**Section 4 Razor**: All authored Python files within limits. `qor/scripts/gate_chain.py` write_gate_artifact helper = 16 lines. `qor/references/doctrine-ci-budget.md` = 96 lines. `qor/references/doctrine-test-discipline.md` = 90 lines. `tests/test_workflow_budget.py` = 110 lines. All within Section 4. PASS.
+
+**Test audit**: 187 passing + 6 skipped (workflow audit dormant until first .github/workflows/ file lands). Total collected: 193.
+
+**Skill file integrity**: No SKILL.md modifications this phase. N/A.
+
+**Content Hash** (substantiate-manifest):
+`7dabb1efca3b44d4d0a851c7f7c237ad720deeec12c5ee8c5f9e4c2c516c97d2`
+
+**Previous Hash**:
+`34aa81c323859e5a4925323e8423a2f586155b4138ae988b0bed99ddd6f0fa0c`
+
+**Chain Hash** (Merkle seal):
+```
+SHA256(content_hash + previous_hash)
+= 8eef606d1366d48b359c128b96bd0a771b53c2454d5ae826635cb34abe0b3e8b
+```
+
+**Decision**: Phase 12 sealed. CI budget doctrine + 8 new tests + test discipline doctrine all in Reality matching override-Promise. Self-enforcing infrastructure for future workflow PRs and test discipline drift. Carried v2 violations resolved at code-time per override.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED*
+*Merkle seal: 8eef606d...*
