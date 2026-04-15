@@ -184,6 +184,25 @@ def test_no_QL_uppercase_leftovers():
     assert not failures, "Pre-rename 'QL' uppercase leftovers:\n  " + "\n  ".join(failures)
 
 
+# ----- S-8: delegation-table acknowledges every skill -----
+
+def test_delegation_table_lists_every_skill():
+    """Every qor-* skill must appear (as detector or destination) in delegation-table.md
+    or in its 'Cross-cutting / bundles' acknowledgement section."""
+    table = REPO_ROOT / "qor" / "gates" / "delegation-table.md"
+    assert table.exists(), "qor/gates/delegation-table.md missing"
+    text = table.read_text(encoding="utf-8")
+
+    expected = set()
+    for skill_dir in SKILLS_ROOT.rglob("*"):
+        if skill_dir.is_dir() and skill_dir.name.startswith("qor-"):
+            if (skill_dir / "SKILL.md").exists():
+                expected.add(skill_dir.name)
+
+    missing = sorted(s for s in expected if s not in text)
+    assert not missing, "qor-* skills missing from delegation-table:\n  " + "\n  ".join(missing)
+
+
 # ----- S-10: no tools/reliability vestigial references -----
 
 def test_no_tools_reliability_references():

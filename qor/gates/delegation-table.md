@@ -31,6 +31,46 @@ This table is the single source of truth for cross-skill handoffs. Every `/qor-*
 | any phase | Process Shadow Genome threshold (sev sum >= 10) | `/qor-remediate` | auto-triggered by `qor/scripts/check_shadow_threshold.py` |
 | any phase | Capability shortfall (codex-plugin, agent-teams missing on host that supports them) | log via `qor_platform.is_available` + `shadow_process.append_event` | non-blocking; logged for trend analysis |
 
+## Cross-cutting skills (no fixed handoff)
+
+These skills are invokable from any phase. They have no chain prior, no chain successor — they're tools, not stages.
+
+| Skill | When to invoke | Notes |
+|---|---|---|
+| `/qor-status` | Any time | Diagnose lifecycle stage + next action; pure read |
+| `/qor-document` | Any time | Author / update governance docs |
+| `/qor-organize` | Any time (also as destination from `qor-audit` Orphan/Macro VETO) | Project-level structure |
+| `/qor-debug` | After any phase that emits regression / hallucination / degradation | Cross-cutting diagnosis |
+| `/qor-help` | Any time | Command catalog (display-only) |
+| `/qor-shadow-process` | Auto-invoked by override paths and capability-shortfall handlers | Append-only shadow event recorder |
+| `/qor-governance-compliance` | Periodic governance audit; before release | Workspace hygiene + sensitive file checks |
+| `/qor-docs-technical-writing` | Documentation needs structured authoring | Migrated qore-* skill |
+| `/qor-meta-log-decision` | Major decision points (ADR-style) | Migrated qore-* skill |
+| `/qor-meta-track-shadow` | Cross-cycle pattern detection | Migrated qore-* skill |
+
+## Repo-level meta skills (workspace lifecycle)
+
+These operate on the workspace itself, outside per-feature SDLC chains.
+
+| Skill | When to invoke | Notes |
+|---|---|---|
+| `/qor-bootstrap` | New workspace genesis | Originator; creates ledger Genesis entry |
+| `/qor-repo-scaffold` | New repo from template | Pre-bootstrap |
+| `/qor-repo-audit` | Repo-level audit (not per-feature) | Independent of SDLC chain |
+| `/qor-repo-release` | Release ceremony | After substantiate + validate PASS; consumes accumulated release doc |
+
+## Workflow bundles (multi-skill orchestration)
+
+Bundles are not invoked AS handoff destinations — operators invoke them directly. Listed here for traceability.
+
+| Bundle | First constituent | When to invoke directly |
+|---|---|---|
+| `/qor-deep-audit` | (decomposed; runs recon then remediate) | Pre-release readiness, large tech-debt sweeps |
+| `/qor-deep-audit-recon` | `/qor-research` (subagents) | Investigation only; ends at RESEARCH_BRIEF |
+| `/qor-deep-audit-remediate` | `/qor-plan` | Action half; consumes RESEARCH_BRIEF |
+| `/qor-onboard-codebase` | `/qor-research` | Inheriting / merging an external codebase |
+| `/qor-process-review-cycle` | `check_shadow_threshold.py` | Periodic process health check |
+
 ## Anti-patterns this prevents
 
 - **Inline reinvention**: `qor-audit` says "fix the 60-line function" without naming `/qor-refactor`. Reader interprets this as "do it yourself" rather than invoking the dedicated skill.
