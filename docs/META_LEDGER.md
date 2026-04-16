@@ -2122,4 +2122,34 @@ SHA256(content_hash + previous_hash)
 ---
 
 *Chain integrity: VALID*
-*Session: OPEN (audit tribunal active, round 2)*
+
+---
+
+### Entry #62: GATE TRIBUNAL — plan-qor-phase20-v3-import-migration
+
+**Timestamp**: 2026-04-16
+**Phase**: GATE (pre-implementation audit, round 3)
+**Author**: Judge
+**Verdict**: **PASS**
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase20-v3-import-migration.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+
+**Content Hash**: `bbcc9d32db7d0d43841e998629b3530b44e170477672859cdbffedf7d46486f4`
+**Previous Hash**: `02c379b80148a5a43800d01c901579fb68cdf55a15e36e981271b481be36eed3`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= 0ace3b3e0a4972ddc98092b8d540601bb5eae172d645362bee398c1ab0b1b1ef
+```
+
+**Verdict Summary**: Entry #61 V-1 closed: `addopts = "-m 'not integration'"` in pyproject; mechanism verified (pytest last-`-m`-wins). All Entry #60 closures preserved. Modified 21 verified. 7 remaining post-phase. No new violations. Implementation gate UNLOCKED.
+
+**Decision**: Phase 20 v3 implementation-ready. 3 new + 21 modified files. 4 IMP gaps to close. Version 0.10.0 → 0.11.0.
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN (implementation gate unlocked)*
