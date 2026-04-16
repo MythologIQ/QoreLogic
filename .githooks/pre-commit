@@ -18,7 +18,7 @@ if [ "$BUILD_REGEN" != "1" ]; then
   echo ""
   echo "To commit generated-output changes:"
   echo "  1. Edit the source under qor/skills/ or qor/agents/"
-  echo "  2. Run:  BUILD_REGEN=1 python qor/scripts/compile.py"
+  echo "  2. Run:  BUILD_REGEN=1 python qor/scripts/dist_compile.py"
   echo "  3. Stage the regenerated qor/dist/ files"
   echo "  4. Commit with:  BUILD_REGEN=1 git commit ..."
   exit 1

@@ -1,0 +1,372 @@
+{
+  "schema_version": "1",
+  "generated_ts": "2026-04-16T22:26:08Z",
+  "files": [
+    {
+      "id": "agent-architect.md",
+      "source_path": "agents/agent-architect.md",
+      "install_rel_path": "agents/agent-architect.md",
+      "sha256": "afc6c8b146d65b52280aa4e77a6384f105de93ca22abf19db880c72ab4117239"
+    },
+    {
+      "id": "build-doctor.md",
+      "source_path": "agents/build-doctor.md",
+      "install_rel_path": "agents/build-doctor.md",
+      "sha256": "83e89d47916ed6b19b1477fae4df340e040f516770046fb91b9981206ea8cf64"
+    },
+    {
+      "id": "documentation-scribe.md",
+      "source_path": "agents/documentation-scribe.md",
+      "install_rel_path": "agents/documentation-scribe.md",
+      "sha256": "62f410a300cf22b3b7f3c5340e303f3d40dbe087f8c09fc09e06a2c0b4e2989b"
+    },
+    {
+      "id": "learning-capture.md",
+      "source_path": "agents/learning-capture.md",
+      "install_rel_path": "agents/learning-capture.md",
+      "sha256": "a2b3367fce94cdec68ea830baecf67d5a92cd9df622a77b61705ead3053de245"
+    },
+    {
+      "id": "project-planner.md",
+      "source_path": "agents/project-planner.md",
+      "install_rel_path": "agents/project-planner.md",
+      "sha256": "c94045b58785afee36b6030c758809e0e5406bd883eaf0c16ba42ac7fab90730"
+    },
+    {
+      "id": "qor-fixer.md",
+      "source_path": "agents/qor-fixer.md",
+      "install_rel_path": "agents/qor-fixer.md",
+      "sha256": "1b8f510a4a097e38b2b3f64b930a22bb419610eb62dd3fe9ace4ea26da85e9f5"
+    },
+    {
+      "id": "qor-governor.md",
+      "source_path": "agents/qor-governor.md",
+      "install_rel_path": "agents/qor-governor.md",
+      "sha256": "f1615e899586e8a07d41ab4a0924fc4c783bf15aac650c1e6d3859fe9ebb8080"
+    },
+    {
+      "id": "qor-judge.md",
+      "source_path": "agents/qor-judge.md",
+      "install_rel_path": "agents/qor-judge.md",
+      "sha256": "58d7dca9e80cc4bd1d333941e1d5d51f2e991cb041f9f599e79605a632e6df4f"
+    },
+    {
+      "id": "qor-specialist.md",
+      "source_path": "agents/qor-specialist.md",
+      "install_rel_path": "agents/qor-specialist.md",
+      "sha256": "ce53efc7b0a6089547c41ddaa8a3a05072c543b9ec5d9c8fd5e13b74b1a15fa8"
+    },
+    {
+      "id": "qor-strategist.md",
+      "source_path": "agents/qor-strategist.md",
+      "install_rel_path": "agents/qor-strategist.md",
+      "sha256": "e38bd29a19b336d8336b822ae218b079d4af555661021bdc6409e4408fa41083"
+    },
+    {
+      "id": "qor-technical-writer.md",
+      "source_path": "agents/qor-technical-writer.md",
+      "install_rel_path": "agents/qor-technical-writer.md",
+      "sha256": "181b4d239cc2ca5cfd94822423e18594a440625eecc0a24de10e2bdcd36ee2b0"
+    },
+    {
+      "id": "qor-ux-evaluator.md",
+      "source_path": "agents/qor-ux-evaluator.md",
+      "install_rel_path": "agents/qor-ux-evaluator.md",
+      "sha256": "564ec4a4ba18da1bf258209919b3e4a6e7fc8a29894c907fa2d5552a8bac13ac"
+    },
+    {
+      "id": "system-architect.md",
+      "source_path": "agents/system-architect.md",
+      "install_rel_path": "agents/system-architect.md",
+      "sha256": "b9a9e03c0ed8bc8fecee3b46edc88d03646e754d0f1b9d5e7e68672bb8f56564"
+    },
+    {
+      "id": "log-decision.md",
+      "source_path": "skills/log-decision.md",
+      "install_rel_path": "skills/log-decision.md",
+      "sha256": "794f44a183e54f1ed73970e16599c87c145230ac1dcdc9ae80ac5040c48ab1d6"
+    },
+    {
+      "id": "qor-audit",
+      "source_path": "skills/qor-audit/references/adversarial-mode.md",
+      "install_rel_path": "skills/qor-audit/references/adversarial-mode.md",
+      "sha256": "d6d16798bac2b2a91c7e424b46c2227a28c3559d45cc77b5d37f151f6bb14e48"
+    },
+    {
+      "id": "qor-audit",
+      "source_path": "skills/qor-audit/references/qor-audit-templates.md",
+      "install_rel_path": "skills/qor-audit/references/qor-audit-templates.md",
+      "sha256": "860edaec5130cfd260fb7e0e86f3175e519d1a97b7e0c391659419867f3094b0"
+    },
+    {
+      "id": "qor-audit",
+      "source_path": "skills/qor-audit/SKILL.md",
+      "install_rel_path": "skills/qor-audit/SKILL.md",
+      "sha256": "6f2cab62c71f22613e86b2c7533f7e9302bc795e4c50afbed45c6c457f26aa0d"
+    },
+    {
+      "id": "qor-bootstrap",
+      "source_path": "skills/qor-bootstrap/references/qor-bootstrap-templates.md",
+      "install_rel_path": "skills/qor-bootstrap/references/qor-bootstrap-templates.md",
+      "sha256": "44091f861ed6a5542ec0d43f38ef02f84fdd7b4b7509f2a83152c3f5b27e55b5"
+    },
+    {
+      "id": "qor-bootstrap",
+      "source_path": "skills/qor-bootstrap/SKILL.md",
+      "install_rel_path": "skills/qor-bootstrap/SKILL.md",
+      "sha256": "7049d4c07b4a3a7fe7f3368a7d600488b9639d76a7c9f73ed2d768d310ff855d"
+    },
+    {
+      "id": "qor-debug",
+      "source_path": "skills/qor-debug/SKILL.md",
+      "install_rel_path": "skills/qor-debug/SKILL.md",
+      "sha256": "e294f85efd8cb61053dcbd50e5b38d93bc60e0e9dd205724ec552767c4a41fdf"
+    },
+    {
+      "id": "qor-deep-audit",
+      "source_path": "skills/qor-deep-audit/SKILL.md",
+      "install_rel_path": "skills/qor-deep-audit/SKILL.md",
+      "sha256": "dab1743a53a76d75fe654107f6a10dc55179f0bbc5f440d1539b5a48b51b906c"
+    },
+    {
+      "id": "qor-deep-audit-recon",
+      "source_path": "skills/qor-deep-audit-recon/SKILL.md",
+      "install_rel_path": "skills/qor-deep-audit-recon/SKILL.md",
+      "sha256": "7323068ba315831987f08946c091b6e2af118b369a95ed64fc69722519d620da"
+    },
+    {
+      "id": "qor-deep-audit-remediate",
+      "source_path": "skills/qor-deep-audit-remediate/SKILL.md",
+      "install_rel_path": "skills/qor-deep-audit-remediate/SKILL.md",
+      "sha256": "9ef6799bf415db858490ac630066e57fccd4dbafce041b06b0fb3e6659d4da16"
+    },
+    {
+      "id": "qor-docs-technical-writing",
+      "source_path": "skills/qor-docs-technical-writing/agents/openai.yaml",
+      "install_rel_path": "skills/qor-docs-technical-writing/agents/openai.yaml",
+      "sha256": "b35a049e3764d07885ce532c9d1534f8a92be2c9ef62c9c49f3baa5658d4caed"
+    },
+    {
+      "id": "qor-docs-technical-writing",
+      "source_path": "skills/qor-docs-technical-writing/SKILL.md",
+      "install_rel_path": "skills/qor-docs-technical-writing/SKILL.md",
+      "sha256": "9aa828644ba241fe5f6a53bfe7abd1c5ddf9d84d2c9a751c2a9227ff04560fe6"
+    },
+    {
+      "id": "qor-docs-technical-writing",
+      "source_path": "skills/qor-docs-technical-writing/SOURCE.yml",
+      "install_rel_path": "skills/qor-docs-technical-writing/SOURCE.yml",
+      "sha256": "a7d3f3000446d90fbae17930817583b0c510d7a34635a220cd8c6b513909e860"
+    },
+    {
+      "id": "qor-document",
+      "source_path": "skills/qor-document/SKILL.md",
+      "install_rel_path": "skills/qor-document/SKILL.md",
+      "sha256": "2623dd34fa8b61f2920b9a50ef5c8e8c30ab2c08009c1fa5ce938641a812970e"
+    },
+    {
+      "id": "qor-governance-compliance",
+      "source_path": "skills/qor-governance-compliance/SKILL.md",
+      "install_rel_path": "skills/qor-governance-compliance/SKILL.md",
+      "sha256": "21228cdea105b59121bf1e890c0407d12e0d71bf53d83c6087c462536044df5d"
+    },
+    {
+      "id": "qor-governance-compliance",
+      "source_path": "skills/qor-governance-compliance/SOURCE.yml",
+      "install_rel_path": "skills/qor-governance-compliance/SOURCE.yml",
+      "sha256": "f2bd3e0e2e784361c0fa1d5c5e6095b036ff1c458e1a5a2ce94dc36f8d50e376"
+    },
+    {
+      "id": "qor-help",
+      "source_path": "skills/qor-help/SKILL.md",
+      "install_rel_path": "skills/qor-help/SKILL.md",
+      "sha256": "3ccc4c2aa61b17fee93afbb82409916336bd4f0b8df3a28840b731cf6ae034f5"
+    },
+    {
+      "id": "qor-implement",
+      "source_path": "skills/qor-implement/references/qor-implement-patterns.md",
+      "install_rel_path": "skills/qor-implement/references/qor-implement-patterns.md",
+      "sha256": "e728938da87b903e0c613a9a3be0665e5e9999bc673e466640f4ace2f5afa1c1"
+    },
+    {
+      "id": "qor-implement",
+      "source_path": "skills/qor-implement/SKILL.md",
+      "install_rel_path": "skills/qor-implement/SKILL.md",
+      "sha256": "82a25e46ee5b3a0d286c171156f30cd2b7646956fe33c8e34f61c92eec2ab858"
+    },
+    {
+      "id": "qor-meta-log-decision",
+      "source_path": "skills/qor-meta-log-decision/SKILL.md",
+      "install_rel_path": "skills/qor-meta-log-decision/SKILL.md",
+      "sha256": "fa91b0002683a4d84688d47f6571efd6f8b926d01f8ae1a5f105acb0cfe3782a"
+    },
+    {
+      "id": "qor-meta-log-decision",
+      "source_path": "skills/qor-meta-log-decision/SOURCE.yml",
+      "install_rel_path": "skills/qor-meta-log-decision/SOURCE.yml",
+      "sha256": "c482e0dc10235019a845d0eb0bccb3b095bf2f9c592dd8ff3f2ea4c2d0e6107a"
+    },
+    {
+      "id": "qor-meta-track-shadow",
+      "source_path": "skills/qor-meta-track-shadow/SKILL.md",
+      "install_rel_path": "skills/qor-meta-track-shadow/SKILL.md",
+      "sha256": "198543147010fbb4cbf929dee29d9441dfc1f79f174e292f49d9a27489720da2"
+    },
+    {
+      "id": "qor-meta-track-shadow",
+      "source_path": "skills/qor-meta-track-shadow/SOURCE.yml",
+      "install_rel_path": "skills/qor-meta-track-shadow/SOURCE.yml",
+      "sha256": "c482e0dc10235019a845d0eb0bccb3b095bf2f9c592dd8ff3f2ea4c2d0e6107a"
+    },
+    {
+      "id": "qor-onboard-codebase",
+      "source_path": "skills/qor-onboard-codebase/SKILL.md",
+      "install_rel_path": "skills/qor-onboard-codebase/SKILL.md",
+      "sha256": "4e4ae78713123e0d84a9aac7983b78425e746a6a4447c8b89c69638de7523441"
+    },
+    {
+      "id": "qor-organize",
+      "source_path": "skills/qor-organize/references/qor-organize-templates.md",
+      "install_rel_path": "skills/qor-organize/references/qor-organize-templates.md",
+      "sha256": "32429cd6d61327b2d8447921d72b2513afc029b2068bab1f008f171e1f801cbc"
+    },
+    {
+      "id": "qor-organize",
+      "source_path": "skills/qor-organize/SKILL.md",
+      "install_rel_path": "skills/qor-organize/SKILL.md",
+      "sha256": "11042ad7a75ab1d99b59b0cd59287a5083a4b19ffa94d4418f008571edeb34db"
+    },
+    {
+      "id": "qor-plan",
+      "source_path": "skills/qor-plan/references/step-extensions.md",
+      "install_rel_path": "skills/qor-plan/references/step-extensions.md",
+      "sha256": "64c848f61c6152407e4e7e9cb13c2d33b0a5b2170b2c97eeb589a5eec187ee67"
+    },
+    {
+      "id": "qor-plan",
+      "source_path": "skills/qor-plan/SKILL.md",
+      "install_rel_path": "skills/qor-plan/SKILL.md",
+      "sha256": "d74a0a6e7f8a38f391dc7c12146e3ff21cb3a5db22e1f0588f706f6fc37bb79f"
+    },
+    {
+      "id": "qor-process-review-cycle",
+      "source_path": "skills/qor-process-review-cycle/SKILL.md",
+      "install_rel_path": "skills/qor-process-review-cycle/SKILL.md",
+      "sha256": "3155affb92779e9e60d0acf36eaf72d7ee4d86d087ff5ff906e3ed26a9dc8bba"
+    },
+    {
+      "id": "qor-refactor",
+      "source_path": "skills/qor-refactor/references/qor-refactor-examples.md",
+      "install_rel_path": "skills/qor-refactor/references/qor-refactor-examples.md",
+      "sha256": "d2e1f6896d6bd8cc051ef99bf44dd2d9ce708d1be9a4ecb46c78c48127dc9f48"
+    },
+    {
+      "id": "qor-refactor",
+      "source_path": "skills/qor-refactor/SKILL.md",
+      "install_rel_path": "skills/qor-refactor/SKILL.md",
+      "sha256": "61b2e4474d073b5e8cd24dd1246decd782f6f76455aaef0a7235d2d927fdd5f3"
+    },
+    {
+      "id": "qor-remediate",
+      "source_path": "skills/qor-remediate/SKILL.md",
+      "install_rel_path": "skills/qor-remediate/SKILL.md",
+      "sha256": "0145c8a23c2659e3cd9ed596ba5785caa023c3cc24e8ca68b1647970e1a31b46"
+    },
+    {
+      "id": "qor-repo-audit",
+      "source_path": "skills/qor-repo-audit/SKILL.md",
+      "install_rel_path": "skills/qor-repo-audit/SKILL.md",
+      "sha256": "1fd70dbf11f1434db8be789d7f574d2c8992fd21f12c36c418a974dad52ec6a7"
+    },
+    {
+      "id": "qor-repo-release",
+      "source_path": "skills/qor-repo-release/SKILL.md",
+      "install_rel_path": "skills/qor-repo-release/SKILL.md",
+      "sha256": "eac4cac6f1b0b04ad21e95f87829d74667a243271ba3d37c8f19913d62913db6"
+    },
+    {
+      "id": "qor-repo-scaffold",
+      "source_path": "skills/qor-repo-scaffold/references/CODE_OF_CONDUCT.md",
+      "install_rel_path": "skills/qor-repo-scaffold/references/CODE_OF_CONDUCT.md",
+      "sha256": "ee007361306395887e28792a0e2c277268106c501c522fcd646f8e62fd545664"
+    },
+    {
+      "id": "qor-repo-scaffold",
+      "source_path": "skills/qor-repo-scaffold/references/CONTRIBUTING.md",
+      "install_rel_path": "skills/qor-repo-scaffold/references/CONTRIBUTING.md",
+      "sha256": "c105e3580908eecf9ba654eea1ee1233f25820296aa0dab45e2cb39577beb128"
+    },
+    {
+      "id": "qor-repo-scaffold",
+      "source_path": "skills/qor-repo-scaffold/references/GOVERNANCE.md",
+      "install_rel_path": "skills/qor-repo-scaffold/references/GOVERNANCE.md",
+      "sha256": "1df892ce2aded980d624654f975c2e65f83bda98d7e2e4e7dc85e6a23779976d"
+    },
+    {
+      "id": "qor-repo-scaffold",
+      "source_path": "skills/qor-repo-scaffold/references/Issue templates/bug_report.yml",
+      "install_rel_path": "skills/qor-repo-scaffold/references/Issue templates/bug_report.yml",
+      "sha256": "a043b4b8edce1d692a2057260f903275d5243ed3519234f22e9f7a85266f88c3"
+    },
+    {
+      "id": "qor-repo-scaffold",
+      "source_path": "skills/qor-repo-scaffold/references/SECURITY.md",
+      "install_rel_path": "skills/qor-repo-scaffold/references/SECURITY.md",
+      "sha256": "55dd4cbd89b83dd03f9cfe5a6c9ec757d5fc8eaeb51cf43de22146c03515195a"
+    },
+    {
+      "id": "qor-repo-scaffold",
+      "source_path": "skills/qor-repo-scaffold/SKILL.md",
+      "install_rel_path": "skills/qor-repo-scaffold/SKILL.md",
+      "sha256": "608b8950d912cb3a949b62c707456e5e4f7d6174ca025a8ac3a49e609dad3a55"
+    },
+    {
+      "id": "qor-research",
+      "source_path": "skills/qor-research/SKILL.md",
+      "install_rel_path": "skills/qor-research/SKILL.md",
+      "sha256": "f09c5b0531ba782ee175d67e3a528c33b0749f00dbb1141360fef01458657bf7"
+    },
+    {
+      "id": "qor-shadow-process",
+      "source_path": "skills/qor-shadow-process/SKILL.md",
+      "install_rel_path": "skills/qor-shadow-process/SKILL.md",
+      "sha256": "31e26618f0f43a3784b5bc7682fee6a28de8b47117bdc2c981a5f317239cc745"
+    },
+    {
+      "id": "qor-status",
+      "source_path": "skills/qor-status/SKILL.md",
+      "install_rel_path": "skills/qor-status/SKILL.md",
+      "sha256": "9029dfe2e56428458acc5283401049f6af22338afe6368a7a7689a0aca439dc8"
+    },
+    {
+      "id": "qor-substantiate",
+      "source_path": "skills/qor-substantiate/references/qor-substantiate-templates.md",
+      "install_rel_path": "skills/qor-substantiate/references/qor-substantiate-templates.md",
+      "sha256": "80a325c87a7d5f686885fe8092eaf11b935900d02b7b6735828493290ea4e9c2"
+    },
+    {
+      "id": "qor-substantiate",
+      "source_path": "skills/qor-substantiate/SKILL.md",
+      "install_rel_path": "skills/qor-substantiate/SKILL.md",
+      "sha256": "aa49655aaa05e305e49c78078f6a954a3525893eccad8e4144c4b82fec6f9015"
+    },
+    {
+      "id": "qor-validate",
+      "source_path": "skills/qor-validate/references/qor-validate-reports.md",
+      "install_rel_path": "skills/qor-validate/references/qor-validate-reports.md",
+      "sha256": "1364c9a06a1053fe9d9b47fad911c320ddafcfec64923475b666b13eb8732663"
+    },
+    {
+      "id": "qor-validate",
+      "source_path": "skills/qor-validate/SKILL.md",
+      "install_rel_path": "skills/qor-validate/SKILL.md",
+      "sha256": "63911d9e3c7c88b408f8ce1db7c6027681650c36387b41b578fa10faaca897e4"
+    },
+    {
+      "id": "track-shadow-genome.md",
+      "source_path": "skills/track-shadow-genome.md",
+      "install_rel_path": "skills/track-shadow-genome.md",
+      "sha256": "b89bb2a6c3c67322ebb3b1cea76235056d9cf9f8998664bbe4875031c706898a"
+    }
+  ]
+}

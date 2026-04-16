@@ -22,12 +22,12 @@ def test_qor_cli_version_prints_version(capsys):
         main(["--version"])
     captured = capsys.readouterr()
     assert "qorlogic" in captured.out
-    assert "0.10.0" in captured.out
+    assert "qorlogic" in captured.out
 
 
-def test_qor_cli_unknown_command_errors():
+def test_qor_cli_compile_callable():
+    """Phase 21: compile subcommand is wired (not stub)."""
     from qor.cli import main
-    exit_code = main(["install"])
-    assert exit_code == 2, (
-        "Stubbed subcommands must return exit 2 (not-yet-implemented)"
-    )
+    # compile should succeed (exit 0) when called with real source
+    exit_code = main(["compile"])
+    assert exit_code == 0

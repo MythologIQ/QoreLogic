@@ -2251,3 +2251,53 @@ SHA256(content_hash + previous_hash)
 ---
 
 *Chain integrity: VALID*
+
+---
+
+### Entry #66: IMPLEMENTATION -- Phase 21 CLI Harness + Polish
+
+**Timestamp**: 2026-04-15
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L2
+
+**Target**: `docs/plan-qor-phase21-cli-harness-polish.md`
+**Change Class**: `feature`
+**Version**: `0.11.0 -> 0.12.0`
+
+**Files Created** (2):
+- `qor/hosts.py` -- HostTarget dataclass + resolve() for claude/kilo-code/codex
+- `tests/test_phase21_harness.py` -- 20 new tests
+
+**Files Modified** (7):
+- `qor/cli.py` -- 6 subcommands wired (install/uninstall/list/info/compile/verify-ledger)
+- `qor/scripts/dist_compile.py` -- renamed from compile.py + manifest emission
+- `qor/scripts/check_variant_drift.py` -- updated import + manifest exclusion
+- `tests/test_compile.py` -- updated import
+- `tests/test_e2e.py` -- updated import
+- `.github/workflows/ci.yml` -- drift + ledger steps added
+- `.gitignore` -- build artifact patterns
+
+**Files Deleted** (1):
+- `qor/scripts/compile.py` -- renamed to dist_compile.py
+
+**Test Results**: 298 passed, 4 deselected (baseline 278 + 20 new)
+**Drift Check**: clean (123 files, no drift)
+**Ledger Verify**: all entries valid
+
+**Gaps Closed** (7): GAP-HAR-01, GAP-HAR-02, GAP-HAR-03, GAP-CI-03, GAP-CI-04, GAP-IMP-04, GAP-PKG-06
+
+**Content Hash**: `7c929496bb78ae692dfb46b092a4ceabe025550f6692c1f4ff5d139d705f816d`
+**Previous Hash**: `61791255a459835a4822244f9e2ca22c623b2f9a69c080466e48adbb88f4a63c`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= c254d1322dd7c76d01e2e38c70fffc90db2bd45bd39774213c21db41bd9ec76d
+```
+
+**Decision**: Phase 21 implementation complete. All 7 remaining RESEARCH_BRIEF gaps closed. 18/18 gaps now resolved across Phases 19-21.
+
+---
+
+*Chain integrity: VALID*

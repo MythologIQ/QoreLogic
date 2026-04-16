@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from qor.scripts import compile as compile_mod
+from qor.scripts import dist_compile as compile_mod
 from qor.scripts import check_variant_drift as drift_mod
 
 

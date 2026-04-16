@@ -11,11 +11,15 @@ import hashlib
 import tempfile
 from pathlib import Path
 
-from qor.scripts import compile as compile_mod
+from qor.scripts import dist_compile as compile_mod
 
 from qor import resources as _resources
 
 COMMITTED_DIST = Path(str(_resources.asset("dist")))
+
+
+# Files excluded from drift comparison (contain non-deterministic fields like timestamps)
+_DRIFT_EXCLUDE = {"manifest.json"}
 
 
 def hash_tree(root: Path) -> dict[str, str]:
@@ -24,7 +28,7 @@ def hash_tree(root: Path) -> dict[str, str]:
     if not root.exists():
         return out
     for p in sorted(root.rglob("*")):
-        if p.is_file():
+        if p.is_file() and p.name not in _DRIFT_EXCLUDE:
             rel = p.relative_to(root).as_posix()
             h = hashlib.sha256(p.read_bytes()).hexdigest()
             out[rel] = h
@@ -67,7 +71,7 @@ def main() -> int:
             print(d)
         if len(diffs) > 50:
             print(f"  ... and {len(diffs) - 50} more")
-        print("\nFix: BUILD_REGEN=1 python qor/scripts/compile.py && git add qor/dist/")
+        print("\nFix: BUILD_REGEN=1 python qor/scripts/dist_compile.py && git add qor/dist/")
         return 1
     print(f"OK: {len(committed_hashes)} files, no drift")
     return 0

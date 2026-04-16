@@ -7,7 +7,10 @@ codex writes only a .gitkeep stub. Format divergence is deferred.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 
 from qor import resources as _resources
@@ -99,7 +102,41 @@ def compile_all(out_root: Path, dry_run: bool = False) -> dict:
         elif target == "codex":
             emit_codex(variant_root)
 
+    if not dry_run:
+        _emit_manifest(out_root)
+
     return summary
+
+
+def _emit_manifest(out_root: Path) -> None:
+    """Write manifest.json listing all claude variant files with sha256."""
+    claude_root = out_root / "variants" / "claude"
+    if not claude_root.exists():
+        return
+    files = []
+    for p in sorted(claude_root.rglob("*")):
+        if not p.is_file():
+            continue
+        rel = p.relative_to(claude_root).as_posix()
+        sha = hashlib.sha256(p.read_bytes()).hexdigest()
+        # Derive a skill id from the path
+        parts = rel.split("/")
+        skill_id = parts[1] if len(parts) >= 2 and parts[0] == "skills" else parts[-1]
+        files.append({
+            "id": skill_id,
+            "source_path": rel,
+            "install_rel_path": rel,
+            "sha256": sha,
+        })
+    manifest = {
+        "schema_version": "1",
+        "generated_ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "files": files,
+    }
+    manifest_path = out_root / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2) + "\n", encoding="utf-8",
+    )
 
 
 def main() -> int:

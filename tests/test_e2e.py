@@ -238,7 +238,7 @@ def test_session_continuity_across_modules(isolated):
 
 def test_compile_drift_full_cycle(tmp_path, monkeypatch):
     """Compile real fake source → tamper dist → drift detects → recompile → clean."""
-    from qor.scripts import compile as compile_mod
+    from qor.scripts import dist_compile as compile_mod
     from qor.scripts import check_variant_drift as drift_mod
 
     # Build a minimal source tree

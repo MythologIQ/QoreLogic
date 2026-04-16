@@ -17,3 +17,9 @@ Thumbs.db
 __pycache__/
 .pytest_cache/
 *.pyc
+
+# Build artifacts
+build/
+/dist/
+*.egg-info/
+*.whl

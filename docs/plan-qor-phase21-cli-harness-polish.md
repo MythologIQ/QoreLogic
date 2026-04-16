@@ -103,7 +103,7 @@ Decision: historical docs (plan-qor-migration-*.md, META_LEDGER.md, RESEARCH_BRI
 
 Add 4 patterns to `.gitignore`:
 1. `build/`
-2. `dist/`
+2. `/dist/` (root-only, avoids matching `qor/dist/`)
 3. `*.egg-info/`
 4. `*.whl`
 
