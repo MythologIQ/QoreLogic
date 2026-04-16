@@ -7,7 +7,7 @@ import shutil
 import sys
 from pathlib import Path
 
-__version__ = "0.12.0"
+__version__ = "0.13.0"
 
 
 def _default_dist_root() -> Path:
@@ -186,52 +186,55 @@ def main(argv: list[str] | None = None) -> int:
     )
     sub = parser.add_subparsers(dest="command", metavar="<command>")
 
-    # install
+    _hosts = ["claude", "kilo-code", "codex"]
     sp_install = sub.add_parser("install", help="install skills into an AI coding host")
-    sp_install.add_argument("--host", required=True, choices=["claude", "kilo-code", "codex"])
-    sp_install.add_argument("--target", type=Path, default=None, help="override install path")
+    sp_install.add_argument("--host", required=True, choices=_hosts)
+    sp_install.add_argument("--target", type=Path, default=None)
     sp_install.add_argument("--dry-run", action="store_true")
-
-    # uninstall
     sp_uninstall = sub.add_parser("uninstall", help="remove installed skills")
-    sp_uninstall.add_argument("--host", default="claude", choices=["claude", "kilo-code", "codex"])
+    sp_uninstall.add_argument("--host", default="claude", choices=_hosts)
     sp_uninstall.add_argument("--target", type=Path, default=None)
-
-    # list
     sp_list = sub.add_parser("list", help="enumerate available or installed skills")
     sp_list.add_argument("--available", action="store_true")
     sp_list.add_argument("--installed", action="store_true")
     sp_list.add_argument("--host", default="claude")
-
-    # info
     sp_info = sub.add_parser("info", help="show skill metadata")
     sp_info.add_argument("skill", help="skill name")
-
-    # compile
     sp_compile = sub.add_parser("compile", help="regenerate variants from source")
     sp_compile.add_argument("--dry-run", action="store_true")
-
-    # verify-ledger
     sub.add_parser("verify-ledger", help="verify META_LEDGER.md chain")
+    sp_init = sub.add_parser("init", help="initialize .qorlogic/config.json")
+    sp_init.add_argument("--host", default="claude", choices=_hosts)
+    sp_init.add_argument("--profile", default="sdlc", choices=["sdlc", "filesystem", "data", "research"])
+    sp_init.add_argument("--target", type=Path, default=None)
+    sp_policy = sub.add_parser("policy", help="policy engine commands")
+    policy_sub = sp_policy.add_subparsers(dest="policy_command", metavar="<subcommand>")
+    sp_policy_check = policy_sub.add_parser("check", help="evaluate request against cedar policies")
+    sp_policy_check.add_argument("request", help="path to request JSON file")
 
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
         return 0
-
-    if args.command == "install":
-        return _do_install(args.host, target_override=args.target, dry_run=args.dry_run)
-    if args.command == "uninstall":
-        return _do_uninstall(host=args.host, target_override=args.target)
-    if args.command == "list":
-        return _do_list(args)
-    if args.command == "info":
-        return _do_info(args)
-    if args.command == "compile":
-        return _do_compile(args)
-    if args.command == "verify-ledger":
-        return _do_verify_ledger(args)
-
+    dispatch = {
+        "install": lambda: _do_install(args.host, target_override=args.target, dry_run=args.dry_run),
+        "uninstall": lambda: _do_uninstall(host=args.host, target_override=args.target),
+        "list": lambda: _do_list(args),
+        "info": lambda: _do_info(args),
+        "compile": lambda: _do_compile(args),
+        "verify-ledger": lambda: _do_verify_ledger(args),
+    }
+    if args.command in dispatch:
+        return dispatch[args.command]()
+    if args.command == "init":
+        from qor.cli_policy import do_init
+        return do_init(args)
+    if args.command == "policy":
+        from qor.cli_policy import do_policy_check
+        if getattr(args, "policy_command", None) == "check":
+            return do_policy_check(args)
+        sp_policy.print_help()
+        return 0
     parser.print_help()
     return 0
 

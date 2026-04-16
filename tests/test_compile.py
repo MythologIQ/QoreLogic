@@ -70,13 +70,15 @@ def test_compile_flattens_agents(fake_tree):
     assert not (out / "variants" / "claude" / "agents" / "governance").exists()
 
 
-def test_codex_stub_writes_gitkeep_only(fake_tree):
+def test_codex_emits_same_as_claude(fake_tree):
+    """Phase 22: codex now emits identity-copy of claude variant."""
     out = fake_tree / "dist"
     compile_mod.compile_all(out)
     codex = out / "variants" / "codex"
-    children = list(codex.iterdir())
-    assert len(children) == 1
-    assert children[0].name == ".gitkeep"
+    claude = out / "variants" / "claude"
+    codex_files = sorted(p.name for p in codex.rglob("*") if p.is_file())
+    claude_files = sorted(p.name for p in claude.rglob("*") if p.is_file())
+    assert codex_files == claude_files
 
 
 def test_compile_cleans_stale_outputs(fake_tree):

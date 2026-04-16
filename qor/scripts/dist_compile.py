@@ -66,9 +66,9 @@ def emit_kilocode(skills_dirs: list[Path], loose_skills: list[Path], agents: lis
     emit_claude(skills_dirs, loose_skills, agents, out)
 
 
-def emit_codex(out: Path) -> None:
-    out.mkdir(parents=True, exist_ok=True)
-    (out / ".gitkeep").touch()
+def emit_codex(skills_dirs: list[Path], loose_skills: list[Path], agents: list[Path], out: Path) -> None:
+    """Emit codex variant. Identity-copy of claude variant for now; format TBD."""
+    emit_claude(skills_dirs, loose_skills, agents, out)
 
 
 def clean_variant(variant_root: Path) -> None:
@@ -100,7 +100,7 @@ def compile_all(out_root: Path, dry_run: bool = False) -> dict:
         elif target == "kilo-code":
             emit_kilocode(skills_dirs, loose_skills, agents, variant_root)
         elif target == "codex":
-            emit_codex(variant_root)
+            emit_codex(skills_dirs, loose_skills, agents, variant_root)
 
     if not dry_run:
         _emit_manifest(out_root)

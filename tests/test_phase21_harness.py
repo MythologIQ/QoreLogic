@@ -26,10 +26,12 @@ def test_host_resolver_kilo_default():
     assert target.agents_dir == Path.home() / ".kilo-code" / "agents"
 
 
-def test_host_resolver_codex_raises():
+def test_host_resolver_codex_resolves():
+    """Phase 22: codex now resolves instead of raising."""
     from qor.hosts import resolve
-    with pytest.raises(NotImplementedError, match="codex"):
-        resolve("codex")
+    target = resolve("codex")
+    assert target.name == "codex"
+    assert "codex" in str(target.skills_dir)
 
 
 def test_host_resolver_target_override(tmp_path):
