@@ -1,73 +1,65 @@
-# AUDIT REPORT — plan-qor-phase16-v2-governance-polish.md
+# AUDIT REPORT — plan-qor-phase17a-doctrine-completion.md
 
 **Tribunal Date**: 2026-04-16
-**Target**: `docs/plan-qor-phase16-v2-governance-polish.md`
+**Target**: `docs/plan-qor-phase17a-doctrine-completion.md`
 **Risk Grade**: L1
-**Auditor**: The QorLogic Judge (cross-referencing `qor/references/doctrine-shadow-genome-countermeasures.md`)
+**Auditor**: The QorLogic Judge
 
 ---
 
-## VERDICT: **PASS**
+## VERDICT: **VETO**
 
 ---
 
 ### Executive Summary
 
-Plan v2 closes all 3 Entry #40 violations with inline-grounded citations (dogfooding SG-036's "no grace period" rule). V-1: `qor-audit/SKILL.md` cited at 237 lines, +3 → 240 — Judge re-verified via `wc -l` during this audit. V-2: `test_step_extensions_content_moved_not_copied` uses body-unique anchors (`InterdictionError` at `qor-plan/SKILL.md:101`; `capability_shortfall` at lines 137,140) — Judge re-verified via grep. V-3: pointers omit anchors, match Phase 15's Step 2b style exactly. Fresh adversarial sweep: no new violations. Implementation gate UNLOCKED.
+Plan is sound in intent — codify SG-036 + SG-037, expand `test_doctrine_lists_all_sg_ids` to cover all existing + new IDs, fix line 265's unanchored check. VETO issued for 2 defects. V-1 (critical): plan is self-inconsistent — prose + Success Criteria say "all 11 SG IDs" but the proposed code block in Track B lists only 9, missing SG-034 and SG-035. Implementer following the code literally would produce a test that still fails to cover the doctrine's actual content (the exact defect the plan claims to close). V-2: test count arithmetic is off by one (claims +3, actually +2). Minor, but a phase focused on rigor should get its own arithmetic right.
 
 ### Audit Results
 
 #### Security Pass
-**Result**: PASS. Documentation-only phase; no credentials, auth, or network surfaces.
-
-#### Ghost UI Pass
-**Result**: PASS. No UI.
-
-#### Section 4 Razor Pass
 **Result**: PASS.
 
-| Check | Limit | Grounded Post-Edit | Status |
-|---|---|---|---|
-| Max function lines | 40 | N/A (doc-only) | OK |
-| Max file lines | 250 | `qor-audit/SKILL.md` 237→240; `qor-plan/SKILL.md` 278→~240 (delta math ±2); `step-extensions.md` ~48 | OK |
-| Max nesting depth | 3 | N/A | OK |
-| Nested ternaries | 0 | 0 | OK |
+#### Ghost UI Pass
+**Result**: PASS.
+
+#### Section 4 Razor Pass
+**Result**: PASS. Doctrine 69 → ~89; test file deltas small. All under 250.
 
 #### Dependency Pass
-**Result**: PASS. No new dependencies.
+**Result**: PASS. No new deps (stdlib `re` + existing).
 
 #### Orphan Pass
-**Result**: PASS. `step-extensions.md` cited by `qor-plan/SKILL.md` pointers; tested by `test_qor_plan_step_extensions_reference_exists`. Connected.
+**Result**: PASS. All modified files tied to existing test/skill/doctrine chains.
 
 #### Macro-Level Architecture Pass
-**Result**: PASS. Doctrine now cited by both Planner (qor-plan Step 2b) and Judge (qor-audit Step 3) — architectural symmetry confirmed. Clean module boundary between skill protocol and phase-specific extensions.
-
-### Entry #40 Closure Verification
-
-| Entry #40 ID | Status | Judge Re-Verification |
-|---|---|---|
-| V-1 (SG-016 recurrence) | CLOSED | Plan cites `qor-audit/SKILL.md` at 237 lines inline; Judge re-ran `wc -l` — confirmed 237. Post-edit 237+3=240, under 250. SG-036 honored: no deferral. |
-| V-2 (verbatim extraction test gap) | CLOSED | `test_step_extensions_content_moved_not_copied` asserts movement (anchors appear in step-extensions.md AND NOT in qor-plan/SKILL.md). Judge re-ran grep: `InterdictionError` at line 101 only; `capability_shortfall` at lines 137,140 only — both body-unique, valid movement anchors. |
-| V-3 (anchor syntax) | CLOSED | Pointers now `See \`...step-extensions.md\` for the full protocol.` — matches Phase 15 Step 2b pointer verbatim. No GitHub-anchor dependency. |
-
-### Fresh Adversarial Findings
-
-None. Swept for:
-- **Test count arithmetic**: plan says +3 (cite, exists, movement); 228 + 3 = 231. Matches plan's stated target.
-- **Delta math precision on `qor-plan/SKILL.md`**: plan computes 278 - 44 + 6 = 240. Exact body line counts (21 for Step 0.5, 25 for Step 1.a) produce a ±2 variance vs. plan's 20/24 numbers — this is fencepost imprecision (inclusive vs. exclusive of surrounding blanks), not a substantive error. Either way the final size lands at 238–240, under Razor 250.
-- **Pointer symmetry**: Track B's Step 3 prelude and Track C's Step 0.5/1.a pointers use the same "See `<path>` for ..." pattern as Phase 15's Step 2b. Consistent voice.
-- **Grounding discipline**: plan inline-cites every file-size and phrase-location claim with a date-stamped provenance ("grounded 2026-04-16 via `wc -l`" / "via grep"). SG-036 active.
+**Result**: PASS. Doctrine remains single source of truth for SG inventory.
 
 ### Violations Found
 
-None.
+| ID | Category | Location | Description |
+|---|---|---|---|
+| V-1 | Self-inconsistency (critical) | Track B code block vs. prose + Success Criteria | Plan's prose says "Correcting to cover all 9 existing + 2 new = 11 IDs" and Success Criteria says "covers all 11 SG IDs (016, 017, 019, 020, 021, 032, 033, 034, 035, 036, 037)". But the proposed code block lists only 9: `("SG-016", "SG-017", "SG-019", "SG-020", "SG-021", "SG-032", "SG-033", "SG-036", "SG-037")` — **missing SG-034 and SG-035**. Judge-grounded 2026-04-16: doctrine contains 9 SG sections (grep `^## SG-` → 8 headers because SG-017/020 share one section header, 9 IDs). An implementer following the code block verbatim would create a test that covers 9 IDs and still leaves SG-034 + SG-035 uncovered — precisely the gap Phase 17a claims to close. This is a case of prose promising X while code does Y (a pattern SG-033 warns about in a different domain). Required: fix the code block to list all 11 IDs as the prose claims. |
+| V-2 | Test count arithmetic off by one | Track B + Success Criteria + Constraints | Plan says "+2 new + 1 updated (doctrine lists) + 1 rewritten (governance hygiene) = effectively +3. Baseline 231 → **234 passing**." Pytest counts test functions by name, not by assertion coverage. New test functions: `test_doctrine_documents_sg036_grace_period`, `test_doctrine_documents_sg037_surface_drift` = **2 new**. Updated test (`test_doctrine_lists_all_sg_ids`) keeps the same function name — no count change. Rewritten test (`test_governance_doctrine_documents_github_hygiene`) keeps the same function name — no count change. Actual net: +2. Baseline 231 → 233, not 234. Minor, but Phase 17a's thesis is grounding rigor; arithmetic errors undermine the thesis. |
+
+### Required Remediation
+
+1. **V-1**: Replace the Track B code block with the full 11-ID list:
+   ```python
+   for sg in ("SG-016", "SG-017", "SG-019", "SG-020", "SG-021",
+             "SG-032", "SG-033", "SG-034", "SG-035",
+             "SG-036", "SG-037"):
+       assert sg in body, f"Doctrine must contain {sg}"
+   ```
+   Verify match against Success Criteria list.
+2. **V-2**: Fix arithmetic. "+2 new, baseline 231 → **233 passing**". Update Success Criteria line accordingly. Keep the distinction between "new test" and "updated test coverage" visible in the explanatory prose, but do not treat updates as net-new tests in the count.
 
 ### Verdict Hash
 
-**Content Hash**: `0efea95a940d8b51b6715cb8706506a3e6fe9d4dd39460e10358c5cfb7d6de55`
-**Previous Hash**: `dc830d12a64062886fcd3ec4433714d13faa7e0b9866de8fb179d36587c69b27`
-**Chain Hash**: `c25166aee5fb780510e7f1d1b738444fe70936d7121fb13b9d026d01c9ce9a4f`
-(sealed as Entry #41)
+**Content Hash**: `ebfd6293b6802ef60ca040bf2292ec217c2d105d2c2efdeb78dd238852973a7c`
+**Previous Hash**: `fe327680d3fbf3dfce652905d9d424ced9738a9bebb031c21b69d07a459f2f2c`
+**Chain Hash**: `933dc3773d5865defc272f700a5ef962d31f6ce8563ada4c2782515301f6a725`
+(sealed as Entry #44)
 
 ---
 _This verdict is binding._

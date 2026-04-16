@@ -323,4 +323,24 @@ Cognitive pattern: the plan author (operating as Governor) treated the counterme
 
 ---
 
+### Entry #15: VETO — plan-qor-phase17a-doctrine-completion (prose-code mismatch)
+
+**Date**: 2026-04-16
+**Verdict ID**: Entry #44
+**Failure Mode**: DOCUMENTATION_DRIFT / VALIDATION_GAP
+
+#### What Failed
+Plan promised to expand `test_doctrine_lists_all_sg_ids` to cover 11 SG IDs (prose + Success Criteria), but the proposed code block listed only 9 — missing SG-034 and SG-035. Implementer following the code would produce a test whose name suggests full coverage but actual coverage is partial.
+
+#### Why It Failed
+Cognitive pattern: when editing a plan mid-draft, the author updated the prose narrative but forgot to update the code snippet in sync. The prose and code are separate surfaces that both encode the same spec; drift between them is silent.
+
+#### Pattern to Avoid
+**SG-038**: In a plan document, prose descriptions and code blocks are two encodings of the same spec. They drift independently. An implementer reading the code literally may ship what the code says, not what the prose promises. Countermeasure: when a plan updates a list/enumeration, grep the plan for every occurrence of the list and update all copies in lockstep. Optional future enforcement: lint plans for prose+code consistency on named enumerations.
+
+#### Remediation
+2 mandatory items in audit report. V-1: fix code block to list all 11 IDs (015-021, 032-037). V-2: fix arithmetic (+2, not +3; baseline 231 → 233).
+
+---
+
 *Shadow integrity: ACTIVE*

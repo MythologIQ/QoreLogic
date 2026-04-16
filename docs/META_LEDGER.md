@@ -1463,3 +1463,32 @@ SHA256(content_hash + previous_hash)
 *Chain integrity: VALID*
 *Session: SEALED*
 *Merkle seal: fe327680...*
+
+---
+
+### Entry #44: GATE TRIBUNAL — plan-qor-phase17a-doctrine-completion
+
+**Timestamp**: 2026-04-16
+**Phase**: GATE (pre-implementation audit)
+**Author**: Judge
+**Verdict**: **VETO**
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase17a-doctrine-completion.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+
+**Content Hash**: `ebfd6293b6802ef60ca040bf2292ec217c2d105d2c2efdeb78dd238852973a7c`
+**Previous Hash**: `fe327680d3fbf3dfce652905d9d424ced9738a9bebb031c21b69d07a459f2f2c`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= 933dc3773d5865defc272f700a5ef962d31f6ce8563ada4c2782515301f6a725
+```
+
+**Verdict Summary**: 2 violations. V-1 (critical): plan's Track B code block lists only 9 SG IDs while prose + Success Criteria promise 11 — missing SG-034 + SG-035. An implementer following the code verbatim produces a test that still fails to cover the doctrine's actual content, recurrence of "prose promises X, code does Y" pattern. V-2: test arithmetic off by one (+3 claimed, +2 actual). Baseline 231 → 233, not 234. Minor but undermines the phase's grounding-rigor thesis.
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN (audit tribunal active)*
