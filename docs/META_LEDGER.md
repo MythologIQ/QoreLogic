@@ -2152,4 +2152,71 @@ SHA256(content_hash + previous_hash)
 ---
 
 *Chain integrity: VALID*
-*Session: OPEN (implementation gate unlocked)*
+
+---
+
+### Entry #63: IMPLEMENTATION — Phase 20 Import Migration
+
+**Timestamp**: 2026-04-16
+**Phase**: IMPLEMENT (via background subagent)
+**Author**: Specialist
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase20-v3-import-migration.md`
+
+**Files Created (2)**: `qor/resources.py`, `qor/workdir.py`
+**Files Modified (31)**: 15 scripts (sibling-import + REPO_ROOT migration), 2 reliability scripts (REPO_ROOT retained — dashed filenames prevent module import), 2 test files (sys.path.insert removed), pyproject.toml (addopts + pythonpath), ci.yml (install-smoke job), conftest.py, + variant regeneration
+
+**Test Discipline**: 278 passed + 4 deselected (default); 282 total with `-m integration`. Deterministic 2x.
+**Drift**: clean (123 files).
+
+**Deviations from plan v3**:
+1. `qor/reliability/{gate-skill-matrix,skill-admission}.py` retain REPO_ROOT (dashed filenames prevent package import — documented judgment call)
+2. `pythonpath = ["tests"]` added to pyproject.toml for `bundle_runner` import resolution
+
+**Content Hash**: `01acf5b2d67fa1f689ac59eb9588a51106bccc26e2eb3a26e9b64f90d014a43b`
+**Previous Hash**: `0ace3b3e0a4972ddc98092b8d540601bb5eae172d645362bee398c1ab0b1b1ef`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= 9de78b2753d74accb07d28135639c1576668aa6face87e49ebbbab00890cc2fe
+```
+
+**Decision**: Phase 20 Reality = Promise. 4 IMP gaps closed. `pip install .` now produces a wheel with working imports.
+
+---
+
+*Chain integrity: VALID*
+
+---
+
+### Entry #64: SESSION SEAL — Phase 20 substantiated (merge-reconciled)
+
+**Timestamp**: 2026-04-16
+**Phase**: SUBSTANTIATE (subagent-sealed; main-session rechained)
+**Author**: Judge
+**Risk Grade**: L1
+**Verdict**: PASS (Reality = Promise)
+
+**Target**: `docs/plan-qor-phase20-v3-import-migration.md`
+**Change Class**: `feature`
+**Version**: `0.10.0 → 0.11.0`
+**Tag**: `v0.11.0` (pending operator push)
+
+**Content Hash**: `9f6be66a4c9052a850d0bab630976c73ad112e0ccf50c2a516d6d1a7cfa8bd41`
+**Previous Hash**: `9de78b2753d74accb07d28135639c1576668aa6face87e49ebbbab00890cc2fe`
+
+**Chain Hash** (Merkle seal):
+```
+SHA256(content_hash + previous_hash)
+= 887c8b5cc7652e2bf149873157b618cb139ead0ef06ba47c08af9b6c2e019600
+```
+
+**Decision**: Phase 20 sealed. Import migration complete: 13 sibling imports converted, 11 REPO_ROOT sites split to `qor.resources`/`qor.workdir`, 8 hardcoded paths cleaned. `sys.path.insert` eliminated from all production scripts. Non-SDLC-aware anchor (`$QOR_ROOT` → CWD). Sprint 2 of 4 complete; 7 gaps remaining.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED*
+*Merkle seal: 887c8b5c...*
