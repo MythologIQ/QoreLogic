@@ -1,223 +1,298 @@
 <p align="center">
   <strong>QorLogic</strong><br>
-  S.H.I.E.L.D. Governance for AI Coding Agents
+  Standards-Aligned Governance for AI Coding Agents
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/License-BSL--1.1-orange" alt="License: BSL-1.1">
-  <img src="https://img.shields.io/badge/Skills-27-blue" alt="Skills: 27">
-  <img src="https://img.shields.io/badge/Bundles-5-blue" alt="Bundles: 5">
-  <img src="https://img.shields.io/badge/Agents-13-blue" alt="Agents: 13">
-  <img src="https://img.shields.io/badge/Tests-263%20passing-brightgreen" alt="Tests: 263 passing">
+  <a href="https://pypi.org/project/qor-logic/"><img src="https://img.shields.io/pypi/v/qor-logic?color=blue&label=PyPI" alt="PyPI"></a>
   <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
-  <img src="https://img.shields.io/badge/Ledger-Entry%20%2355-green" alt="Ledger Entry 55">
-  <img src="https://img.shields.io/badge/Version-0.9.0-blue" alt="Version: 0.9.0">
+  <img src="https://img.shields.io/badge/License-BSL--1.1-orange" alt="License: BSL-1.1">
+  <img src="https://img.shields.io/badge/Tests-323%20passing-brightgreen" alt="Tests: 323 passing">
+  <img src="https://img.shields.io/badge/NIST-SP%20800--218A%20aligned-004488" alt="NIST SP 800-218A aligned">
+  <img src="https://img.shields.io/badge/OWASP-Top%2010%20audited-004488" alt="OWASP Top 10 audited">
+  <img src="https://img.shields.io/badge/Skills-27-blue" alt="Skills: 27">
+  <img src="https://img.shields.io/badge/Agents-13-blue" alt="Agents: 13">
+  <img src="https://img.shields.io/badge/Ledger-69%20entries%20sealed-green" alt="Ledger: 69 entries sealed">
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick Start</a> |
+  <a href="#lifecycle">Lifecycle</a> |
+  <a href="#policy-engine">Policy Engine</a> |
+  <a href="#skill-catalog">Skills</a> |
+  <a href="#governance-model">Governance</a> |
+  <a href="#contributing">Contributing</a>
 </p>
 
 ---
 
-## What QorLogic is
+## What QorLogic Does
 
-A governance framework for AI coding agents (Claude Code, Kilo Code, Codex). It supplies a curated set of skills, agents, and runtime infrastructure that enforce a disciplined SDLC — research, plan, audit, implement, substantiate, validate — with hash-chained evidence, advisory gates, and a process-failure feedback loop.
+QorLogic is a governance framework that ships curated skills, doctrines, and runtime enforcement to AI coding agents. It covers the full software development lifecycle with hash-chained evidence, machine-enforceable policies, and a process-failure feedback loop.
+
+Supported hosts: **Claude Code**, **Kilo Code**, **Codex** (provisional).
 
 Built around **S.H.I.E.L.D.**: Single-purpose, Hash-chained, Idempotent, Explicit, Layered, Delegating.
 
-## Why use it
+## Quick Start
 
-- **Skills name skills.** `/qor-audit` finds a Razor violation → it tells you to run `/qor-refactor`. No reinvented inline processes. ([delegation-table](qor/gates/delegation-table.md))
-- **Long workflows checkpoint and budget.** Workflow bundles (multi-skill orchestrators) declare phase budgets and pause for operator review between phases. Context windows stay manageable. ([workflow-bundles](qor/gates/workflow-bundles.md))
-- **Process drift is recorded and acted on.** Every gate override, capability shortfall, and degradation lands in an append-only Process Shadow Genome. Threshold breaches auto-trigger remediation. ([shadow-process](qor/skills/governance/qor-shadow-process/SKILL.md))
-- **Token-efficient by default.** Repo-root [`CLAUDE.md`](CLAUDE.md) drops in terseness rules; full doctrine in [`qor/references/doctrine-token-efficiency.md`](qor/references/doctrine-token-efficiency.md).
-- **Cryptographic continuity.** Every governance decision is appended to `docs/META_LEDGER.md` as a SHA256-chained entry. `python qor/scripts/ledger_hash.py verify` validates the entire chain.
-
-## Quick start
-
-### Drop-in for an existing project
+### Install from PyPI
 
 ```bash
-# Copy the canonical skills + agents into your project's Claude Code install
-cp -r qor/skills/governance /path/to/your-project/.claude/skills/governance
-cp -r qor/skills/sdlc       /path/to/your-project/.claude/skills/sdlc
-cp -r qor/skills/memory     /path/to/your-project/.claude/skills/memory
-cp -r qor/skills/meta       /path/to/your-project/.claude/skills/meta
-cp -r qor/agents/*          /path/to/your-project/.claude/agents/
-cp CLAUDE.md                /path/to/your-project/CLAUDE.md
+pip install qor-logic
 ```
 
-Or consume the variant outputs directly: `qor/dist/variants/claude/` (or `kilo-code/`).
-
-### Use a workflow bundle
+### Deploy skills to your AI coding host
 
 ```bash
-# In Claude Code (or any harness with QorLogic skills loaded)
-/qor-deep-audit-recon       # investigate before acting
-/qor-onboard-codebase       # absorb an external repo
-/qor-process-review-cycle   # weekly process health check
+# Initialize with your host and use-case profile
+qorlogic init --host claude --profile sdlc
+
+# Install all governance skills and agent personas
+qorlogic install --host claude
+
+# Verify the installation
+qorlogic list --available
 ```
 
-### Bootstrap a new repo
+### Or install to a custom target
 
 ```bash
-/qor-bootstrap              # creates CONCEPT, ARCHITECTURE_PLAN, META_LEDGER
+# Non-standard host, filesystem governance, or data pipeline projects
+qorlogic install --target /path/to/.claude/
 ```
+
+### Use in your AI coding session
+
+```
+/qor-plan          # author a phased implementation plan
+/qor-audit         # adversarial PASS/VETO tribunal
+/qor-implement     # build under Section 4 Razor constraints
+/qor-substantiate  # seal with Merkle hash evidence
+```
+
+## Lifecycle
+
+QorLogic enforces a phased governance lifecycle. Each phase gates the next. Every decision is SHA256-chained in the Meta Ledger.
+
+```mermaid
+graph LR
+    R["/qor-research"] --> P["/qor-plan"]
+    P --> A["/qor-audit"]
+    A -->|PASS| I["/qor-implement"]
+    A -->|VETO| P
+    I --> S["/qor-substantiate"]
+    S --> V["/qor-validate"]
+
+    D["/qor-debug"] -.->|cross-cutting| I
+    RE["/qor-remediate"] -.->|process recovery| P
+
+    SG["Shadow Genome"] -.->|threshold breach| RE
+
+    style A fill:#c62828,color:#fff
+    style S fill:#2e7d32,color:#fff
+    style SG fill:#ff8f00,color:#fff
+```
+
+Each transition produces a ledger entry. VETO loops back to planning. Process failures accumulate in the Shadow Genome and auto-trigger remediation at configurable thresholds.
+
+## Policy Engine
+
+QorLogic includes a Cedar-inspired policy evaluator written in pure Python. Policies are data files, not hardcoded logic.
+
+```cedar
+// qor/policies/gate_enforcement.cedar
+permit (
+  principal,
+  action == Action::"implement",
+  resource == Gate::"plan"
+) when { resource.verdict == "PASS" };
+
+forbid (
+  principal,
+  action == Action::"implement",
+  resource == Gate::"plan"
+) when { resource.verdict == "VETO" };
+```
+
+Evaluate policies from the CLI:
+
+```bash
+qorlogic policy check request.json
+```
+
+The evaluator supports `permit`/`forbid` effects, `==` and `in` constraints, `when` conditions, and default-deny semantics (forbid overrides permit). Designed for compatibility with the [Cedar](https://www.cedarpolicy.com/) language; swap in a native Cedar SDK when Python bindings ship.
+
+## Standards Alignment
+
+### NIST SP 800-218A (SSDF for AI)
+
+QorLogic maps its lifecycle to the Secure Software Development Framework practices defined in [NIST SP 800-218A](https://doi.org/10.6028/NIST.SP.800-218A):
+
+| SSDF Practice Group | QorLogic Implementation |
+|---|---|
+| **PO** Prepare the Organization | `/qor-bootstrap`, 8 doctrine files, `CLAUDE.md` drop-in |
+| **PS** Protect the Software | `/qor-audit` tribunal, reliability scripts, Shadow Genome |
+| **PW** Produce Well-Secured Software | `/qor-plan` > `/qor-audit` > `/qor-implement` > `/qor-substantiate` |
+| **RV** Respond to Vulnerabilities | `/qor-remediate`, `/qor-debug`, threshold-triggered issue creation |
+
+Full mapping: [`qor/references/doctrine-nist-ssdf-alignment.md`](qor/references/doctrine-nist-ssdf-alignment.md)
+
+### OWASP Top 10
+
+The codebase has been [audited against OWASP Top 10 (2021)](docs/security-audit-2026-04-16.md). Findings: 0 HIGH, 3 MEDIUM (integrity-hardening), 6 LOW (hygiene). No exploitable vulnerabilities. All subprocess calls use list-form argv. No shell injection surface. No unsafe deserialization.
+
+## Skill Catalog
+
+### SDLC Chain (9 skills)
+
+| Skill | Phase | Purpose |
+|---|---|---|
+| `/qor-research` | research | Investigate before planning |
+| `/qor-plan` | plan | Author phased plans with tests |
+| `/qor-audit` | gate | Adversarial PASS/VETO tribunal |
+| `/qor-implement` | implement | Build under KISS constraints |
+| `/qor-refactor` | implement | Section 4 Razor cleanup |
+| `/qor-debug` | cross-cutting | Root-cause diagnosis |
+| `/qor-substantiate` | substantiate | Seal with Merkle evidence |
+| `/qor-validate` | validate | Chain and criteria verification |
+| `/qor-remediate` | process recovery | Process-level fix from Shadow Genome |
+
+### Memory and Meta (8 skills)
+
+| Skill | Purpose |
+|---|---|
+| `/qor-status` | Diagnose lifecycle state and next action |
+| `/qor-document` | Update governance documentation |
+| `/qor-organize` | Project-level structure reorganization |
+| `/qor-bootstrap` | Seed a new workspace with governance DNA |
+| `/qor-help` | In-skill command catalog |
+| `/qor-repo-audit` | Repository-level compliance audit |
+| `/qor-repo-release` | Release ceremony orchestration |
+| `/qor-repo-scaffold` | New-repo template generation |
+
+### Workflow Bundles (5 bundles)
+
+| Bundle | Phases | Use When |
+|---|---|---|
+| `/qor-deep-audit` | recon (3) + remediate (3) | Pre-release readiness, tech-debt sweep |
+| `/qor-deep-audit-recon` | research + synthesize + verify | Investigation only; ends at RESEARCH_BRIEF |
+| `/qor-deep-audit-remediate` | plan + implement + validate | Action half; consumes RESEARCH_BRIEF |
+| `/qor-onboard-codebase` | research > organize > audit > plan | Absorbing an external codebase |
+| `/qor-process-review-cycle` | shadow-sweep > remediate > audit | Periodic process health check |
+
+### Governance (1 skill)
+
+| Skill | Purpose |
+|---|---|
+| `/qor-shadow-process` | Append structured process-failure events |
+
+## Governance Model
+
+1. **Every decision is logged.** Plans, audits, and substantiations land in `docs/META_LEDGER.md` as SHA256-chained entries. Verify the full chain: `qorlogic verify-ledger`.
+
+2. **Gates are advisory with teeth.** Skills check for prior-phase artifacts. Override is permitted but logged as a severity-1 `gate_override` event in the Shadow Genome.
+
+3. **Process failures are append-only.** `docs/PROCESS_SHADOW_GENOME.md` stores JSONL events that flow through stale-expiry rules and aged-high-severity self-escalation. Threshold breach (severity sum >= 10) triggers `/qor-remediate`.
+
+4. **Policies are data.** Cedar-syntax `.cedar` files under `qor/policies/` define permit/forbid rules evaluated at gate check points. The policy engine logs every decision for audit.
+
+5. **Skills delegate explicitly.** When `/qor-audit` finds a Razor violation, it names `/qor-refactor`. No skill reinvents another skill's process. ([delegation-table](qor/gates/delegation-table.md))
+
+6. **Bundles checkpoint and budget.** Multi-phase workflows declare budgets and surface progress between phases. Context windows stay manageable. ([workflow-bundles](qor/gates/workflow-bundles.md))
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                 QorLogic SSoT (qor/)                     │
-│                                                          │
-│  skills/ ──┬── governance/   audit, validate, ...        │
-│            ├── sdlc/         research, plan, implement   │
-│            ├── memory/       status, organize, document  │
-│            └── meta/         bootstrap, help, bundles    │
-│                                                          │
-│  agents/   ── governance, sdlc, memory, meta            │
-│  vendor/   ── third-party skills + agents                │
-│  scripts/  ── ledger_hash, gate_chain, shadow_process   │
-│  gates/    ── chain.md, workflow-bundles.md, schemas    │
-│  platform/ ── capability detection + 5 host profiles    │
-│  references/  doctrines + patterns                       │
-│                                                          │
-└──────────────────────┬──────────────────────────────────┘
-                       │ compile.py
-                       ▼
-              ┌────────────────────┐
-              │  qor/dist/variants │
-              ├────────────────────┤
-              │  claude/           │
-              │  kilo-code/        │
-              │  codex/  (stub)    │
-              └────────────────────┘
-                       │
-                       ▼
-                 Consumer projects
-                  (.claude/, .kilo/)
+qor-logic/
+  qor/
+    skills/           27 skills + 5 bundles (governance, sdlc, memory, meta)
+    agents/           13 agent personas
+    policy/           Cedar-inspired permit/forbid evaluator (pure Python)
+    policies/         .cedar policy files (gate enforcement, skill admission)
+    scripts/          Runtime: ledger, gates, shadow, platform, compiler, remediate
+    reliability/      Intent Lock, Skill Admission, Gate-to-Skill Matrix
+    references/       8 doctrines (token efficiency, test discipline, NIST SSDF, ...)
+    gates/            Phase chain, delegation table, workflow bundles, 9 JSON schemas
+    resources.py      importlib.resources wrapper for packaged assets
+    workdir.py        $QOR_ROOT / CWD anchor for consumer-state paths
+    hosts.py          Host-to-install-path resolver (claude, kilo, codex)
+    cli.py            qorlogic CLI entry point
+    dist/variants/    Pre-compiled per-host outputs (claude, kilo-code, codex)
+  tests/              323 tests (unit, integration, e2e, doctrine, bundle contract)
+  .github/workflows/  CI (6-job matrix) + PyPI release (OIDC trusted publisher)
 ```
 
-### Key subsystems
-
-| Subsystem | Module(s) | What it does |
-|---|---|---|
-| **Skill execution** | `qor/skills/<category>/` | 23 user-invocable skills + 5 workflow bundles |
-| **Gate chain** | `qor/scripts/gate_chain.py`, `session.py` | Advisory gates between SDLC phases; session-scoped artifacts |
-| **Shadow genome** | `qor/scripts/shadow_process.py`, `check_shadow_threshold.py` | Append-only process-failure log; threshold-triggered issues |
-| **Cross-repo collector** | `qor/scripts/collect_shadow_genomes.py` | Pool shadow events across repos; consolidated GitHub issue |
-| **Platform detection** | `qor/scripts/qor_platform.py` | Auto-detect host + gh CLI; declare codex-plugin / agent-teams |
-| **Compile pipeline** | `qor/scripts/compile.py`, `check_variant_drift.py` | Regenerate variants from SSoT; drift detection in CI |
-| **Ledger** | `qor/scripts/ledger_hash.py` + `docs/META_LEDGER.md` | SHA256-chained governance entries; `verify` walks the chain |
-
-## Skill catalog
-
-### SDLC chain
-
-| Skill | Phase | Purpose |
-|---|---|---|
-| [`/qor-research`](qor/skills/sdlc/qor-research/) | research | Investigate before planning |
-| [`/qor-plan`](qor/skills/sdlc/qor-plan/) | plan | Author plan-*.md with phases + tests |
-| [`/qor-audit`](qor/skills/governance/qor-audit/) | audit | Adversarial PASS/VETO; Razor → refactor; Orphan/Macro → organize |
-| [`/qor-implement`](qor/skills/sdlc/qor-implement/) | implement | Execute under KISS after PASS |
-| [`/qor-refactor`](qor/skills/sdlc/qor-refactor/) | implement | File-internal Section 4 cleanup |
-| [`/qor-debug`](qor/skills/sdlc/qor-debug/) | (cross-cutting) | Root-cause diagnosis on regression |
-| [`/qor-substantiate`](qor/skills/governance/qor-substantiate/) | substantiate | Seal session; Merkle evidence |
-| [`/qor-validate`](qor/skills/governance/qor-validate/) | validate | Verify chain + criteria pre-delivery |
-| [`/qor-remediate`](qor/skills/sdlc/qor-remediate/) | (process recovery) | Process-level fix; absorbs `/qor-course-correct` |
-
-### Memory & meta
-
-| Skill | Purpose |
-|---|---|
-| [`/qor-status`](qor/skills/memory/qor-status/) | Diagnose lifecycle + next action |
-| [`/qor-document`](qor/skills/memory/qor-document/) | Update governance docs |
-| [`/qor-organize`](qor/skills/memory/qor-organize/) | Project-level structure |
-| [`/qor-bootstrap`](qor/skills/meta/qor-bootstrap/) | New-workspace DNA seeder |
-| [`/qor-help`](qor/skills/meta/qor-help/) | Command catalog (you're reading the README; this is the in-skill version) |
-| [`/qor-repo-audit`](qor/skills/meta/qor-repo-audit/) | Repo-level audit |
-| [`/qor-repo-release`](qor/skills/meta/qor-repo-release/) | Release ceremony |
-| [`/qor-repo-scaffold`](qor/skills/meta/qor-repo-scaffold/) | New-repo template |
-
-### Governance & process
-
-| Skill | Purpose |
-|---|---|
-| [`/qor-shadow-process`](qor/skills/governance/qor-shadow-process/) | Append process-failure events |
-
-### Workflow bundles
-
-| Bundle | Phases | Use when |
-|---|---|---|
-| [`/qor-deep-audit`](qor/skills/meta/qor-deep-audit/) | recon (3) + remediate (3) | Pre-release readiness, large tech-debt sweep. Decomposed. |
-| [`/qor-deep-audit-recon`](qor/skills/meta/qor-deep-audit-recon/) | research + synthesize + verify | Investigation only; ends at RESEARCH_BRIEF |
-| [`/qor-deep-audit-remediate`](qor/skills/meta/qor-deep-audit-remediate/) | plan + implement + validate | Action half; consumes RESEARCH_BRIEF |
-| [`/qor-onboard-codebase`](qor/skills/meta/qor-onboard-codebase/) | research → organize → audit → plan | Inheriting / merging an external codebase |
-| [`/qor-process-review-cycle`](qor/skills/governance/qor-process-review-cycle/) | shadow-sweep → remediate → audit | Periodic process health check |
-
-## Repository layout
+## CLI Reference
 
 ```
-Qor-logic/
-  qor/                      Single source of truth (edit here)
-    skills/<category>/      27 skills + 5 bundles across governance/sdlc/memory/meta
-    agents/<category>/      13 qor-scoped agent personas
-    vendor/                 Third-party skills + agents (~65 + wshobson collection)
-    scripts/                Runtime: ledger, gates, shadow, platform, compile, collector, remediate
-    reliability/            Intent Lock, Skill Admission, Gate-to-Skill Matrix (Phase 17)
-    gates/                  chain.md, workflow-bundles.md, delegation-table.md, schemas
-    platform/               capabilities.md, detect.md, 5 profiles
-    references/             doctrines + patterns + examples (incl. doctrine-shadow-genome-countermeasures.md)
-    experimental/           non-canonical research
-    templates/              doc templates
-    dist/variants/          generated outputs (claude, kilo-code, codex stub)
-  tests/                    263 tests (unit + integration + e2e + bundle contract)
-  docs/                     Plans, ledger, shadow genomes, manifests, archive, security audit
-  CLAUDE.md                 Drop-in token-efficiency defaults
-  pyproject.toml            Python 3.11+, pytest, jsonschema
+qorlogic install --host <claude|kilo-code|codex> [--target <path>] [--dry-run]
+qorlogic uninstall --host <host>
+qorlogic init --host <host> --profile <sdlc|filesystem|data|research>
+qorlogic list [--available] [--installed]
+qorlogic info <skill-name>
+qorlogic compile [--dry-run]
+qorlogic verify-ledger [<path>]
+qorlogic policy check <request.json>
+qorlogic --version
 ```
-
-## Governance model
-
-1. **Every decision is logged.** Plans, audits, substantiations land in `docs/META_LEDGER.md` as SHA256-chained entries. The chain is verifiable: `python qor/scripts/ledger_hash.py verify docs/META_LEDGER.md`.
-2. **Gates are advisory.** Skills check for prior-phase artifacts; missing/invalid prompts the user. Override is permitted but logged as a sev-1 `gate_override` event.
-3. **Process failures are append-only.** `docs/PROCESS_SHADOW_GENOME.md` is JSONL; events flow through stale-expiry rules and aged-high-severity self-escalation. Threshold breach (sev sum ≥ 10) triggers `/qor-remediate`.
-4. **Skills delegate explicitly.** When `/qor-audit` finds a Razor violation, it names `/qor-refactor`. No skill reinvents another skill's process. ([delegation-table](qor/gates/delegation-table.md))
-5. **Bundles checkpoint.** Multi-phase workflows surface progress between phases for operator decision. No silent runaway.
 
 ## Development
 
 ```bash
-pip install -e ".[dev]"                                  # install runtime + dev deps
-python -m pytest tests/                                  # 154 tests
-python qor/scripts/check_variant_drift.py                # SSoT vs dist consistency
-python qor/scripts/ledger_hash.py verify docs/META_LEDGER.md  # chain integrity
-git config core.hooksPath .githooks                      # one-time hook install
+pip install -e ".[dev]"
+python -m pytest tests/                                    # 323 tests
+python -m pytest tests/ -m integration                     # +4 install-smoke tests
+qorlogic verify-ledger                                     # Merkle chain integrity
+BUILD_REGEN=1 python qor/scripts/dist_compile.py           # regenerate variants
+python qor/scripts/check_variant_drift.py                  # SSoT vs dist consistency
 ```
 
-## Documentation
+## Key Documentation
 
-- [`docs/SYSTEM_STATE.md`](docs/SYSTEM_STATE.md) — current snapshot of the file tree + ledger head
-- [`docs/SKILL_REGISTRY.md`](docs/SKILL_REGISTRY.md) — category-organized skill index
-- [`docs/META_LEDGER.md`](docs/META_LEDGER.md) — hash-chained governance log (20 entries sealed)
-- [`qor/gates/chain.md`](qor/gates/chain.md) — SDLC phase sequence + per-phase reads/writes
-- [`qor/gates/delegation-table.md`](qor/gates/delegation-table.md) — explicit handoff matrix
-- [`qor/gates/workflow-bundles.md`](qor/gates/workflow-bundles.md) — bundle metadata + checkpoint protocol
-- [`qor/references/doctrine-token-efficiency.md`](qor/references/doctrine-token-efficiency.md) — long-session rules
-- [`docs/Lessons-Learned/`](docs/Lessons-Learned/) — postmortems and corrections
+| Document | Purpose |
+|---|---|
+| [`docs/META_LEDGER.md`](docs/META_LEDGER.md) | SHA256-chained governance log (69 entries sealed) |
+| [`docs/RESEARCH_BRIEF.md`](docs/RESEARCH_BRIEF.md) | PyPI packaging gap audit (18/18 gaps closed) |
+| [`docs/security-audit-2026-04-16.md`](docs/security-audit-2026-04-16.md) | OWASP Top 10 + stability audit |
+| [`qor/references/doctrine-nist-ssdf-alignment.md`](qor/references/doctrine-nist-ssdf-alignment.md) | NIST SP 800-218A lifecycle mapping |
+| [`qor/references/doctrine-shadow-genome-countermeasures.md`](qor/references/doctrine-shadow-genome-countermeasures.md) | 12 codified failure patterns (SG-016 through SG-038) |
+| [`qor/gates/delegation-table.md`](qor/gates/delegation-table.md) | Skill-to-skill handoff matrix |
+| [`qor/gates/workflow-bundles.md`](qor/gates/workflow-bundles.md) | Bundle checkpoint and budget protocol |
+| [`CLAUDE.md`](CLAUDE.md) | Drop-in token-efficiency defaults for any project |
+
+## Shadow Genome
+
+The Shadow Genome is QorLogic's institutional memory for failure patterns. Every governance failure (plan VETOes, import breakage, arithmetic drift, silent data loss) is recorded, classified, and codified as a countermeasure.
+
+12 patterns codified so far:
+
+| ID | Pattern | Countermeasure |
+|---|---|---|
+| SG-016 | Generic-convention paths without grounding | Grep/read before citing any path |
+| SG-021 | Multi-layer edit compression | Enumerate every file that receives the edit |
+| SG-032 | Batch-split-write coverage gap | Classify records at creation, not post-hoc |
+| SG-033 | Positional-to-keyword signature breakage | Grep all callers before adding `*` |
+| SG-036 | Doctrine adoption grace period | No grace period; inline grounding immediately |
+| SG-038 | Prose-code mismatch in plans | Grep plan for every enumeration; update in lockstep |
+
+Full inventory: [`qor/references/doctrine-shadow-genome-countermeasures.md`](qor/references/doctrine-shadow-genome-countermeasures.md)
 
 ## License
 
-Business Source License 1.1 (BSL-1.1). Free for non-production use; production deployment requires a commercial license. See LICENSE for details.
+Business Source License 1.1 (BSL-1.1). Free for non-production use. Production deployment requires a commercial license from [MythologIQ Labs, LLC](https://github.com/MythologIQ-Labs-LLC). See [LICENSE](LICENSE) for details.
 
 ## Contributing
 
-Skills are authored under `qor/skills/<category>/<skill>/SKILL.md` (the SSoT). The dist outputs under `qor/dist/variants/` are **generated** — never hand-edit them. The pre-commit hook enforces this; CI drift check is authoritative.
+Skills live under `qor/skills/<category>/<skill-name>/SKILL.md` (the single source of truth). The `qor/dist/variants/` outputs are generated. Never edit them directly.
 
 To author a new skill:
 
-1. Pick a category that fits (governance, sdlc, memory, meta).
-2. Write `qor/skills/<category>/<skill-name>/SKILL.md` with required frontmatter (`name`, `description`, `phase`, `gate_reads`, `gate_writes`).
-3. Add a row to [`qor/gates/delegation-table.md`](qor/gates/delegation-table.md) if your skill is a destination of any other skill's handoff.
-4. Add the skill to [`/qor-help`](qor/skills/meta/qor-help/SKILL.md).
-5. `BUILD_REGEN=1 python qor/scripts/compile.py` to refresh dist.
-6. Test: `python -m pytest tests/`.
+1. Pick a category: `governance`, `sdlc`, `memory`, or `meta`.
+2. Create `qor/skills/<category>/<name>/SKILL.md` with required frontmatter (`name`, `description`, `phase`, `gate_reads`, `gate_writes`).
+3. Add a row to [`qor/gates/delegation-table.md`](qor/gates/delegation-table.md).
+4. Register in [`/qor-help`](qor/skills/meta/qor-help/SKILL.md).
+5. Regenerate: `BUILD_REGEN=1 python qor/scripts/dist_compile.py`
+6. Test: `python -m pytest tests/`
 
-To author a workflow bundle, follow the same flow plus the metadata schema in [`qor/gates/workflow-bundles.md`](qor/gates/workflow-bundles.md). Bundles get covered by `tests/test_bundles.py` automatically via the contract tests.
+For workflow bundles, follow the metadata schema in [`qor/gates/workflow-bundles.md`](qor/gates/workflow-bundles.md). Bundle contract tests in `tests/test_bundles.py` cover new bundles automatically.
