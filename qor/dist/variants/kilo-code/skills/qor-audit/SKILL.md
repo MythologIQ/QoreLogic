@@ -195,7 +195,7 @@ Template: `references/qor-audit-templates.md`.
 
 ### Step 6: Shadow Genome (If VETO)
 
-If verdict is VETO, document in `docs/SHADOW_GENOME.md` using template from `references/qor-audit-templates.md`.
+If verdict is VETO, document in `docs/SHADOW_GENOME.md` using template from `references/qor-audit-templates.md`. Note: narrative entries in `SHADOW_GENOME.md` are out of scope for the collector and attribution classification (see `qor/references/doctrine-shadow-attribution.md` §6).
 
 ### Step 7: Final Report
 

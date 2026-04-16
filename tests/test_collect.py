@@ -319,3 +319,22 @@ def test_flip_only_preserves_other_events(tmp_path):
     assert by_id[e1["id"]]["addressed"] is True
     assert by_id[e2["id"]]["addressed"] is False  # untouched
     assert by_id[e3["id"]]["addressed"] is True   # already-addressed unchanged
+
+
+# ----- Phase 14: collector reads upstream file -----
+
+def test_collector_reads_upstream_file(tmp_path):
+    """When both files present, collector reads UPSTREAM; LOCAL events not pooled."""
+    repo = tmp_path / "repo1"
+    (repo / "docs").mkdir(parents=True)
+    upstream_event = _mk_event(severity=2, session_id="s-upstream")
+    local_event = _mk_event(severity=3, session_id="s-local")
+    upstream_log = repo / "docs" / "PROCESS_SHADOW_GENOME_UPSTREAM.md"
+    local_log = repo / "docs" / "PROCESS_SHADOW_GENOME.md"
+    upstream_log.write_text(json.dumps(upstream_event) + "\n", encoding="utf-8")
+    local_log.write_text(json.dumps(local_event) + "\n", encoding="utf-8")
+
+    events = collect.read_repo_shadow(repo)
+    ids = {e["id"] for e in events}
+    assert upstream_event["id"] in ids
+    assert local_event["id"] not in ids

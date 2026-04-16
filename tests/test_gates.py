@@ -203,6 +203,7 @@ def test_check_prior_malformed_returns_invalid(tmp_path, monkeypatch):
 def test_emit_gate_override_writes_shadow_event(tmp_path, monkeypatch):
     log = tmp_path / "shadow.md"
     monkeypatch.setattr(shadow_process, "LOG_PATH", log)
+    monkeypatch.setattr(shadow_process, "UPSTREAM_LOG_PATH", log)
 
     eid = gate_chain.emit_gate_override(
         current_phase="plan",

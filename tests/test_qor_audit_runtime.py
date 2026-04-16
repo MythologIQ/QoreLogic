@@ -112,6 +112,7 @@ def test_adversarial_false_when_host_unknown(tmp_path, monkeypatch):
 def test_emit_capability_shortfall_appends_sev2_event(tmp_path, monkeypatch):
     log = tmp_path / "shadow.md"
     monkeypatch.setattr(shadow_process, "LOG_PATH", log)
+    monkeypatch.setattr(shadow_process, "UPSTREAM_LOG_PATH", log)
 
     eid = runtime.emit_capability_shortfall("codex-plugin", "2026-04-15T18:00-abcdef")
     assert len(eid) == 64
@@ -126,6 +127,7 @@ def test_emit_capability_shortfall_appends_sev2_event(tmp_path, monkeypatch):
 def test_emit_capability_shortfall_details_shape(tmp_path, monkeypatch):
     log = tmp_path / "shadow.md"
     monkeypatch.setattr(shadow_process, "LOG_PATH", log)
+    monkeypatch.setattr(shadow_process, "UPSTREAM_LOG_PATH", log)
 
     runtime.emit_capability_shortfall("agent-teams", "s-id")
     events = shadow_process.read_events(log)
@@ -138,6 +140,7 @@ def test_emit_capability_shortfall_details_shape(tmp_path, monkeypatch):
 def test_emit_gate_override_writes_sev1_event(tmp_path, monkeypatch):
     log = tmp_path / "shadow.md"
     monkeypatch.setattr(shadow_process, "LOG_PATH", log)
+    monkeypatch.setattr(shadow_process, "UPSTREAM_LOG_PATH", log)
 
     eid = runtime.emit_gate_override("missing plan artifact", "s-id")
     events = shadow_process.read_events(log)

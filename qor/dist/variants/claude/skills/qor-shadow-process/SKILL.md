@@ -6,7 +6,9 @@ category: governance
 requires: []
 enhances_with: []
 gate_reads: []
-gate_writes: docs/PROCESS_SHADOW_GENOME.md (append-only)
+gate_writes:
+  - docs/PROCESS_SHADOW_GENOME.md
+  - docs/PROCESS_SHADOW_GENOME_UPSTREAM.md
 phase: governance
 ---
 # /qor-shadow-process — Process Shadow Genome Recorder
@@ -15,7 +17,7 @@ phase: governance
   <trigger>/qor-shadow-process</trigger>
   <phase>GOVERNANCE (cross-cutting; invoked by other skills and auto-triggers)</phase>
   <persona>Judge</persona>
-  <output>Appended event in docs/PROCESS_SHADOW_GENOME.md (JSONL)</output>
+  <output>Appended event in docs/PROCESS_SHADOW_GENOME.md or docs/PROCESS_SHADOW_GENOME_UPSTREAM.md (JSONL)</output>
 </skill>
 
 ## Purpose
@@ -73,8 +75,11 @@ event = {
     "addressed_reason": None,
     "source_entry_id": None,
 }
-event_id = shadow_process.append_event(event)
+event_id = shadow_process.append_event(event, attribution="UPSTREAM")
+# or attribution="LOCAL" — classify per qor/references/doctrine-shadow-attribution.md
 ```
+
+Before appending, classify attribution per `qor/references/doctrine-shadow-attribution.md`. UPSTREAM events go to `docs/PROCESS_SHADOW_GENOME_UPSTREAM.md`. LOCAL events go to `docs/PROCESS_SHADOW_GENOME.md`. When in doubt, LOCAL.
 
 Validates against `qor/gates/schema/shadow_event.schema.json`, computes `id` = SHA256 of canonical event fields, appends atomically via `os.replace()`.
 

@@ -152,7 +152,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
     ap.add_argument("--repo", default=DEFAULT_REPO)
     ap.add_argument("--events", help="Comma-separated event ids (overrides marker)")
-    ap.add_argument("--log", type=Path, default=shadow_process.LOG_PATH)
+    ap.add_argument("--log", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--skip-auth", action="store_true", help="For testing only")
     ap.add_argument("--flip-only", metavar="URL",
@@ -164,24 +164,25 @@ def main() -> int:
                          "resolution when there's no GitHub issue to attach.")
     args = ap.parse_args()
 
-    # Mark-resolved mode: no gh, no URL, manual resolution
+    single_file = args.log is not None
+    log = args.log or shadow_process.LOG_PATH
+
     if args.mark_resolved:
         if not args.events:
             print("ERROR: --mark-resolved requires --events <ids>", file=sys.stderr)
             return 2
         target_ids = set(args.events.split(","))
-        flipped = mark_resolved(args.log, target_ids)
-        print(f"Marked {flipped} event(s) resolved in {args.log}")
+        flipped = mark_resolved(log, target_ids)
+        print(f"Marked {flipped} event(s) resolved in {log}")
         return 0
 
-    # Flip-only mode: no gh call, no marker load
     if args.flip_only:
         if not args.events:
             print("ERROR: --flip-only requires --events <ids>", file=sys.stderr)
             return 2
         target_ids = set(args.events.split(","))
-        flipped = flip_events_only(args.log, target_ids, args.flip_only)
-        print(f"Flipped {flipped} event(s) in {args.log}")
+        flipped = flip_events_only(log, target_ids, args.flip_only)
+        print(f"Flipped {flipped} event(s) in {log}")
         if MARKER_PATH.exists():
             MARKER_PATH.unlink()
         return 0
@@ -196,7 +197,10 @@ def main() -> int:
         marker = load_marker()
         target_ids = set(marker["event_ids"])
 
-    all_events = shadow_process.read_events(args.log)
+    if single_file:
+        all_events = shadow_process.read_events(log)
+    else:
+        all_events = shadow_process.read_all_events()
     selected = [e for e in all_events if e["id"] in target_ids and not e["addressed"]]
     if not selected:
         print("No matching unaddressed events. Nothing to do.")
@@ -213,8 +217,12 @@ def main() -> int:
     print(f"Issue created: {url}")
 
     updated = mark_addressed(all_events, target_ids, url)
-    shadow_process.write_events(updated, args.log)
-    print(f"Updated {len(target_ids)} event(s) in {args.log}")
+    if single_file:
+        shadow_process.write_events(updated, log)
+    else:
+        src_map = shadow_process.id_source_map()
+        shadow_process.write_events_per_source(updated, src_map)
+    print(f"Updated {len(target_ids)} event(s)")
 
     if MARKER_PATH.exists() and not args.events:
         MARKER_PATH.unlink()

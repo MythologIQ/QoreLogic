@@ -84,7 +84,9 @@ Document what worked instead (if known):
 
 ### 5. Update Shadow Genome File
 
-Append entry to `docs/SHADOW_GENOME.md`:
+For structured process events (JSONL), classify attribution per `qor/references/doctrine-shadow-attribution.md` before logging. UPSTREAM events (implicating Qor-logic artifacts) go to `docs/PROCESS_SHADOW_GENOME_UPSTREAM.md`. LOCAL events (consumer codebase or LLM-intrinsic) go to `docs/PROCESS_SHADOW_GENOME.md`. When in doubt, LOCAL.
+
+For narrative failure entries (markdown), append to `docs/SHADOW_GENOME.md`:
 
 ```yaml
 - id: "SG-{sequential_number}"

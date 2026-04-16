@@ -37,6 +37,8 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(session, "MARKER_PATH", sm)
     monkeypatch.setattr(qplat, "MARKER_PATH", pm)
     monkeypatch.setattr(shadow_process, "LOG_PATH", log)
+    monkeypatch.setattr(shadow_process, "UPSTREAM_LOG_PATH", log)
+    monkeypatch.setattr(shadow_process, "LOCAL_LOG_PATH", log)
     monkeypatch.setattr(gate_chain, "GATES_DIR", gates)
     monkeypatch.setattr(cst, "MARKER_PATH", marker)
     monkeypatch.setattr(csi, "MARKER_PATH", marker)

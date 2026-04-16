@@ -1067,4 +1067,107 @@ SHA256(content_hash + previous_hash)
 ---
 
 *Chain integrity: VALID*
-*Session: OPEN (implementation gate unlocked)*
+
+---
+
+### Entry #34: IMPLEMENTATION — Phase 14 Shadow Attribution
+
+**Timestamp**: 2026-04-15
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase14-v3-shadow-attribution.md`
+
+**Files Created**:
+- `qor/references/doctrine-shadow-attribution.md` (6 sections)
+- `docs/PROCESS_SHADOW_GENOME_UPSTREAM.md` (empty starter)
+- `tests/test_shadow_attribution.py` (10 tests)
+
+**Files Modified**:
+- `qor/scripts/shadow_process.py` (LOCAL/UPSTREAM constants, log_path_for, append_event(attribution=...), read_all_events, id_source_map, write_events_per_source)
+- `qor/scripts/collect_shadow_genomes.py` (read_repo_shadow with upstream-first fallback)
+- `qor/scripts/gate_chain.py` (attribution="UPSTREAM")
+- `qor/scripts/qor_audit_runtime.py` (attribution="UPSTREAM")
+- `qor/scripts/check_shadow_threshold.py` (dual-file read, caller-side escalation classification, write_events_per_source)
+- `qor/scripts/create_shadow_issue.py` (dual-file read, write_events_per_source)
+- `qor/skills/governance/qor-shadow-process/SKILL.md` (YAML list gate_writes, attribution step)
+- `qor/skills/governance/qor-audit/SKILL.md` (Step 6 narrative out-of-scope note)
+- `qor/skills/memory/track-shadow-genome.md` (attribution doctrine reference)
+- `qor/skills/meta/qor-meta-track-shadow/SKILL.md` (attribution doctrine reference)
+- `tests/test_shadow.py` (+3 tests, 2 positional-to-keyword fixes)
+- `tests/test_skill_doctrine.py` (+3 tests)
+- `tests/test_collect.py` (+1 test)
+- `tests/test_e2e.py` (UPSTREAM_LOG_PATH monkeypatch)
+- `tests/test_gates.py` (UPSTREAM_LOG_PATH monkeypatch)
+- `tests/test_qor_audit_runtime.py` (UPSTREAM_LOG_PATH monkeypatch)
+
+**Test Results**: 219 passed + 6 skipped (deterministic across 2 runs). +17 from 202 baseline.
+
+**Drift**: clean (121 files, no drift after BUILD_REGEN=1).
+**Ledger chain**: Entries #12-#33 verified.
+
+**Implementation deviation from plan v3**: sweep() kept pure (no I/O) rather than classify-at-creation inside sweep(). Escalation classification moved to caller in main() to avoid append-then-rewrite collision. V-1 intent fully preserved: escalation events classified UPSTREAM, written via write_events_per_source with explicit src_map entry, never dropped.
+
+**Content Hash** (implementation-manifest):
+`06927ff85f244f4278861bc63d89a82aedb169cd409dd84743f7d466a68a90b2`
+
+**Previous Hash**:
+`98a26463c8b51ec48251cd32a90dfb72a0cc83a8692427dd1e72bba4fa4ef41b`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= 2903c5f3e40e321ec58695bbb2dcd631acb99cbcad066ada043492e0605a7f81
+```
+
+**Decision**: Phase 14 v3 Reality matches Promise. Dual-file shadow attribution infrastructure in place: doctrine, 7 writer call sites, 4 skills, collector fallback. All Entry #31 + #32 violations closed in code. +17 tests (202 → 219). Ready for substantiation.
+
+---
+
+*Chain integrity: VALID*
+
+---
+
+### Entry #35: SESSION SEAL — Phase 14 v3 substantiated
+
+**Timestamp**: 2026-04-15
+**Phase**: SUBSTANTIATE
+**Author**: Judge
+**Risk Grade**: L1
+**Verdict**: PASS (Reality = Promise)
+
+**Target**: `docs/plan-qor-phase14-v3-shadow-attribution.md`
+**Change Class**: `feature`
+**Version**: `0.3.0 → 0.4.0`
+**Tag**: `v0.4.0` (pending — see Step 9.6 operator decision)
+
+**Verification Results**:
+- Version gate: PASS (0.4.0 > 0.3.0)
+- Reality audit: PASS (all plan v3 files present; no orphans)
+- Test discipline: 219 passed + 6 skipped, deterministic across 2 runs
+- Section 4 Razor: PASS (all 6 modified scripts at or under 250 lines)
+- Drift: clean (121 files, no drift after BUILD_REGEN=1)
+- Ledger chain: Entries #12-#34 verified
+
+**Implementation deviation**: sweep() kept pure; escalation classification in caller. Intent preserved — documented in Entry #34.
+
+**Content Hash** (substantiate-manifest):
+`5b25477173ef5c077a9c58e7f07df2100e21830e522f30a947c728df984b6852`
+
+**Previous Hash**:
+`2903c5f3e40e321ec58695bbb2dcd631acb99cbcad066ada043492e0605a7f81`
+
+**Chain Hash** (Merkle seal):
+```
+SHA256(content_hash + previous_hash)
+= 937dec794308dcca09765003004042f8afd622b8b93b438aedad44af9dc66440
+```
+
+**Decision**: Phase 14 v3 sealed. Shadow attribution in Reality = Promise. Dual-file schema, classification-aware API, collector fallback, 7 writer call sites, 4 skills. SG-032 + SG-033 closed. Next: Step 9.6 push/merge operator decision.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED*
+*Merkle seal: 937dec79...*

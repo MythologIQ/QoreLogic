@@ -97,7 +97,7 @@ def emit_gate_override(
         "addressed_reason": None,
         "source_entry_id": None,
     }
-    return shadow_process.append_event(event)
+    return shadow_process.append_event(event, attribution="UPSTREAM")
 
 
 def write_gate_artifact(

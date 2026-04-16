@@ -63,7 +63,7 @@ def emit_capability_shortfall(capability: str, session_id: str) -> str:
         "addressed_reason": None,
         "source_entry_id": None,
     }
-    return shadow_process.append_event(event)
+    return shadow_process.append_event(event, attribution="UPSTREAM")
 
 
 def emit_gate_override(reason: str, session_id: str) -> str:

@@ -154,10 +154,8 @@ def test_sev3_never_stale_expires():
     now = datetime(2027, 4, 15, tzinfo=timezone.utc)  # ~1 year after
     e = make_event(severity=3, ts="2026-04-15T00:00:00Z")
     updated, escalations, _ = cst.sweep([e], now)
-    # Original event NOT stale-expired
     orig = [x for x in updated if x["id"] == e["id"]][0]
     assert orig["addressed"] is False
-    # But a self-escalation event WAS emitted
     assert len(escalations) == 1
     assert escalations[0]["event_type"] == "aged_high_severity_unremediated"
     assert escalations[0]["source_entry_id"] == e["id"]
@@ -177,26 +175,21 @@ def test_sev5_never_stale_expires():
 def test_aged_escalation_idempotent():
     now = datetime(2027, 4, 15, tzinfo=timezone.utc)
     src = make_event(severity=3, ts="2026-04-15T00:00:00Z")
-    # First sweep emits escalation
     updated1, esc1, _ = cst.sweep([src], now)
     assert len(esc1) == 1
-    # Second sweep on updated list: must NOT emit another escalation
-    _, esc2, _ = cst.sweep(updated1, now)
+    _, esc2, _ = cst.sweep(updated1 + esc1, now)
     assert len(esc2) == 0
 
 
 def test_aged_escalation_idempotent_even_if_escalation_addressed():
     """Even if the escalation was addressed (issue created), the source is still aged
-    and unaddressed — but a new escalation must not fire because one already exists."""
+    and unaddressed -- but a new escalation must not fire because one already exists."""
     now = datetime(2027, 4, 15, tzinfo=timezone.utc)
     src = make_event(severity=3, ts="2026-04-15T00:00:00Z")
-    updated1, _, _ = cst.sweep([src], now)
-    # Mark the escalation as addressed
-    for ev in updated1:
-        if ev["event_type"] == "aged_high_severity_unremediated":
-            ev["addressed"] = True
-    # Second sweep: still no new escalation
-    _, esc2, _ = cst.sweep(updated1, now)
+    updated1, esc1, _ = cst.sweep([src], now)
+    for ev in esc1:
+        ev["addressed"] = True
+    _, esc2, _ = cst.sweep(updated1 + esc1, now)
     assert len(esc2) == 0
 
 
@@ -326,7 +319,7 @@ def test_append_event_atomic(tmp_path):
     e = make_event()
     # Strip the id so append computes it
     del e["id"]
-    eid = shadow_process.append_event(e, log)
+    eid = shadow_process.append_event(e, log_path=log)
     assert len(eid) == 64
     events = shadow_process.read_events(log)
     assert len(events) == 1
@@ -338,7 +331,64 @@ def test_append_multiple_preserves_order(tmp_path):
     for i in range(3):
         e = make_event(ts=f"2026-04-15T1{i}:00:00Z", session_id=f"s-{i}")
         del e["id"]
-        shadow_process.append_event(e, log)
+        shadow_process.append_event(e, log_path=log)
     events = shadow_process.read_events(log)
     assert len(events) == 3
     assert events[0]["ts"] < events[1]["ts"] < events[2]["ts"]
+
+
+# ----- Phase 14: classification-aware append -----
+
+def test_append_event_classifies_upstream(tmp_path):
+    upstream = tmp_path / "upstream.md"
+    local = tmp_path / "local.md"
+    import unittest.mock as mock
+    with mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream), \
+         mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local):
+        e = make_event()
+        del e["id"]
+        eid = shadow_process.append_event(e, attribution="UPSTREAM")
+    assert shadow_process.read_events(upstream)
+    assert not local.exists()
+
+
+def test_id_source_map_distinguishes_files(tmp_path):
+    local = tmp_path / "local.md"
+    upstream = tmp_path / "upstream.md"
+    e1 = make_event(session_id="s-local")
+    e2 = make_event(session_id="s-upstream")
+    shadow_process.append_event(e1, log_path=local)
+    shadow_process.append_event(e2, log_path=upstream)
+    import unittest.mock as mock
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        src_map = shadow_process.id_source_map()
+    stored_local = shadow_process.read_events(local)
+    stored_upstream = shadow_process.read_events(upstream)
+    assert src_map[stored_local[0]["id"]] == local
+    assert src_map[stored_upstream[0]["id"]] == upstream
+
+
+def test_escalation_events_not_dropped_during_sweep(tmp_path):
+    """Escalation events classified UPSTREAM survive the dual-file write-back."""
+    upstream = tmp_path / "upstream.md"
+    local = tmp_path / "local.md"
+    now = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    old_ts = (now - timedelta(days=100)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    e = make_event(ts=old_ts, severity=4, session_id="s-aged")
+    shadow_process.append_event(e, log_path=local)
+    import unittest.mock as mock
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        events = shadow_process.read_all_events()
+        updated, new_escalations, breach_sum = cst.sweep(events, now)
+        assert len(new_escalations) > 0
+        src_map = shadow_process.id_source_map()
+        for esc in new_escalations:
+            src_map[esc["id"]] = shadow_process.UPSTREAM_LOG_PATH
+        shadow_process.write_events_per_source(
+            updated + new_escalations, src_map,
+        )
+    escalations = shadow_process.read_events(upstream)
+    assert len(escalations) > 0
+    assert escalations[0]["event_type"] == "aged_high_severity_unremediated"

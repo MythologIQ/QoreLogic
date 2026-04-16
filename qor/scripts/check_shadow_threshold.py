@@ -37,11 +37,11 @@ def parse_ts(s: str) -> datetime:
 
 
 def sweep(events: list[dict], now: datetime) -> tuple[list[dict], list[dict], int]:
-    """Apply stale expiry + self-escalation; return (updated_events, new_escalations, breach_sum)."""
-    changed = False
-    cutoff = now - timedelta(days=STALE_DAYS)
+    """Apply stale expiry + self-escalation; return (updated_events, new_escalations, breach_sum).
 
-    # Index: source_entry_id -> escalation event (to check idempotence)
+    Pure function — no I/O. Caller is responsible for writing results.
+    Escalation events are always UPSTREAM (infrastructure-generated).
+    """
     existing_escalations: set[str] = {
         e["source_entry_id"]
         for e in events
@@ -59,7 +59,6 @@ def sweep(events: list[dict], now: datetime) -> tuple[list[dict], list[dict], in
             e["addressed"] = True
             e["addressed_ts"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
             e["addressed_reason"] = "stale"
-            changed = True
         elif e["severity"] >= 3 and e["id"] not in existing_escalations:
             new_event = {
                 "ts": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -84,7 +83,7 @@ def sweep(events: list[dict], now: datetime) -> tuple[list[dict], list[dict], in
 
     combined = events + new_escalations
     sum_unaddressed = sum(e["severity"] for e in combined if not e["addressed"])
-    return combined, new_escalations, sum_unaddressed
+    return events, new_escalations, sum_unaddressed
 
 
 def write_marker(sum_severity: int, unaddressed_ids: list[str]) -> None:
@@ -112,12 +111,16 @@ def remove_marker() -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.strip().splitlines()[0])
-    ap.add_argument("--log", type=Path, default=shadow_process.LOG_PATH)
+    ap.add_argument("--log", type=Path, default=None)
     ap.add_argument("--now", type=str, help="ISO-8601 UTC override for testing")
     ap.add_argument("--dry-run", action="store_true", help="Don't write changes back")
     args = ap.parse_args()
 
-    events = shadow_process.read_events(args.log)
+    single_file = args.log is not None
+    if single_file:
+        events = shadow_process.read_events(args.log)
+    else:
+        events = shadow_process.read_all_events()
     if not events:
         print("No events in log; nothing to check.")
         remove_marker()
@@ -126,11 +129,19 @@ def main() -> int:
     now = parse_ts(args.now) if args.now else datetime.now(timezone.utc)
     updated, new_escalations, sum_unaddr = sweep(events, now)
 
-    unaddr_ids = [e["id"] for e in updated if not e["addressed"]]
+    unaddr_ids = [e["id"] for e in (updated + new_escalations) if not e["addressed"]]
 
     if not args.dry_run:
         if new_escalations or any(e.get("addressed_reason") == "stale" for e in updated):
-            shadow_process.write_events(updated, args.log)
+            if single_file:
+                shadow_process.write_events(updated + new_escalations, args.log)
+            else:
+                src_map = shadow_process.id_source_map()
+                for esc in new_escalations:
+                    src_map[esc["id"]] = shadow_process.UPSTREAM_LOG_PATH
+                shadow_process.write_events_per_source(
+                    updated + new_escalations, src_map,
+                )
             print(f"Sweep wrote {len(new_escalations)} new escalation(s) and stale-expired events.")
 
     if sum_unaddr >= THRESHOLD:

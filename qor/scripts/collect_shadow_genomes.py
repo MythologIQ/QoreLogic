@@ -36,8 +36,8 @@ DEFAULT_CONFIG = Path.home() / ".qor" / "repos.json"
 
 CHECK_SCRIPT = "qor/scripts/check_shadow_threshold.py"
 ISSUE_SCRIPT = "qor/scripts/create_shadow_issue.py"
-SHADOW_LOG_REL = "docs/PROCESS_SHADOW_GENOME.md"
-
+UPSTREAM_LOG_REL = "docs/PROCESS_SHADOW_GENOME_UPSTREAM.md"
+LEGACY_LOG_REL = "docs/PROCESS_SHADOW_GENOME.md"
 
 def load_config(path: Path | None = None) -> dict:
     """Load config from $QOR_CONFIG, explicit path, or ~/.qor/repos.json."""
@@ -51,6 +51,18 @@ def load_config(path: Path | None = None) -> dict:
     jsonschema.validate(data, schema)
     return data
 
+def read_repo_shadow(repo_path: Path) -> list[dict]:
+    """Read shadow events: upstream-first, legacy fallback with warning."""
+    upstream = repo_path / UPSTREAM_LOG_REL
+    legacy = repo_path / LEGACY_LOG_REL
+    if upstream.exists():
+        return shadow_process.read_events(upstream)
+    events = shadow_process.read_events(legacy) if legacy.exists() else []
+    if events:
+        print(f"WARN: {repo_path.name}: only legacy log present; "
+              f"events pending classification to upstream doctrine.", file=sys.stderr)
+    return events
+
 
 def sweep_one(repo: dict) -> list[dict]:
     """Run per-repo threshold check; return unaddressed events tagged with source_repo."""
@@ -61,7 +73,6 @@ def sweep_one(repo: dict) -> list[dict]:
     if not repo.get("enabled", True):
         return []
 
-    # Delegate stale expiry + self-escalation to the per-repo tool.
     result = subprocess.run(
         [sys.executable, CHECK_SCRIPT],
         cwd=str(repo_path),
@@ -69,14 +80,12 @@ def sweep_one(repo: dict) -> list[dict]:
         text=True,
         timeout=30,
     )
-    # Exit 10 = breach (expected); 0 = under threshold; anything else = error.
     if result.returncode not in (0, 10):
         print(f"WARN: {repo['name']} check failed rc={result.returncode}: {result.stderr}",
               file=sys.stderr)
         return []
 
-    log = repo_path / SHADOW_LOG_REL
-    events = shadow_process.read_events(log)
+    events = read_repo_shadow(repo_path)
     unaddressed = [e for e in events if not e.get("addressed", False)]
     for e in unaddressed:
         e["source_repo"] = repo["name"]

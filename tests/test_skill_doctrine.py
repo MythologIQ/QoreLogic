@@ -263,3 +263,31 @@ def test_governance_doctrine_documents_github_hygiene():
         assert keyword in text, (
             f"doctrine-governance-enforcement.md missing required keyword: {keyword!r}"
         )
+
+
+# ----- Phase 14: shadow attribution skill wiring -----
+
+SHADOW_PROCESS_SKILL = SKILLS_ROOT / "governance" / "qor-shadow-process" / "SKILL.md"
+TRACK_SHADOW_SKILL = SKILLS_ROOT / "memory" / "track-shadow-genome.md"
+META_TRACK_SHADOW_SKILL = SKILLS_ROOT / "meta" / "qor-meta-track-shadow" / "SKILL.md"
+
+
+def test_shadow_process_skill_documents_attribution():
+    text = SHADOW_PROCESS_SKILL.read_text(encoding="utf-8")
+    assert "doctrine-shadow-attribution.md" in text or "UPSTREAM" in text, (
+        "qor-shadow-process/SKILL.md must reference attribution doctrine or UPSTREAM"
+    )
+
+
+def test_shadow_process_skill_documents_both_log_files():
+    text = SHADOW_PROCESS_SKILL.read_text(encoding="utf-8")
+    assert "PROCESS_SHADOW_GENOME.md" in text, "Must reference LOCAL log file"
+    assert "PROCESS_SHADOW_GENOME_UPSTREAM.md" in text, "Must reference UPSTREAM log file"
+
+
+def test_shadow_tracking_skills_reference_attribution_doctrine():
+    for path in (TRACK_SHADOW_SKILL, META_TRACK_SHADOW_SKILL):
+        text = path.read_text(encoding="utf-8")
+        assert "doctrine-shadow-attribution.md" in text, (
+            f"{path.name} must reference doctrine-shadow-attribution.md"
+        )

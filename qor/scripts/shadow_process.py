@@ -12,12 +12,15 @@ import os
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Literal
 
 import jsonschema
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SCHEMA_PATH = REPO_ROOT / "qor" / "gates" / "schema" / "shadow_event.schema.json"
-LOG_PATH = REPO_ROOT / "docs" / "PROCESS_SHADOW_GENOME.md"
+LOCAL_LOG_PATH = REPO_ROOT / "docs" / "PROCESS_SHADOW_GENOME.md"
+UPSTREAM_LOG_PATH = REPO_ROOT / "docs" / "PROCESS_SHADOW_GENOME_UPSTREAM.md"
+LOG_PATH = LOCAL_LOG_PATH
 
 _SCHEMA_CACHE: dict | None = None
 
@@ -51,10 +54,25 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def append_event(event: dict, log_path: Path | None = None) -> str:
+def log_path_for(attribution: Literal["UPSTREAM", "LOCAL"]) -> Path:
+    if attribution == "UPSTREAM":
+        return UPSTREAM_LOG_PATH
+    if attribution == "LOCAL":
+        return LOCAL_LOG_PATH
+    raise ValueError(f"Invalid attribution: {attribution!r}")
+
+
+def append_event(
+    event: dict,
+    *,
+    attribution: Literal["UPSTREAM", "LOCAL"] | None = None,
+    log_path: Path | None = None,
+) -> str:
     """Validate, id, append JSONL line. Returns computed id."""
     if log_path is None:
-        log_path = LOG_PATH
+        if attribution is None:
+            raise ValueError("append_event requires attribution=... or log_path=...")
+        log_path = log_path_for(attribution)
     validate(event)
     event_id = compute_id(event)
     event_with_id = {"id": event_id, **event}
@@ -119,3 +137,29 @@ def write_events(events: list[dict], log_path: Path | None = None) -> None:
         tf.write(content)
         tmp_path = tf.name
     os.replace(tmp_path, log_path)
+
+
+def read_all_events() -> list[dict]:
+    return read_events(LOCAL_LOG_PATH) + read_events(UPSTREAM_LOG_PATH)
+
+
+def id_source_map() -> dict[str, Path]:
+    out: dict[str, Path] = {}
+    for e in read_events(LOCAL_LOG_PATH):
+        out[e["id"]] = LOCAL_LOG_PATH
+    for e in read_events(UPSTREAM_LOG_PATH):
+        out[e["id"]] = UPSTREAM_LOG_PATH
+    return out
+
+
+def write_events_per_source(
+    events: list[dict],
+    src_map: dict[str, Path],
+) -> None:
+    by_file: dict[Path, list[dict]] = {}
+    for e in events:
+        path = src_map.get(e["id"])
+        if path is not None:
+            by_file.setdefault(path, []).append(e)
+    for path, batch in by_file.items():
+        write_events(batch, path)
