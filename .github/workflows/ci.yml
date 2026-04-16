@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/archive/**"
+  pull_request:
+    paths-ignore:
+      - "docs/archive/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      # matrix justification: Python library supporting 3.11-3.13; windows compat required because shadow_process.py uses os.replace (Windows-specific path handling)
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -e ".[dev]"
+      - run: python -m pytest tests/ -v

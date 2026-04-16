@@ -4,14 +4,56 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qor-logic"
-version = "0.9.0"
+version = "0.10.0"
 description = "QorLogic S.H.I.E.L.D. governance skills for Claude Code, Kilo Code, and future AI coding hosts"
+readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "Proprietary" }
+license = { text = "BSL-1.1" }
+authors = [{ name = "MythologIQ Labs, LLC" }]
+keywords = ["governance", "ai", "claude-code", "kilo-code", "codex", "sdlc", "skills"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Quality Assurance",
+]
 dependencies = ["jsonschema>=4"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+
+[project.scripts]
+qorlogic = "qor.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/MythologIQ-Labs-LLC/Qor-logic"
+Repository = "https://github.com/MythologIQ-Labs-LLC/Qor-logic"
+Issues = "https://github.com/MythologIQ-Labs-LLC/Qor-logic/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["qor*"]
+exclude = ["qor.vendor*", "qor.experimental*", "tests*"]
+
+[tool.setuptools.package-data]
+qor = [
+    "skills/**/*.md",
+    "references/*.md",
+    "agents/**/*.md",
+    "gates/*.md",
+    "gates/schema/*.json",
+    "platform/**/*.md",
+    "templates/*",
+    "dist/variants/**/*.md",
+    "dist/variants/**/*.json",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
