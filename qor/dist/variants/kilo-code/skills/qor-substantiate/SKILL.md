@@ -189,13 +189,13 @@ SESSION_ID=$(cat .qor/session/current 2>/dev/null || echo default)
 
 # Re-verify the intent lock captured at /qor-implement Step 5.5.
 # Fails if plan, audit, or HEAD commit drifted since capture.
-python tools/reliability/intent-lock.py verify --session "$SESSION_ID" || ABORT
+python qor/reliability/intent-lock.py verify --session "$SESSION_ID" || ABORT
 
 # Verify current skill is registered and frontmatter is well-formed.
-python tools/reliability/skill-admission.py qor-substantiate || ABORT
+python qor/reliability/skill-admission.py qor-substantiate || ABORT
 
 # Verify all /qor-* handoff references across skills resolve to real skills.
-python tools/reliability/gate-skill-matrix.py || ABORT
+python qor/reliability/gate-skill-matrix.py || ABORT
 ```
 
 Any ABORT leaves the session unsealed. Operator must resolve the drift (re-audit, re-admit, or fix broken handoff) and re-run substantiation.

@@ -5,12 +5,13 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/License-BSL--1.1-orange" alt="License: BSL-1.1">
-  <img src="https://img.shields.io/badge/Skills-23-blue" alt="Skills: 23">
+  <img src="https://img.shields.io/badge/Skills-27-blue" alt="Skills: 27">
   <img src="https://img.shields.io/badge/Bundles-5-blue" alt="Bundles: 5">
   <img src="https://img.shields.io/badge/Agents-13-blue" alt="Agents: 13">
-  <img src="https://img.shields.io/badge/Tests-154%20passing-brightgreen" alt="Tests: 154 passing">
+  <img src="https://img.shields.io/badge/Tests-263%20passing-brightgreen" alt="Tests: 263 passing">
   <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
-  <img src="https://img.shields.io/badge/Ledger-Entry%20%2320-green" alt="Ledger Entry 20">
+  <img src="https://img.shields.io/badge/Ledger-Entry%20%2355-green" alt="Ledger Entry 55">
+  <img src="https://img.shields.io/badge/Version-0.9.0-blue" alt="Version: 0.9.0">
 </p>
 
 ---
@@ -156,18 +157,19 @@ Or consume the variant outputs directly: `qor/dist/variants/claude/` (or `kilo-c
 ```
 Qor-logic/
   qor/                      Single source of truth (edit here)
-    skills/<category>/      23 skills + 5 bundles across governance/sdlc/memory/meta
+    skills/<category>/      27 skills + 5 bundles across governance/sdlc/memory/meta
     agents/<category>/      13 qor-scoped agent personas
     vendor/                 Third-party skills + agents (~65 + wshobson collection)
-    scripts/                Runtime: ledger, gates, shadow, platform, compile, collector
+    scripts/                Runtime: ledger, gates, shadow, platform, compile, collector, remediate
+    reliability/            Intent Lock, Skill Admission, Gate-to-Skill Matrix (Phase 17)
     gates/                  chain.md, workflow-bundles.md, delegation-table.md, schemas
     platform/               capabilities.md, detect.md, 5 profiles
-    references/             doctrines + patterns + examples
+    references/             doctrines + patterns + examples (incl. doctrine-shadow-genome-countermeasures.md)
     experimental/           non-canonical research
     templates/              doc templates
     dist/variants/          generated outputs (claude, kilo-code, codex stub)
-  tests/                    154 tests (unit + integration + e2e + bundle contract)
-  docs/                     Plans, ledger, shadow genomes, manifests, archive
+  tests/                    263 tests (unit + integration + e2e + bundle contract)
+  docs/                     Plans, ledger, shadow genomes, manifests, archive, security audit
   CLAUDE.md                 Drop-in token-efficiency defaults
   pyproject.toml            Python 3.11+, pytest, jsonschema
 ```

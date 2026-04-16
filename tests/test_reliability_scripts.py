@@ -1,4 +1,4 @@
-"""Tests for tools/reliability/ enforcement scripts.
+"""Tests for qor/reliability/ enforcement scripts.
 
 TDD-first: these tests are written before implementation per Phase 17 plan.
 Covers Track 1 (intent-lock: 4), Track 2 (skill-admission: 3),
@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RELIABILITY_DIR = REPO_ROOT / "tools" / "reliability"
+RELIABILITY_DIR = REPO_ROOT / "qor" / "reliability"
 INTENT_LOCK = RELIABILITY_DIR / "intent-lock.py"
 SKILL_ADMISSION = RELIABILITY_DIR / "skill-admission.py"
 GATE_SKILL_MATRIX = RELIABILITY_DIR / "gate-skill-matrix.py"
@@ -257,20 +257,20 @@ def test_reliability_unwired_in_skills() -> None:
 
     # Proximity-anchored (SG-035): step header within 500 chars of invocation path.
     impl_pattern = re.compile(
-        r"Step 5\.5.{0,1500}tools/reliability/intent-lock\.py", re.DOTALL,
+        r"Step 5\.5.{0,1500}qor/reliability/intent-lock\.py", re.DOTALL,
     )
     assert impl_pattern.search(implement), (
         "qor-implement must invoke intent-lock.py near Step 5.5"
     )
 
     sub_pattern_lock = re.compile(
-        r"Step 4\.6.{0,2000}tools/reliability/intent-lock\.py", re.DOTALL,
+        r"Step 4\.6.{0,2000}qor/reliability/intent-lock\.py", re.DOTALL,
     )
     sub_pattern_admit = re.compile(
-        r"Step 4\.6.{0,2000}tools/reliability/skill-admission\.py", re.DOTALL,
+        r"Step 4\.6.{0,2000}qor/reliability/skill-admission\.py", re.DOTALL,
     )
     sub_pattern_matrix = re.compile(
-        r"Step 4\.6.{0,2000}tools/reliability/gate-skill-matrix\.py", re.DOTALL,
+        r"Step 4\.6.{0,2000}qor/reliability/gate-skill-matrix\.py", re.DOTALL,
     )
     assert sub_pattern_lock.search(substantiate), (
         "qor-substantiate must invoke intent-lock.py near Step 4.6"

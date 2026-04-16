@@ -153,7 +153,7 @@ Capture a fingerprint of the implementer's intent (plan + PASS audit + HEAD comm
 ```bash
 PLAN_PATH=$(python -c "import sys; sys.path.insert(0,'qor/scripts'); from governance_helpers import current_phase_plan_path; print(current_phase_plan_path())")
 SESSION_ID=$(cat .qor/session/current 2>/dev/null || echo default)
-python tools/reliability/intent-lock.py capture \
+python qor/reliability/intent-lock.py capture \
   --session "$SESSION_ID" \
   --plan "$PLAN_PATH" \
   --audit .agent/staging/AUDIT_REPORT.md

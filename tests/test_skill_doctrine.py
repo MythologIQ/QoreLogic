@@ -203,18 +203,18 @@ def test_delegation_table_lists_every_skill():
     assert not missing, "qor-* skills missing from delegation-table:\n  " + "\n  ".join(missing)
 
 
-# ----- S-10: tools/reliability/ references must point at real scripts (Phase 17) -----
+# ----- S-10: qor/reliability/ references must point at real scripts (Phase 17) -----
 
 def test_tools_reliability_references_resolve():
-    """Every tools/reliability/<script>.py referenced in a skill must exist on disk."""
+    """Every qor/reliability/<script>.py referenced in a skill must exist on disk."""
     required = set()
     for skill_md in _all_skill_md():
         text = skill_md.read_text(encoding="utf-8")
-        for match in re.finditer(r"tools/reliability/([a-z0-9][\w\-]*\.py)", text):
+        for match in re.finditer(r"qor/reliability/([a-z0-9][\w\-]*\.py)", text):
             required.add(match.group(1))
     missing = [
         s for s in sorted(required)
-        if not (REPO_ROOT / "tools" / "reliability" / s).is_file()
+        if not (REPO_ROOT / "qor" / "reliability" / s).is_file()
     ]
     assert not missing, (
         "Skills reference tools/reliability scripts that do not exist:\n  "
