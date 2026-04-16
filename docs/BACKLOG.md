@@ -21,7 +21,7 @@
 - [x] [B11] Consolidate utility skills — archive, merge, distill (Complete)
 - [x] [B12] Wire qor-document → qor-technical-writer subagent dispatch (Complete)
 
-- [ ] [B13] Encode AI code quality doctrine into QorLogic governance. Add explicit guidance for semantic vs pragmatic functions, stronger model-shaping rules, and anti-slop guardrails inspired by Ben Swerdlow's AI coding write-up at https://aicode.swerdlow.dev/
+- [x] [B13] Encode AI code quality doctrine into QorLogic governance (Complete — doctrine-code-quality.md, audit checklist + implement patterns updated)
 
 ## Lifecycle Coverage
 
@@ -43,17 +43,9 @@ Cross-cutting: RESEARCH ✓, DEBUG ✓, STATUS ✓, VALIDATE ✓, ORGANIZE ✓, 
 | qor-implement | (test-writer) | PROPOSED |
 | qor-substantiate | (verification-auditor) | PROPOSED |
 
-## Final Inventory
+## Inventory
 
-| Category | Count | Location |
-|----------|-------|----------|
-| Governance skills | 17 | ingest/internal/governance/ — ALL COMPLIANT |
-| Agent personas | 6 | ingest/internal/agents/ |
-| Reference docs | 14 | ingest/internal/references/ (7 qor-templates + 7 patterns) |
-| Utility skills | 4 | ingest/internal/utilities/ (meta-skills + generic) |
-| Third-party agents | 229 | ingest/third-party/agents/ (3 enhanced) |
-| Archived | 5 | ingest/experimental/ |
-| Scripts/rules | 402 | ingest/scripts/ |
+Inventory maintained live in the repo tree; see `qor/skills/`, `qor/references/`, `qor/agents/`, `qor/scripts/`, `qor/experimental/`. Use `find qor -name SKILL.md` or equivalent to enumerate at the current HEAD.
 
 ## Remaining Work
 

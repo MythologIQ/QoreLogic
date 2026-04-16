@@ -1371,4 +1371,95 @@ SHA256(content_hash + previous_hash)
 ---
 
 *Chain integrity: VALID*
-*Session: OPEN (implementation gate unlocked)*
+
+---
+
+### Entry #42: IMPLEMENTATION — Phase 16 Governance Polish
+
+**Timestamp**: 2026-04-16
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase16-v2-governance-polish.md`
+
+**Files Created**:
+- `qor/skills/sdlc/qor-plan/references/step-extensions.md` (51 lines; Step 0.5 + Step 1.a verbatim)
+
+**Files Modified**:
+- `docs/BACKLOG.md` (Track A: B13 checkbox fixed; stale `ingest/internal/` inventory replaced with live-tree pointer)
+- `qor/skills/governance/qor-shadow-process/SKILL.md` (Track A: " — deferred" removed from line 27)
+- `qor/skills/governance/qor-audit/SKILL.md` (Track B: Step 3 cites countermeasures doctrine; 237 → 239 lines, +2 actual vs. +3 predicted because a blank already existed)
+- `qor/skills/sdlc/qor-plan/SKILL.md` (Track C: Steps 0.5 and 1.a bodies replaced with pointers; 278 → 238 lines)
+- `tests/test_shadow_genome_doctrine.py` (+3 tests: cite, existence, movement)
+- `tests/test_skill_doctrine.py` (1 test updated: `test_plan_skill_documents_branch_creation` now checks both SKILL.md and step-extensions.md, accommodating the split knowledge surface)
+
+**Test Results**: 231 passed + 6 skipped (deterministic 2x). +3 from 228 baseline.
+
+**Drift**: clean (123 files after BUILD_REGEN=1; step-extensions.md now in variant distribution).
+**Ledger chain**: Entries #12-#41 verified.
+
+**Implementation deviations from plan v2**:
+1. qor-audit/SKILL.md delta was +2 lines (not +3) because a blank line already existed after the Step 3 header. Final size 239, well under Razor.
+2. `test_plan_skill_documents_branch_creation` (pre-existing test) was broken by Track C's content move — unanchored doctrine test checking `"phase/"` in SKILL.md body. Updated to read combined surface (SKILL.md + step-extensions.md). Minor SG-035 adjacent fix; documented here rather than creating a sub-remediation loop.
+
+**Content Hash** (implementation-manifest):
+`b5202ab4816919cbf2a14da0d3b52c2fc5faf70d8f6ddf531bd965eaf9c2d33f`
+
+**Previous Hash**:
+`c25166aee5fb780510e7f1d1b738444fe70936d7121fb13b9d026d01c9ce9a4f`
+
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= ff43f652619759661625a6ada2bc6ebbf27429a7a1ac30beae402c13c069b3ca
+```
+
+**Decision**: Phase 16 Reality matches Promise. Doctrine now cited by both Planner (qor-plan Step 2b) and Judge (qor-audit Step 3). qor-plan/SKILL.md shrunk to 238 lines (under Razor 250 for the first time since Phase 13). Housekeeping debt cleared.
+
+---
+
+*Chain integrity: VALID*
+
+---
+
+### Entry #43: SESSION SEAL — Phase 16 v2 substantiated
+
+**Timestamp**: 2026-04-16
+**Phase**: SUBSTANTIATE
+**Author**: Judge
+**Risk Grade**: L1
+**Verdict**: PASS (Reality = Promise)
+
+**Target**: `docs/plan-qor-phase16-v2-governance-polish.md`
+**Change Class**: `feature`
+**Version**: `0.5.0 → 0.6.0`
+**Tag**: `v0.6.0` (pending operator decision)
+
+**Verification Results**:
+- Version gate: PASS (0.6.0 > 0.5.0)
+- Reality audit: PASS (1 new file + 4 modified skills/docs + 2 modified test files)
+- Test discipline: 231 passed + 6 skipped, deterministic 2x
+- Section 4 Razor: PASS (qor-audit 239; qor-plan 238; step-extensions 51; BACKLOG 60)
+- Drift: clean (123 files, no drift after BUILD_REGEN=1)
+- Ledger chain: Entries #12-#42 verified
+
+**Content Hash** (substantiate-manifest):
+`14701256f7a9c326cf674863c09785b7af91f5c992818b5f5f667b6d0eb30a9c`
+
+**Previous Hash**:
+`ff43f652619759661625a6ada2bc6ebbf27429a7a1ac30beae402c13c069b3ca`
+
+**Chain Hash** (Merkle seal):
+```
+SHA256(content_hash + previous_hash)
+= fe327680d3fbf3dfce652905d9d424ced9738a9bebb031c21b69d07a459f2f2c
+```
+
+**Decision**: Phase 16 v2 sealed. Governance polish complete: doctrine cited from both tribunal sides, qor-plan/SKILL.md under Razor, housekeeping debt cleared. SG-036 dogfood lesson applied throughout v2 remediation.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED*
+*Merkle seal: fe327680...*

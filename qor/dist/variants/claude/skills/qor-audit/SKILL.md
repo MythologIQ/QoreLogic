@@ -87,6 +87,8 @@ Report: "No blueprint found. Governor must complete ENCODE phase first."
 
 ### Step 3: Adversarial Audit
 
+Before running the passes below, consult `qor/references/doctrine-shadow-genome-countermeasures.md` — the catalog of known failure patterns the Judge checks against. Cite specific SG IDs in the verdict when they apply.
+
 #### Security Pass (L3 Violations)
 
 Scan for critical security issues:

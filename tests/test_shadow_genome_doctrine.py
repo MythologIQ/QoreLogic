@@ -153,3 +153,40 @@ def test_async_keyword_only_functions_detected(tmp_path):
     )
     kwonly = _collect_keyword_only_functions(src)
     assert "async_target" in kwonly, "AsyncFunctionDef not discovered"
+
+
+# ----- Phase 16: governance polish -----
+
+QOR_AUDIT_SKILL = REPO_ROOT / "qor" / "skills" / "governance" / "qor-audit" / "SKILL.md"
+STEP_EXTENSIONS = (
+    REPO_ROOT / "qor" / "skills" / "sdlc" / "qor-plan" / "references" / "step-extensions.md"
+)
+
+
+def test_qor_audit_skill_cites_countermeasures_doctrine():
+    text = QOR_AUDIT_SKILL.read_text(encoding="utf-8")
+    assert "doctrine-shadow-genome-countermeasures.md" in text, (
+        "qor-audit/SKILL.md must cite the countermeasures doctrine in its adversarial sweep"
+    )
+
+
+def test_qor_plan_step_extensions_reference_exists():
+    assert STEP_EXTENSIONS.exists(), f"Missing: {STEP_EXTENSIONS}"
+    body = STEP_EXTENSIONS.read_text(encoding="utf-8")
+    assert "Step 0.5" in body
+    assert "Step 1.a" in body
+    skill = QOR_PLAN_SKILL.read_text(encoding="utf-8")
+    assert "qor/skills/sdlc/qor-plan/references/step-extensions.md" in skill, (
+        "qor-plan/SKILL.md must cite step-extensions.md"
+    )
+
+
+def test_step_extensions_content_moved_not_copied():
+    """V-2 closure: verbatim extraction must move content, not copy it."""
+    skill = QOR_PLAN_SKILL.read_text(encoding="utf-8")
+    extensions = STEP_EXTENSIONS.read_text(encoding="utf-8")
+    for anchor in ("InterdictionError", "capability_shortfall"):
+        assert anchor in extensions, f"{anchor!r} must appear in step-extensions.md"
+        assert anchor not in skill, (
+            f"{anchor!r} must NOT appear in qor-plan/SKILL.md (content should be moved, not copied)"
+        )

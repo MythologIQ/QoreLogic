@@ -24,7 +24,7 @@ phase: governance
 
 Record **process-level** failures (distinct from `docs/SHADOW_GENOME.md` which records **audit-verdict** failures). Analogous to the Shadow Genome concept but at the meta-process layer — failures of how we work, not failures in the artifact itself.
 
-Events flow into a threshold-gated GitHub issue pipeline (see `qor/scripts/check_shadow_threshold.py` and `create_shadow_issue.py` — deferred).
+Events flow into a threshold-gated GitHub issue pipeline (see `qor/scripts/check_shadow_threshold.py` and `create_shadow_issue.py`).
 
 ## Event Schema
 

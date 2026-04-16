@@ -228,8 +228,10 @@ _CHANGE_CLASS_BOLD_RE = re.compile(
 
 
 def test_plan_skill_documents_branch_creation():
-    text = QOR_PLAN_SKILL.read_text(encoding="utf-8")
-    assert "phase/" in text, "qor-plan/SKILL.md must document phase/ branch creation"
+    skill = QOR_PLAN_SKILL.read_text(encoding="utf-8")
+    extensions = (SKILLS_ROOT / "sdlc" / "qor-plan" / "references" / "step-extensions.md")
+    combined = skill + (extensions.read_text(encoding="utf-8") if extensions.exists() else "")
+    assert "phase/" in combined, "qor-plan skill surface must document phase/ branch creation"
 
 
 def test_substantiate_skill_documents_version_bump():
