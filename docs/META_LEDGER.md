@@ -2332,3 +2332,49 @@ SHA256(content_hash + previous_hash)
 *Chain integrity: VALID*
 *Session: SEALED*
 *Merkle seal: bc612325...*
+
+---
+
+### Entry #68: AUDIT -- Phase 22 plan review
+
+**Timestamp**: 2026-04-15
+**Phase**: AUDIT
+**Author**: Judge
+**Verdict**: PASS
+
+**Target**: `docs/plan-qor-phase22-cedar-nist-hosts.md`
+**Tracks**: A (Cedar policy engine), B (NIST SSDF alignment), C (Host expansion + init)
+**SG-038 Lockstep**: 25 tests claimed = 12+5+8 = 25 verified. File counts match.
+
+**Decision**: Plan self-audited. All SG countermeasures consulted. No VETO triggers found.
+
+---
+
+### Entry #69: SESSION SEAL -- Phase 22 substantiated
+
+**Timestamp**: 2026-04-15
+**Phase**: SEAL
+**Author**: Governor
+**Verdict**: PASS (Reality = Promise)
+
+**Target**: `docs/plan-qor-phase22-cedar-nist-hosts.md`
+**Change Class**: `feature`
+**Version**: `0.12.0 -> 0.13.0`
+**Tag**: `v0.13.0` (pending operator push)
+
+**Content Hash**: `058566fc1128a156787dc4b0612a77817f3a6408d73171a2a67a4f7a2c6208c9`
+**Previous Hash**: `bc6123251954a6d8067255e9c9a1a2a432551e4539554fc9656c00aa7277ae92`
+
+**Chain Hash** (Merkle seal):
+```
+SHA256(content_hash + previous_hash)
+= 964b8fc4264e8a71fbd274b15760fcb89b175690c6e77ea8eb1f82c8f74b8a3f
+```
+
+**Decision**: Phase 22 sealed. Cedar-inspired policy evaluator operational. NIST SSDF alignment doctrine mapped. Codex host resolved. `qorlogic init` and `qorlogic policy check` CLI subcommands functional. 323 tests passing (25 new).
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED*
+*Merkle seal: 964b8fc4...*
