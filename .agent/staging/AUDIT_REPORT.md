@@ -1,7 +1,7 @@
-# AUDIT REPORT — plan-qor-phase20-v3-import-migration.md
+# AUDIT REPORT -- plan-qor-phase21-cli-harness-polish.md
 
-**Tribunal Date**: 2026-04-16
-**Target**: `docs/plan-qor-phase20-v3-import-migration.md`
+**Tribunal Date**: 2026-04-15
+**Target**: `docs/plan-qor-phase21-cli-harness-polish.md`
 **Risk Grade**: L1
 **Auditor**: The QorLogic Judge
 
@@ -13,17 +13,30 @@
 
 ### Executive Summary
 
-Plan v3 closes Entry #61 V-1 with a single-line pyproject addition (`addopts = "-m 'not integration'"`). Mechanism verified: regular `pytest tests/` applies addopts filter → integration tests excluded (4 skipped); CI install-smoke job passes explicit `-m integration` → CLI replaces addopts (pytest last-`-m`-wins) → only 4 integration tests run. All 3 Entry #60 closures preserved (Scripts 15, Modified 21, 7 remaining). v3 propagated the pyproject.toml touchpoint into Modified total correctly. Design substance unchanged from v1: `qor.resources` + `qor.workdir` + import migration + REPO_ROOT split + install-smoke CI. Fresh adversarial sweep: no new violations. Implementation gate UNLOCKED.
+Phase 21 plan closes all 7 remaining gaps from RESEARCH_BRIEF.md (GAP-HAR-01/02/03, GAP-CI-03/04, GAP-IMP-04, GAP-PKG-06). 4 tracks, 20 tests, 11 file operations. SG-038 lockstep verified across all enumerations. SG-016 grounding verified via wc -l and grep. SG-033 blast radius for compile.py rename covers all 3 Python import sites + 1 shell reference. Implementation gate UNLOCKED.
 
-### Audit Results
+### SG-038 Lockstep
 
-All passes: PASS. (Security, Ghost UI, Razor, Dependency, Orphan, Macro-Level — all clean per v2 assessment; v3 changes only pyproject config.)
+| Claim | Value | Occurrences | Status |
+|---|---|---|---|
+| Gap count | 7 | table(7 rows), header, success(7 IDs), constraints | PASS |
+| Track count | 4 | Track A/B/C/D headers | PASS |
+| Test count | 20 | numbered 1-20, "+20 new", "298 passed" (278+20) | PASS |
+| File ops | 11 | 2+7+1+1=11 | PASS |
+| Remaining gaps | 0 | 18-11-7=0 | PASS |
 
-### Entry #61 Closure Verification
+### SG-016 Grounding
 
-| ID | Status | Verification |
+| Claim | Verification | Status |
 |---|---|---|
-| V-1 (skip mechanism) | CLOSED | `addopts = "-m 'not integration'"` proposed in Track F. Judge verified: (a) pytest applies addopts before CLI; (b) CLI `-m integration` replaces addopts `-m` (last wins); (c) regular test job inherits addopts → 4 skipped; (d) install-smoke job overrides with explicit `-m integration` → 4 run. (e) no `addopts` currently in pyproject (grep verified empty). |
+| cli.py: 47 lines | `wc -l qor/cli.py` = 47 | PASS |
+| .gitignore: 19 lines | `wc -l .gitignore` = 19 | PASS |
+| ci.yml: 46 lines | `wc -l ci.yml` = 46 | PASS |
+| compile.py imports: 3 Python + 1 shell | grep verified | PASS |
+
+### SG-033 Blast Radius (compile.py rename)
+
+3 Python sites: check_variant_drift.py:14, test_compile.py:9, test_e2e.py:241. 1 shell: .githooks/pre-commit:21. All enumerated in plan.
 
 ### Fresh Adversarial Findings
 
@@ -31,10 +44,10 @@ None.
 
 ### Verdict Hash
 
-**Content Hash**: `bbcc9d32db7d0d43841e998629b3530b44e170477672859cdbffedf7d46486f4`
-**Previous Hash**: `02c379b80148a5a43800d01c901579fb68cdf55a15e36e981271b481be36eed3`
-**Chain Hash**: `0ace3b3e0a4972ddc98092b8d540601bb5eae172d645362bee398c1ab0b1b1ef`
-(sealed as Entry #62)
+**Content Hash**: `7932713770743b9b6d97f98a871893ce7e7848eb49b14008841cfae9a7ed6448`
+**Previous Hash**: `887c8b5cc7652e2bf149873157b618cb139ead0ef06ba47c08af9b6c2e019600`
+**Chain Hash**: `61791255a459835a4822244f9e2ca22c623b2f9a69c080466e48adbb88f4a63c`
+(to be sealed as Entry #65)
 
 ---
 _This verdict is binding._
