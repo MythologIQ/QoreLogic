@@ -38,6 +38,11 @@ ISSUE_SCRIPT = [sys.executable, "-m", "qor.scripts.create_shadow_issue"]
 UPSTREAM_LOG_REL = "docs/PROCESS_SHADOW_GENOME_UPSTREAM.md"
 LEGACY_LOG_REL = "docs/PROCESS_SHADOW_GENOME.md"
 
+
+def validate_repo_path(path: Path) -> bool:
+    """Validate repo path contains qor/ or docs/ directory marker."""
+    return (path / "qor").is_dir() or (path / "docs").is_dir()
+
 def load_config(path: Path | None = None) -> dict:
     """Load config from $QOR_CONFIG, explicit path, or ~/.qor/repos.json."""
     if path is None:
@@ -68,6 +73,9 @@ def sweep_one(repo: dict) -> list[dict]:
     repo_path = Path(repo["path"])
     if not repo_path.exists():
         print(f"WARN: repo path not found: {repo_path}", file=sys.stderr)
+        return []
+    if not validate_repo_path(repo_path):
+        print(f"WARN: repo path lacks qor/ or docs/ marker: {repo_path}", file=sys.stderr)
         return []
     if not repo.get("enabled", True):
         return []

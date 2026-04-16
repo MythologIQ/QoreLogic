@@ -14,11 +14,12 @@ Repo defaults to the current working directory. Writes to <repo>/.qor/intent-loc
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import hashlib
 import json
+import re
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -45,9 +46,9 @@ def _head_commit(repo: Path) -> str:
 
 
 def _audit_has_pass(audit_path: Path) -> bool:
-    """Return True if the audit file contains a PASS verdict line."""
+    """Return True if the audit file contains a VERDICT...PASS line."""
     body = audit_path.read_text(encoding="utf-8", errors="replace")
-    return "PASS" in body
+    return bool(re.search(r"VERDICT.*PASS", body, re.IGNORECASE))
 
 
 def _fingerprint_path(repo: Path, session: str) -> Path:
@@ -76,7 +77,7 @@ def capture(args: argparse.Namespace) -> int:
         "audit_path": str(audit),
         "audit_hash": _hash_file(audit),
         "head_commit": _head_commit(repo),
-        "captured_ts": dt.datetime.utcnow().isoformat() + "Z",
+        "captured_ts": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
     out = _fingerprint_path(repo, args.session)

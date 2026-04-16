@@ -50,13 +50,14 @@ def test_chain_hash_recomputable_synthetic():
 
     Per doctrine-test-discipline.md Rule 3: tests must not assert against live ledger
     entries that change outside the test. Use synthetic inputs with computed expected.
+    Phase 23: chain_hash now uses "|" separator between content and prev.
     """
     import hashlib
     content = "a" * 64
     prev = "b" * 64
     # Compute expected via the same algorithm we're testing — inverts to identity check
     # but still validates the hash function isn't silently broken (e.g., returns "")
-    expected = hashlib.sha256((content + prev).encode("utf-8")).hexdigest()
+    expected = hashlib.sha256((content + "|" + prev).encode("utf-8")).hexdigest()
     assert lh.chain_hash(content, prev) == expected
     assert len(lh.chain_hash(content, prev)) == 64
 

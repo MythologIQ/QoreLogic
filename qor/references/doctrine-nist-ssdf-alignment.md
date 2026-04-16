@@ -48,3 +48,29 @@ AI augmentation (SP 800-218A): The `/qor-plan` -> `/qor-audit` -> `/qor-implemen
 | RV.3.1 -- Communicate vulnerability information | Shadow genome upstream reporting | `docs/PROCESS_SHADOW_GENOME_UPSTREAM.md` |
 
 AI augmentation (SP 800-218A): Shadow genome countermeasures doctrine (`SG-016` through `SG-038`) catalogues AI-specific failure patterns and their mechanical mitigations, addressing the AI-introduced vulnerability surface described in SP 800-218A.
+
+## Evidence Collection
+
+Starting with Phase 23, ledger entries include `**SSDF Practices**: PW.1.1, PS.1.1` tags mapping each governance decision to the SSDF practice it satisfies. This transforms the alignment mapping above into verifiable evidence.
+
+### How it works
+
+1. Each `/qor-substantiate` seal adds SSDF practice tags to the ledger entry body.
+2. `qorlogic compliance report` reads META_LEDGER.md, extracts practice tags, and reports coverage.
+3. Coverage gaps (practices with zero entries) indicate areas where governance evidence is missing.
+
+### Running the report
+
+```
+$ qorlogic compliance report
+SSDF Practice Coverage:
+  PO.1.1: 3 entries (Entry #14, Entry #31, Entry #45)
+  PS.1.1: 5 entries (Entry #33, Entry #35, ...)
+  PW.1.1: 12 entries
+  RV.1.1: 2 entries
+Coverage: 4 practice groups, 4 individual practices, 22 total tags
+```
+
+### Practice tag format
+
+Tags use the SSDF practice ID format: `{GROUP}.{TASK}.{SUBTASK}` (e.g., `PW.1.1`, `PS.2.1`). Multiple practices per entry are comma-separated.

@@ -31,6 +31,12 @@ def content_hash(path: Path) -> str:
 
 
 def chain_hash(content: str, prev: str) -> str:
+    """SHA256(content + "|" + prev) -- Phase 23 format with separator."""
+    return hashlib.sha256((content + "|" + prev).encode("utf-8")).hexdigest()
+
+
+def legacy_chain_hash(content: str, prev: str) -> str:
+    """SHA256(content + prev) -- pre-Phase 23 format without separator."""
     return hashlib.sha256((content + prev).encode("utf-8")).hexdigest()
 
 
@@ -83,35 +89,60 @@ CHAIN_HASH_RE = re.compile(r"Chain Hash.*?= ([0-9a-f]{64})", re.DOTALL)
 
 
 def verify(ledger_md: Path) -> int:
-    """Verify chain integrity of META_LEDGER.md. Returns exit code."""
+    """Verify chain integrity of META_LEDGER.md. Returns exit code.
+
+    Tries new format (with separator) first, falls back to legacy (without).
+    Reports count of entries skipped due to non-matching markup.
+    """
     text = ledger_md.read_text(encoding="utf-8")
     entries = []
-    # Split on entry markers, skip first (preamble)
     parts = ENTRY_RE.split(text)
-    # parts = [preamble, "1", body1, "2", body2, ...]
     for i in range(1, len(parts), 2):
         num = int(parts[i])
         body = parts[i + 1] if i + 1 < len(parts) else ""
         entries.append((num, body))
 
     errors = 0
+    skipped = 0
     for num, body in entries:
         ch = CONTENT_HASH_RE.search(body)
         ph = PREV_HASH_RE.search(body)
         xh = CHAIN_HASH_RE.search(body)
         if not (ch and ph and xh):
-            # Older entries may use different markup; skip non-verifiable
+            skipped += 1
             continue
-        expected = chain_hash(ch.group(1), ph.group(1))
-        if expected != xh.group(1):
+        recorded = xh.group(1)
+        new_expected = chain_hash(ch.group(1), ph.group(1))
+        old_expected = legacy_chain_hash(ch.group(1), ph.group(1))
+        if new_expected == recorded or old_expected == recorded:
+            print(f"OK   Entry #{num}: chain hash verified")
+        else:
             print(
-                f"FAIL Entry #{num}: computed {expected} != recorded {xh.group(1)}",
+                f"FAIL Entry #{num}: computed {new_expected} != recorded {recorded}",
                 file=sys.stderr,
             )
             errors += 1
-        else:
-            print(f"OK   Entry #{num}: chain hash verified")
+    if skipped > 0:
+        print(f"Skipped {skipped} entries with non-verifiable markup")
     return 1 if errors else 0
+
+
+SSDF_RE = re.compile(r"\*\*SSDF Practices\*\*:\s*(.+)")
+
+
+def extract_ssdf_practices(ledger_md: Path) -> dict[int, list[str]]:
+    """Extract SSDF practice tags from ledger entries. Returns {entry_num: [practices]}."""
+    text = ledger_md.read_text(encoding="utf-8")
+    result: dict[int, list[str]] = {}
+    parts = ENTRY_RE.split(text)
+    for i in range(1, len(parts), 2):
+        num = int(parts[i])
+        body = parts[i + 1] if i + 1 < len(parts) else ""
+        m = SSDF_RE.search(body)
+        if m:
+            practices = [p.strip() for p in m.group(1).split(",")]
+            result[num] = practices
+    return result
 
 
 def main() -> int:

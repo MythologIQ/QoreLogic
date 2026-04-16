@@ -105,6 +105,19 @@ Scan for critical security issues:
 
 **Any violation -> VETO with L3 flag**
 
+#### OWASP Top 10 Pass
+
+Evaluate proposed changes against applicable OWASP Top 10 (2021) categories:
+- A03 Injection: subprocess calls use list-form argv; no shell=True; user input validated
+- A04 Insecure Design: no fail-open on error; no silent drops of security events
+- A05 Security Misconfiguration: no hardcoded secrets; temp files use secure permissions
+- A08 Software/Data Integrity: no unsafe deserialization (pickle, eval, exec, yaml.load without SafeLoader)
+
+Reference: docs/security-audit-2026-04-16.md for baseline findings.
+Reference: qor/references/doctrine-shadow-genome-countermeasures.md for SG patterns.
+
+**Any violation -> VETO with OWASP category tag**
+
 #### Ghost UI Pass
 
 Scan for UI elements without backend handlers:

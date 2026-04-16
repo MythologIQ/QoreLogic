@@ -14,9 +14,18 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+_SESSION_ID_RE = re.compile(r'^[\w\-T:]+$')
+
+
+def validate_session_id(session_id: str) -> None:
+    """Validate session_id matches ^[\\w\\-T:]+$. Raises ValueError on invalid."""
+    if not session_id or not _SESSION_ID_RE.match(session_id):
+        raise ValueError(f"Invalid session_id: {session_id!r}")
 
 from qor.scripts import shadow_process
 

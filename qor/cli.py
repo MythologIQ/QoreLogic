@@ -7,7 +7,7 @@ import shutil
 import sys
 from pathlib import Path
 
-__version__ = "0.13.0"
+__version__ = "0.14.0"
 
 
 def _default_dist_root() -> Path:
@@ -168,6 +168,47 @@ def _do_compile(args: argparse.Namespace) -> int:
     return 0
 
 
+def _compute_coverage(practice_map: dict[int, list[str]]) -> tuple[int, int, int]:
+    """Compute (group_count, unique_practices, total_tags) from practice_map."""
+    all_practices: set[str] = set()
+    total = 0
+    for practices in practice_map.values():
+        for p in practices:
+            all_practices.add(p)
+            total += 1
+    groups = {p.split(".")[0] for p in all_practices}
+    return len(groups), len(all_practices), total
+
+
+def _do_compliance_report(
+    ledger_path: Path | None = None,
+) -> str:
+    """Generate SSDF practice coverage report from ledger."""
+    from qor.scripts.ledger_hash import extract_ssdf_practices
+    if ledger_path is None:
+        from qor import workdir
+        ledger_path = workdir.meta_ledger()
+    practice_map = extract_ssdf_practices(ledger_path)
+    if not practice_map:
+        return "No SSDF practice tags found in ledger. Coverage: 0"
+
+    # Aggregate by practice
+    by_practice: dict[str, list[int]] = {}
+    for entry_num, practices in practice_map.items():
+        for p in practices:
+            by_practice.setdefault(p, []).append(entry_num)
+
+    lines = ["SSDF Practice Coverage:"]
+    for practice in sorted(by_practice):
+        entries = by_practice[practice]
+        entry_refs = ", ".join(f"Entry #{n}" for n in sorted(entries))
+        lines.append(f"  {practice}: {len(entries)} entries ({entry_refs})")
+
+    groups, unique, total = _compute_coverage(practice_map)
+    lines.append(f"Coverage: {groups} practice groups, {unique} individual practices, {total} total tags")
+    return "\n".join(lines)
+
+
 def _do_verify_ledger(args: argparse.Namespace) -> int:
     """Verify META_LEDGER.md chain."""
     from qor.scripts import ledger_hash
@@ -207,6 +248,10 @@ def main(argv: list[str] | None = None) -> int:
     sp_init.add_argument("--host", default="claude", choices=_hosts)
     sp_init.add_argument("--profile", default="sdlc", choices=["sdlc", "filesystem", "data", "research"])
     sp_init.add_argument("--target", type=Path, default=None)
+    sp_compliance = sub.add_parser("compliance", help="NIST SSDF compliance reporting")
+    compliance_sub = sp_compliance.add_subparsers(dest="compliance_command", metavar="<subcommand>")
+    sp_compliance_report = compliance_sub.add_parser("report", help="show SSDF practice coverage")
+    sp_compliance_report.add_argument("--ledger", type=Path, default=None)
     sp_policy = sub.add_parser("policy", help="policy engine commands")
     policy_sub = sp_policy.add_subparsers(dest="policy_command", metavar="<subcommand>")
     sp_policy_check = policy_sub.add_parser("check", help="evaluate request against cedar policies")
@@ -226,6 +271,13 @@ def main(argv: list[str] | None = None) -> int:
     }
     if args.command in dispatch:
         return dispatch[args.command]()
+    if args.command == "compliance":
+        if getattr(args, "compliance_command", None) == "report":
+            ledger = getattr(args, "ledger", None)
+            print(_do_compliance_report(ledger_path=ledger))
+            return 0
+        sp_compliance.print_help()
+        return 0
     if args.command == "init":
         from qor.cli_policy import do_init
         return do_init(args)

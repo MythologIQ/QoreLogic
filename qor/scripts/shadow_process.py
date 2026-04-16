@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -83,17 +84,44 @@ def append_event(
     return event_id
 
 
+def _lock_file(fh):
+    """Acquire exclusive lock. POSIX: fcntl. Windows: msvcrt."""
+    try:
+        import fcntl
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+    except ImportError:
+        import msvcrt
+        msvcrt.locking(fh.fileno(), msvcrt.LK_LOCK, 1)
+
+
+def _unlock_file(fh):
+    """Release exclusive lock. POSIX: fcntl. Windows: msvcrt."""
+    try:
+        import fcntl
+        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except ImportError:
+        import msvcrt
+        msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+
+
 def _atomic_append(path: Path, line: str) -> None:
-    """Append a line atomically: read existing, write temp, os.replace."""
+    """Append a line atomically with file locking: read existing, write temp, os.replace."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    existing = path.read_text(encoding="utf-8") if path.exists() else ""
-    new_content = existing + (line if existing.endswith("\n") or not existing else "\n" + line)
-    with tempfile.NamedTemporaryFile(
-        mode="w", encoding="utf-8", dir=path.parent, delete=False, suffix=".tmp"
-    ) as tf:
-        tf.write(new_content)
-        tmp_path = tf.name
-    os.replace(tmp_path, path)
+    lock_path = path.parent / (path.name + ".lock")
+    lock_path.touch(exist_ok=True)
+    with open(lock_path, "r") as lock_fh:
+        _lock_file(lock_fh)
+        try:
+            existing = path.read_text(encoding="utf-8") if path.exists() else ""
+            new_content = existing + (line if existing.endswith("\n") or not existing else "\n" + line)
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=path.parent, delete=False, suffix=".tmp"
+            ) as tf:
+                tf.write(new_content)
+                tmp_path = tf.name
+            os.replace(tmp_path, path)
+        finally:
+            _unlock_file(lock_fh)
 
 
 def read_events(log_path: Path | None = None) -> list[dict]:
@@ -103,13 +131,14 @@ def read_events(log_path: Path | None = None) -> list[dict]:
     if not log_path.exists():
         return []
     events: list[dict] = []
-    for line in log_path.read_text(encoding="utf-8").splitlines():
+    for i, line in enumerate(log_path.read_text(encoding="utf-8").splitlines(), 1):
         line = line.strip()
         if not line.startswith("{"):
             continue
         try:
             events.append(json.loads(line))
         except json.JSONDecodeError:
+            print(f"WARN: skipping malformed JSONL line {i}", file=sys.stderr)
             continue
     return events
 

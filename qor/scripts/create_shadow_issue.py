@@ -13,11 +13,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+
+_EVENT_ID_RE = re.compile(r'^[a-f0-9]{64}$')
+
+
+def validate_event_id(event_id: str) -> None:
+    """Validate event ID matches ^[a-f0-9]{64}$. Raises ValueError on invalid."""
+    if not _EVENT_ID_RE.match(event_id):
+        raise ValueError(f"Invalid event ID: {event_id!r}")
 
 from qor.scripts import shadow_process
 
