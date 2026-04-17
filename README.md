@@ -7,7 +7,7 @@
   <a href="https://pypi.org/project/qor-logic/"><img src="https://img.shields.io/pypi/v/qor-logic?color=blue&label=PyPI" alt="PyPI"></a>
   <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/License-BSL--1.1-orange" alt="License: BSL-1.1">
-  <img src="https://img.shields.io/badge/Tests-323%20passing-brightgreen" alt="Tests: 323 passing">
+  <img src="https://img.shields.io/badge/Tests-352%20passing-brightgreen" alt="Tests: 352 passing">
   <img src="https://img.shields.io/badge/NIST-SP%20800--218A%20aligned-004488" alt="NIST SP 800-218A aligned">
   <img src="https://img.shields.io/badge/OWASP-Top%2010%20audited-004488" alt="OWASP Top 10 audited">
   <img src="https://img.shields.io/badge/Skills-27-blue" alt="Skills: 27">
