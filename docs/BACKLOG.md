@@ -49,9 +49,7 @@ Inventory maintained live in the repo tree; see `qor/skills/`, `qor/references/`
 
 ## Remaining Work
 
-**All original backlog items (B1-B12) and all blockers (D1-D3) are COMPLETE.**
-
-- [x] [B13] Encode AI code quality doctrine (Complete — doctrine-code-quality.md, audit checklist + implement patterns updated)
+**All original backlog items (B1-B18) and all blockers (D1-D3) are COMPLETE.**
 
 All backlog items complete. Repository fully operational.
 

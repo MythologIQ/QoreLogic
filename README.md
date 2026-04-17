@@ -7,12 +7,12 @@
   <a href="https://pypi.org/project/qor-logic/"><img src="https://img.shields.io/pypi/v/qor-logic?color=blue&label=PyPI" alt="PyPI"></a>
   <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/License-BSL--1.1-orange" alt="License: BSL-1.1">
-  <img src="https://img.shields.io/badge/Tests-352%20passing-brightgreen" alt="Tests: 352 passing">
+  <img src="https://img.shields.io/badge/Tests-462%20passing-brightgreen" alt="Tests: 462 passing">
   <img src="https://img.shields.io/badge/NIST-SP%20800--218A%20aligned-004488" alt="NIST SP 800-218A aligned">
   <img src="https://img.shields.io/badge/OWASP-Top%2010%20audited-004488" alt="OWASP Top 10 audited">
   <img src="https://img.shields.io/badge/Skills-27-blue" alt="Skills: 27">
   <img src="https://img.shields.io/badge/Agents-13-blue" alt="Agents: 13">
-  <img src="https://img.shields.io/badge/Ledger-69%20entries%20sealed-green" alt="Ledger: 69 entries sealed">
+  <img src="https://img.shields.io/badge/Ledger-84%20entries%20sealed-green" alt="Ledger: 84 entries sealed">
 </p>
 
 <p align="center">
@@ -174,11 +174,12 @@ The codebase has been [audited against OWASP Top 10 (2021)](docs/security-audit-
 | `/qor-validate` | validate | Chain and criteria verification |
 | `/qor-remediate` | process recovery | Process-level fix from Shadow Genome |
 
-### Memory and Meta (8 skills)
+### Memory and Meta (9 skills)
 
 | Skill | Purpose |
 |---|---|
 | `/qor-status` | Diagnose lifecycle state and next action |
+| `/qor-tone` | Set session communication tier (technical / standard / plain) |
 | `/qor-document` | Update governance documentation |
 | `/qor-organize` | Project-level structure reorganization |
 | `/qor-bootstrap` | Seed a new workspace with governance DNA |
@@ -235,7 +236,7 @@ qor-logic/
     hosts.py          Host-to-install-path resolver (claude, kilo, codex, gemini)
     cli.py            qorlogic CLI entry point
     dist/variants/    Pre-compiled per-host outputs (claude, kilo-code, codex, gemini)
-  tests/              323 tests (unit, integration, e2e, doctrine, bundle contract)
+  tests/              462 tests (unit, integration, e2e, doctrine, bundle contract)
   .github/workflows/  CI (6-job matrix) + PyPI release (OIDC trusted publisher)
 ```
 
@@ -257,7 +258,7 @@ qorlogic --version
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest tests/                                    # 323 tests
+python -m pytest tests/                                    # 462 tests
 python -m pytest tests/ -m integration                     # +4 install-smoke tests
 qorlogic verify-ledger                                     # Merkle chain integrity
 BUILD_REGEN=1 python qor/scripts/dist_compile.py           # regenerate variants

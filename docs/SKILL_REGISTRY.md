@@ -1,11 +1,11 @@
 # Qorlogic Skill Registry
 
-**Snapshot**: 2026-04-15
+**Snapshot**: 2026-04-17
 **Authoritative location**: `qor/skills/<category>/<skill>/`
 
 Skills organized by functional category. Path-shown relative to repo root.
 
-## governance/ (5)
+## governance/ (6)
 
 Gate, audit, and compliance authority.
 
@@ -16,6 +16,7 @@ Gate, audit, and compliance authority.
 | qor-substantiate | `qor/skills/governance/qor-substantiate/` | Active |
 | qor-shadow-process | `qor/skills/governance/qor-shadow-process/` | Stub (full impl deferred) |
 | qor-governance-compliance | `qor/skills/governance/qor-governance-compliance/` | Active (migrated) |
+| qor-process-review-cycle | `qor/skills/governance/qor-process-review-cycle/` | Active (workflow bundle) |
 
 ## sdlc/ (6)
 
@@ -30,22 +31,23 @@ Research → plan → implement → refactor → debug → remediate cycle.
 | qor-debug | `qor/skills/sdlc/qor-debug/` | Active |
 | qor-remediate | `qor/skills/sdlc/qor-remediate/` | Stub (absorbs qor-course-correct) |
 
-## memory/ (6)
+## memory/ (7)
 
-State tracking, documentation, decision logs.
+State tracking, documentation, decision logs, session tier selection.
 
 | Skill | Path | Status |
 |---|---|---|
-| qor-status | `qor/skills/memory/qor-status/` | Active |
+| qor-status | `qor/skills/memory/qor-status/` | Active (tone-aware canonical example) |
+| qor-tone | `qor/skills/memory/qor-tone/` | Active (v0.16.0; three-tier communication selector) |
 | qor-document | `qor/skills/memory/qor-document/` | Active |
 | qor-organize | `qor/skills/memory/qor-organize/` | Active |
 | log-decision | `qor/skills/memory/log-decision.md` | Active (migrated) |
 | track-shadow-genome | `qor/skills/memory/track-shadow-genome.md` | Active (migrated) |
 | qor-docs-technical-writing | `qor/skills/memory/qor-docs-technical-writing/` | Active (migrated) |
 
-## meta/ (7)
+## meta/ (11)
 
-Bootstrapping, help, repo management, meta-tracking.
+Bootstrapping, help, repo management, meta-tracking, workflow bundles.
 
 | Skill | Path | Status |
 |---|---|---|
@@ -56,6 +58,10 @@ Bootstrapping, help, repo management, meta-tracking.
 | qor-repo-scaffold | `qor/skills/meta/qor-repo-scaffold/` | Active |
 | qor-meta-log-decision | `qor/skills/meta/qor-meta-log-decision/` | Active (migrated) |
 | qor-meta-track-shadow | `qor/skills/meta/qor-meta-track-shadow/` | Active (migrated) |
+| qor-deep-audit | `qor/skills/meta/qor-deep-audit/` | Active (workflow bundle; autonomy: autonomous) |
+| qor-deep-audit-recon | `qor/skills/meta/qor-deep-audit-recon/` | Active (recon half of deep-audit; autonomy: autonomous) |
+| qor-deep-audit-remediate | `qor/skills/meta/qor-deep-audit-remediate/` | Active (remediate half of deep-audit; autonomy: autonomous) |
+| qor-onboard-codebase | `qor/skills/meta/qor-onboard-codebase/` | Active (workflow bundle for external codebase intake) |
 
 ## custom/ (0)
 

@@ -38,13 +38,13 @@ If the user asks about a specific command, direct them to invoke it. If unsure, 
 |---|---|---|
 | `/qor-research` | Investigate before planning. Surface conventions, deps, prior art. | Beginning of any non-trivial work; chain start. |
 | `/qor-plan` | Author plan-*.md with phases, tests, open questions. | After research; before audit. |
-| `/qor-audit` | Adversarial PASS/VETO review. Razor → `/qor-refactor`; Orphan/Macro → `/qor-organize`. | Before any L2/L3 risk implementation. |
+| `/qor-audit` | Adversarial PASS/VETO review. Each VETO ground names its required next action per `qor/references/doctrine-audit-report-language.md`: Razor -> `/qor-refactor`; Orphan or Macro-arch -> `/qor-organize`; Plan-text -> Governor amends plan, re-runs `/qor-audit`; Process-level -> `/qor-remediate`; Code-logic defect -> `/qor-debug`. | Before any L2/L3 risk implementation. |
 | `/qor-implement` | Execute work under KISS constraints after PASS. | After `/qor-audit` PASS. |
 | `/qor-refactor` | File-internal logic shape (Section 4). | When audit/implement detects bloat. |
 | `/qor-debug` | Root-cause diagnosis (cross-cutting). | Regression / hallucination / degradation. |
 | `/qor-substantiate` | Seal session, record Merkle evidence. | End of completed work session. |
 | `/qor-validate` | Verify chain integrity + criteria. | Before delivery; on repeat failure → `/qor-remediate`. |
-| `/qor-remediate` | Process-level fix (NOT code). Absorbed the retired qor-course-correct skill. | Process Shadow Genome threshold breach or repeat failure. |
+| `/qor-remediate` | Process-level fix (NOT code). Absorbed the retired qor-course-correct skill. | Process Shadow Genome severity-sum threshold breach; `repeated_veto_pattern` event fired by `qor/scripts/veto_pattern.py` (>=2 consecutive sealed phases each needing >1 audit pass); capability-shortfall cascade. |
 
 ## Memory & Meta
 
@@ -95,6 +95,7 @@ Bundles honor `qor/gates/workflow-bundles.md` (checkpoints, budgets, decompositi
 New workspace?              → /qor-bootstrap
 New feature?                → /qor-research → /qor-plan → /qor-audit → /qor-implement
 Check state?                → /qor-status
+Output too technical/plain? → /qor-tone technical|standard|plain (session-sticky)
 Refactor needed?            → /qor-refactor (file-internal) or /qor-organize (project-level)
 Bug / regression?           → /qor-debug
 Done with session?          → /qor-substantiate

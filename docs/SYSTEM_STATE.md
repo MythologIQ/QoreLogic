@@ -98,13 +98,21 @@ G:/MythologIQ/Qorlogic/
 
 ## Ledger chain head
 
-- Entry #18 MIGRATION-COMPLETE
-- Chain hash: `7c41dbc944f53a2663de190ba14bdbc2c5fa5b81ecb8f5d3dffc67d32d9a8b18`
-- Verification: `python qor/scripts/ledger_hash.py verify docs/META_LEDGER.md` → all 18 entries OK
+- Entry #83 SESSION SEAL — Phase 26 substantiated (v0.17.0)
+- Chain hash: `047f2f79f636507473704a085d27baef6c087044175d354eadea922afc12feb4`
+- Entry #84 BACKFILL — Phase 23 historical annotation (non-advancing; documents `8081422` at `v0.14.0`)
+- Verification: `python qor/scripts/ledger_hash.py verify docs/META_LEDGER.md` → all sealable entries OK from #63 through #83
 
-## Deferred
+## Shipped tooling
 
-Tooling phases (compile pipeline, gate chain runtime, shadow threshold automation, cross-repo collector, platform detect, full validation suite) are tracked in `docs/plan-qor-tooling-deferred.md` for subsequent, scope-limited plans.
+Compile pipeline, gate chain runtime, shadow threshold automation, cross-repo collector, platform detect, and validation suite were all shipped across Phases 10-23. Current tooling surface is operational:
+
+- CLI: `qorlogic install|uninstall|list|init|info|compile|verify-ledger|seed|compliance|policy`
+- Python modules: `qor/seed.py`, `qor/tone.py`, `qor/install.py`, `qor/hosts.py`, `qor/scripts/veto_pattern.py`, `qor/scripts/gemini_variant.py`, `qor/scripts/dist_compile.py`, `qor/scripts/ledger_hash.py`, `qor/scripts/shadow_process.py`
+- Tests: 462 passing (unit + integration + e2e + doctrine + bundle contract)
+- Supported hosts: claude, kilo-code, codex, gemini (all with repo/global scope)
+- Communication tiers: technical / standard / plain via `/qor-tone` or `qorlogic init --tone`
+- Shadow Genome events: 7 structured `event_type` enum values (incl. `repeated_veto_pattern` from Phase 26)
 
 ## Advisory-gate overrides carried
 

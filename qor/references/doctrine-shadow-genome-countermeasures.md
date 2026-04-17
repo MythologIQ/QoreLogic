@@ -91,3 +91,16 @@ A plan document encodes the same spec in two places: prose descriptions and code
 **Countermeasure**: When a plan updates a list, enumeration, or count, grep the plan for every occurrence of that element and update all copies in lockstep. Prose, code blocks, and success criteria must cite the same values.
 
 **Verification hint**: Judge cross-checks prose claims against code blocks during audit; any mismatch is VETO-grade. Optional future enforcement: lint plans for prose+code consistency on named enumerations. Source incident: Phase 17a v1 (Entry #44 V-1).
+
+## Phase 24-26 narrative SG entries (see `docs/SHADOW_GENOME.md`)
+
+The following pattern IDs were surfaced as narrative Shadow Genome entries during audit tribunals in Phases 24, 25, and 26. Promotion into full structured countermeasure form (with grep/test verification hint) is queued; in the meantime, citing the pattern by ID in a plan or audit report references the narrative entry in `docs/SHADOW_GENOME.md`.
+
+- **SG-Phase24-A**: cumulative razor creep in CLI harness (additive edits to an already-over-limit file without a companion refactor). Mitigation shipped: Phase 24 `/qor-refactor` extracted `qor/install.py`.
+- **SG-Phase24-B**: unsafe deserializer defaults (plan introduces YAML parsing without naming `yaml.safe_load`). Mitigation shipped: `tests/test_yaml_safe_load_discipline.py` scans `qor/` and `tests/**/*.py` (widened in Phase 25).
+- **SG-Phase24-C**: reflexive dependency introduction for trivial serializers (proposing `tomli_w` when a <15-line vanilla writer suffices). Mitigation shipped: dependency-shape test locks `pyproject.toml` runtime deps.
+- **SG-Phase24-D**: remediation target mismatch (running `/qor-refactor` to address plan-text VETO grounds). Mitigation shipped in Phase 26: per-ground `**Required next action:**` directives in audit reports (`qor/references/doctrine-audit-report-language.md`).
+- **SG-Phase25-A**: A08 discipline scope gap (lint test root not covering new usage directory). Mitigation shipped: widened walk + planted-call negative test.
+- **SG-Phase25-B**: ghost feature via metadata-only declaration (frontmatter flag without backing behavior). Mitigation shipped: canonical section markers + lint (`test_tone_skill_frontmatter.py`) + pinned example (`test_tone_rendering_example.py`).
+
+No narrative SG entries surfaced during Phase 26 audit tribunals; pattern `repeated_veto_pattern` is a Shadow Genome *event* (structured, in `PROCESS_SHADOW_GENOME.md`), not a narrative failure pattern.
