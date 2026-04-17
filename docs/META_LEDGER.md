@@ -2985,3 +2985,149 @@ Phase 23's outputs are present in the repository and were released under tag `v0
 *Chain integrity: VALID (from #1 to #83, continuous)*
 *Session: SEALED (Phase 26)*
 *Merkle seal: 047f2f79f6... (unchanged; backfill entries do not advance seal)*
+
+
+### Entry #85: AUDIT -- Phase 27 plan review
+
+**Timestamp**: 2026-04-17
+**Phase**: AUDIT
+**Author**: Judge
+**Verdict**: VETO
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase27-changelog-and-substantiate-automation.md`
+**Mode**: Solo (codex-plugin capability shortfall logged)
+
+**VETO Grounds**:
+1. SG-038 (prose-code mismatch) -- Phase 2 declares "Step 7.4" but says it runs AFTER Step 7.5. A step numbered 7.4 cannot chronologically follow Step 7.5. Rename to Step 7.6 in all references.
+2. Incomplete automation -- Phase 2 adds the stamp step but does not update Step 9.5's auto-stage list to include `CHANGELOG.md`. Stamped CHANGELOG would not be committed by the seal ceremony unless explicitly added.
+
+**Other passes**: PASS across Security L3, OWASP (A03/A04/A05/A08), Ghost Feature, Section 4 Razor, Dependency (no new packages), Macro-Level Architecture, Orphan Detection. Historical backfill hand-authored (no parser coupling); forward automation minimal (stamp only, no content gen); stamp raises on collision/empty/missing (fail-fast, no silent overwrite).
+
+**Mandated Next Action**: two plan-text amendments. Then re-submit to `/qor-audit`.
+
+**Decision**: Plan rejected. Remediation is documentation-only.
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN*
+*Merkle seal: 047f2f79f6... (unchanged; audit entries do not advance seal)*
+
+
+### Entry #86: AUDIT -- Phase 27 plan review (Pass 2)
+
+**Timestamp**: 2026-04-17
+**Phase**: AUDIT
+**Author**: Judge
+**Verdict**: PASS
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase27-changelog-and-substantiate-automation.md`
+**Mode**: Solo (codex-plugin capability shortfall logged)
+
+**Ground status vs Entry #85**:
+1. SG-038 step numbering -- PASS (Step 7.4 renamed to Step 7.6 throughout Phase 2)
+2. Incomplete automation -- PASS (explicit directive added to update Step 9.5 auto-stage with `git add CHANGELOG.md`; Phase 3 test spec includes staging assertion)
+
+**All other passes**: PASS (Security L3, OWASP A03/A04/A05/A08, Ghost Feature, Section 4 Razor, Dependency, Macro-Level Architecture, Orphan Detection).
+
+**Mandated Next Action**: `/qor-implement`. Change class on seal: feature (0.17.0 -> 0.18.0).
+
+**Decision**: Plan approved. Implementation may proceed.
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN*
+*Merkle seal: 047f2f79f6... (unchanged; audit entries do not advance seal)*
+
+
+### Entry #87: IMPLEMENT -- Phase 27 CHANGELOG + substantiate automation
+
+**Timestamp**: 2026-04-17
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Verdict**: PASS (482 tests, two consecutive green runs)
+
+**Target**: `docs/plan-qor-phase27-changelog-and-substantiate-automation.md`
+**Gate**: Entry #86 PASS (pass 2)
+
+**New artifacts**:
+- `CHANGELOG.md` (repo root) -- Keep-a-Changelog 1.1.0 format, full backfill v0.3.0 through v0.17.0 (15 version sections) plus populated `[Unreleased]` for Phase 27 itself. 158 lines.
+- `qor/scripts/changelog_stamp.py` -- pure stamp module + atomic apply_stamp wrapper. 79 lines total; all 6 functions <=15 lines each.
+- `qor/references/doctrine-changelog.md` -- CHANGELOG discipline codified. 65 lines.
+- 4 new test files: `test_changelog_format.py` (5 tests), `test_changelog_tag_coverage.py` (2 tests), `test_changelog_stamp.py` (9 tests), `test_substantiate_changelog_integration.py` (4 tests including git staging assertion).
+- 3 new fixture files under `tests/fixtures/`: `changelog_good.md`, `changelog_bad_date.md`, `changelog_bad_category.md`.
+
+**Modified**:
+- `qor/skills/governance/qor-substantiate/SKILL.md` -- Step 7.6 added (stamp after version bump, before cleanup); Step 9.5 auto-stage list gains `git add CHANGELOG.md`.
+
+**Razor compliance**:
+- `changelog_stamp.py`: 79 lines (<250), 6 functions all <=15 lines (<40).
+- CHANGELOG.md: 158 lines (content file, not subject to code razor).
+- Tests: each <150 lines.
+
+**SG countermeasures applied**:
+- SG-038 avoided in plan amendment (Step numbering fixed in audit pass 2 before implementation started).
+- Fail-fast contract: stamp raises on missing Unreleased, empty Unreleased, version collision, non-SemVer, non-ISO date. Never silently ships malformed output.
+
+**Pattern verification**:
+Applied `test_every_tag_has_changelog_section` against live repo: v0.3.0 through v0.17.0 all present; no orphans. `test_every_changelog_section_has_tag` confirms bijection.
+
+**Decision**: Phase 27 implementation complete. 482 tests passing across two consecutive runs. Ready for `/qor-substantiate` (Phase 27 will be the first phase whose seal ceremony exercises its own CHANGELOG stamp automation).
+
+---
+
+*Chain integrity: VALID*
+*Session: OPEN*
+*Merkle seal: 047f2f79f6... (unchanged; implement entries do not advance seal)*
+
+
+### Entry #88: SESSION SEAL -- Phase 27 substantiated
+
+**Timestamp**: 2026-04-17
+**Phase**: SEAL
+**Author**: Judge
+**Verdict**: PASS (Reality = Promise)
+
+**Target**: `docs/plan-qor-phase27-changelog-and-substantiate-automation.md`
+**Change Class**: `feature`
+**Version**: `0.17.0 -> 0.18.0`
+**Tag**: `v0.18.0` (pending operator push)
+
+**Content Hash**: `f276aba3dde3d88c58e8071475e74cc3b59d81f4537a2323bd8a323147007593`
+**Previous Hash**: `047f2f79f636507473704a085d27baef6c087044175d354eadea922afc12feb4`
+
+**Chain Hash** (Merkle seal):
+```
+SHA256(content_hash + previous_hash)
+= cdb77df12071f45595d7ec4fe067ab20d4fedca17b9fcc2222f9044f0719952a
+```
+
+**Reality Audit**:
+- 3 phases delivered per plan (backfill + format/tag lint, stamp module + substantiate wiring, doctrine + integration test with staging assertion)
+- New artifacts:
+  - `CHANGELOG.md` (repo root, 158 lines, full v0.3.0-v0.17.0 backfill)
+  - `qor/scripts/changelog_stamp.py` (79 lines, 6 functions all <=15)
+  - `qor/references/doctrine-changelog.md` (65 lines)
+  - 4 new test files (20 assertions total) + 3 fixture files
+- Modified: `qor/skills/governance/qor-substantiate/SKILL.md` gains Step 7.6 + Step 9.5 auto-stage update
+- **UNPLANNED**: none
+- **MISSING**: none
+
+**Self-referential seal**: Phase 27's own seal ceremony exercises its own stamp automation. `qor/scripts/changelog_stamp.py apply_stamp("CHANGELOG.md", "0.18.0", "2026-04-17")` was invoked at seal time; the Phase 27 Unreleased bullets became the `[0.18.0] - 2026-04-17` section; a fresh empty Unreleased was inserted above.
+
+**Test discipline**: 482 tests pass pre-seal. Post-seal (after v0.18.0 tag creation), `test_every_changelog_section_has_tag` will also pass -- the transient failure during stamping is expected and resolves on tag creation.
+
+**Razor compliance**: `changelog_stamp.py` 79 lines (<250), all functions <=15 (<40). CHANGELOG.md 158 lines (content, not code).
+
+**SG countermeasures applied**: SG-038 step-numbering issue caught in audit pass 1 and corrected before implementation. Automation contract (stamp + stage) verified end-to-end by `test_stamped_changelog_included_in_auto_stage`.
+
+**Decision**: Phase 27 sealed. User-facing change narrative (CHANGELOG) + automated seal-time stamp operational. Historical backfill complete; forward automation in place. First seal whose ceremony exercised its own new automation.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED*
+*Merkle seal: cdb77df120...*

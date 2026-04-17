@@ -232,6 +232,24 @@ tag = gh.create_seal_tag(
 )
 ```
 
+### Step 7.6: Stamp CHANGELOG (Phase 27 wiring)
+
+After the version bump in Step 7.5 produces `new_version` and the seal date is known, stamp `CHANGELOG.md` in place:
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+from qor.scripts.changelog_stamp import apply_stamp
+from datetime import datetime, timezone
+
+apply_stamp(
+    path="CHANGELOG.md",
+    version=new_version,
+    date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+)
+```
+
+`apply_stamp` raises `ValueError` on missing `## [Unreleased]`, empty Unreleased (no bullets), or collision with an existing `[new_version]` section. On any raise, PAUSE with the operator message; do NOT silently ship an unstamped CHANGELOG. Per `qor/references/doctrine-changelog.md`, every release gets a dated section; the Unreleased convention is populated during `/qor-implement` and mechanically renamed on seal.
+
 ### Step 8: Cleanup Staging
 
 Clear: .failsafe/governance/
@@ -246,6 +264,7 @@ Template: `references/qor-substantiate-templates.md`.
 
   **Stage All Artifacts**:
   ```bash
+  git add CHANGELOG.md
   git add docs/CONCEPT.md
   git add docs/ARCHITECTURE_PLAN.md
   git add docs/META_LEDGER.md
