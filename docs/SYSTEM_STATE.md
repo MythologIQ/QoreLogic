@@ -1,8 +1,8 @@
 # Qorlogic System State
 
 **Snapshot**: 2026-04-17
-**Chain Status**: ACTIVE (83 entries, last seal: 047f2f79f6... at v0.17.0)
-**Phase**: Phase 26 sealed. Audit-report language reformed with per-ground `**Required next action:**` directives (B17). Repeated-VETO pattern detector (B18) in `qor/scripts/veto_pattern.py` fires when two consecutive sealed phases each required >1 audit pass; emits severity-3 `repeated_veto_pattern` Shadow Genome event; surfaces non-blocking advisory in `## Process Pattern Advisory` section of AUDIT_REPORT. Doctrine codified in `qor/references/doctrine-audit-report-language.md`.
+**Chain Status**: ACTIVE (88 entries, last seal: cdb77df120... at v0.18.0)
+**Phase**: Phase 27 sealed. `CHANGELOG.md` authored (Keep-a-Changelog 1.1.0, v0.3.0-v0.17.0 backfill + Phase 27 entry). `/qor-substantiate` Step 7.6 stamps `## [Unreleased]` -> `## [X.Y.Z] - YYYY-MM-DD` on seal via `qor/scripts/changelog_stamp.py`; Step 9.5 auto-stage includes `CHANGELOG.md`. Format + tag-bijection + stamp + integration lint tests in `tests/test_changelog_*.py`. Doctrine at `qor/references/doctrine-changelog.md`.
 
 ## Authoritative source
 
