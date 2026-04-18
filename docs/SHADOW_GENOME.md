@@ -697,4 +697,35 @@ SG-Phase31-A (in-plan correction parallel to primary source of truth instead of 
 
 ---
 
+### Entry #22: post-seal failure -- README version-specific content went stale across Phase 32
+
+**Timestamp**: 2026-04-18
+**Target**: `README.md` (not a plan artifact; narrative doc)
+**Context**: surfaced after Phase 32 seal when operator attempted `pip install qor-logic` and observed version mismatch across badge / "What's new" header / `qorlogic --version` / PyPI latest.
+
+### Pattern
+
+During Phase 31's /qor-document run I wrote a `## What's new in v0.22.0` section with v0.22.0-specific bullets into README.md. Phase 32 sealed at v0.23.0 but the /qor-document skill was not re-invoked. README still says "What's new in v0.22.0" with Phase 28-31 content and a stale nav anchor `#whats-new-in-v0220`. The Phase 31 Documentation Currency Check (/qor-substantiate Step 6.5) EXPLICITLY EXCLUDES README.md and CHANGELOG.md as "narrative entry points" -- so nothing fired.
+
+### Why It Matters
+
+Version-specific content in README drifts every release. My Phase 31 design call was wrong: I excluded README from Step 6.5 to prevent noise, but README is not pure narrative -- it carries version-specific claims (badges, "What's new", nav anchors, counts) that must be kept current OR made version-agnostic.
+
+The Documentation Currency heuristic as designed catches skill/doctrine/script changes vs system-tier docs; it does NOT catch README drift even though README IS a system-tier consumer of every release.
+
+### Countermeasure
+
+Two-layer fix applied in this session:
+
+1. **README rewritten to be version-agnostic**: replaced the static `## What's new in v0.22.0` section with a `## Latest release` section that points to CHANGELOG.md as the single source of truth. No version-specific content in README body; the PyPI badge auto-reflects latest published. This removes the drift surface -- there's nothing version-specific left in README to go stale.
+2. **Future Phase 33 candidate**: extend Step 6.5 heuristic to include README.md and CHANGELOG.md when the triggering file class is `qor/scripts/changelog_stamp.py` or any version-bump path -- catches the narrow case where release metadata drifts.
+
+The deeper pattern: **narrative docs that carry version-specific claims need either currency checking OR version-agnostic content.** Choose one, never neither.
+
+### Pattern ID
+
+SG-Phase32-B (narrative-doc version drift: README / CHANGELOG excluded from currency check but carries version-specific content that goes stale)
+
+---
+
 *Shadow integrity: ACTIVE*
