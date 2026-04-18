@@ -10,6 +10,53 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-04-18
+
+### Added
+- **System-tier documentation topology** at `docs/architecture.md`, `docs/lifecycle.md`, `docs/operations.md`, and `docs/policies.md`. Authored from the existing repo state (chain.md, skills catalog, policies, doctrines). Qor-logic itself can now declare `doc_tier: system` on plans and the check passes. Phase 30 is the first plan to self-substantiate at this tier.
+- **`/qor-audit` Step Z** wires audit.json gate artifact writes via `gate_chain.write_gate_artifact` (Phase 29 delivered the SKILL edit; Phase 30 doctrine + live dogfood). Downstream phases can now read structured audit verdicts.
+- **Session rotation** via `qor/scripts/session.py::rotate()`. `/qor-substantiate` Step Z calls it after writing `substantiate.json`, so the next `/qor-plan` starts with a clean `.qor/gates/<new_sid>/` directory. Prior session dirs preserved for archaeology. New doctrine section: `doctrine-governance-enforcement.md` §7.
+- **Dist recompile on seal**: `/qor-substantiate` Step 8.5 invokes `python -m qor.scripts.dist_compile` automatically so variant outputs (claude / kilo-code / codex / gemini) stay in sync with source skills.
+- **Check Surface D (term-drift grep)** and **Check Surface E (cross-doc conflict detection)** in new `qor/scripts/doc_integrity_strict.py`. Lenient-by-default; `strict=True` kwarg routes through `run_all_checks_from_plan`. Both scope-fenced to markdown files; code files excluded.
+- **CONTRIBUTING.md**: Phase 29 landed pointer + quickstart; Phase 30 adds full doctrine inventory link from README.
+- **Razor compliance forward-regression guards**: `tests/test_doc_integrity_razor_compliance.py` enforces <=250 lines on both `doc_integrity.py` and `doc_integrity_strict.py` (SG-Phase30-A countermeasure).
+
+### Changed
+- `/qor-substantiate` Constraints now require `bump_version` to run BEFORE `create_seal_tag` in Step 7.5. Inverted order (bug observed in Phase 29) interdicts on tag-already-exists and forces manual pyproject editing. Paired test locks the contract.
+- CLAUDE.md: bare-backtick doctrine paths replaced with markdown links.
+- README.md: complete doctrine inventory section added (14 doctrines + patterns + templates + glossary linked).
+- 15 `qor/skills/**/SKILL.md` files: XML `<phase>X</phase>` tags lowercased to match YAML frontmatter case (GAP-REPO-06 resolution).
+- `.github/workflows/ci.yml` and `.github/workflows/release.yml`: `actions/checkout@v4` gains `fetch-depth: 0, fetch-tags: true` so `test_every_changelog_section_has_tag` finds tags in CI.
+
+### Security
+- Check-surface scanners use stdlib `re` only; no new deserialization or subprocess surface. Scope fence explicitly excludes `*.py`, `*.json`, `*.toml`, `*.cedar` and `vendor/` / `fixtures/` / `dist/` directories.
+
+## [0.20.0] - 2026-04-18
+
+### Added
+- `/qor-audit` now writes a schema-valid `audit.json` gate artifact at `.qor/gates/<session>/audit.json` (Step Z wiring). Previously missing; downstream phases (`/qor-implement`) had to fall back to gate overrides or hand-written artifacts. Payload carries `target`, `verdict`, `report_path`, and `risk_grade` per `qor/gates/schema/audit.schema.json`.
+- `CONTRIBUTING.md` at the repo root (40 lines) -- canonical contributor entry point pointing to CLAUDE.md, gates/chain, delegation-table, workflow-bundles, doctrines, and the glossary in reading order. Quickstart recipe names the `/qor-research -> /qor-plan -> /qor-audit -> /qor-implement -> /qor-substantiate` chain. PR contract delegates to `doctrine-governance-enforcement.md` Section 6 (single source of truth; no duplication).
+
+### Changed
+- Glossary orphan adoption: seven `qor/references/glossary.md` entries (`Doctrine`, `Doc Tier`, `Glossary Entry`, `Concept Home`, `Orphan Concept`, `Doc Integrity Check Surface`, `Complecting`) now carry legitimate `referenced_by:` consumers. Closes the Phase 28 doctrine's newly-enforced-doctrine grace gap (SG-Phase29-A) caught during Phase 29 audit pass 1 and resolved before implementation.
+- `README.md` gains a one-line link to CONTRIBUTING.md in the quickstart region.
+
+## [0.19.0] - 2026-04-18
+
+### Added
+- Documentation-integrity doctrine (`qor/references/doctrine-documentation-integrity.md`) with four tiers (`minimal` / `standard` / `system` / `legacy`) enforced at `/qor-substantiate` time via the new `qor/scripts/doc_integrity.py` module.
+- Canonical glossary at `qor/references/glossary.md` with 13 entries covering Phase 28 doctrine terms plus Qor-logic canonical terms (Phase SDLC, Gate, Shadow Genome, Substantiate, Workflow Bundle, change_class, Delegation Table, Complecting). Glossary entries serve simultaneously as concept-map entries (`home:` + `referenced_by:` fields).
+- `/qor-plan` Step 1b: dialogue for `doc_tier`, `terms_introduced`, and `boundaries` declarations; Plan Structure top-matter extension.
+- `/qor-substantiate` Step 4.7: hard-blocks seal on documentation-integrity violations via `doc_integrity.run_all_checks_from_plan` (topology presence + glossary hygiene + orphan scan). `legacy` tier is the sole documented escape.
+- `/qor-audit` Documentation Drift advisory: non-VETO `## Documentation Drift` section in AUDIT_REPORT.md when plan declarations diverge from glossary/topology.
+
+### Changed
+- `qor/gates/schema/plan.schema.json` gains optional `doc_tier`, `doc_tier_rationale`, `terms`, and `boundaries` fields. An `if-then` rule enforces that `doc_tier: legacy` requires `doc_tier_rationale`.
+- `qor/gates/workflow-bundles.md` example phases list expanded to the canonical seven-phase chain (previously omitted `validate` and `remediate`).
+
+### Security
+- New `doc_integrity.parse_glossary` uses `yaml.safe_load` exclusively and rejects documents containing custom tags (SG-Phase24-B countermeasure). Covered by existing `tests/test_yaml_safe_load_discipline.py` scanner.
+
 ## [0.18.0] - 2026-04-17
 
 ### Added

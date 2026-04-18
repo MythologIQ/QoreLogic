@@ -1,8 +1,8 @@
 # Qorlogic System State
 
-**Snapshot**: 2026-04-17
-**Chain Status**: ACTIVE (88 entries, last seal: cdb77df120... at v0.18.0)
-**Phase**: Phase 27 sealed. `CHANGELOG.md` authored (Keep-a-Changelog 1.1.0, v0.3.0-v0.17.0 backfill + Phase 27 entry). `/qor-substantiate` Step 7.6 stamps `## [Unreleased]` -> `## [X.Y.Z] - YYYY-MM-DD` on seal via `qor/scripts/changelog_stamp.py`; Step 9.5 auto-stage includes `CHANGELOG.md`. Format + tag-bijection + stamp + integration lint tests in `tests/test_changelog_*.py`. Doctrine at `qor/references/doctrine-changelog.md`.
+**Snapshot**: 2026-04-18
+**Chain Status**: ACTIVE (Phase 30 sealing at v0.21.0; Entry #100 milestone)
+**Phase**: Phase 30 sealing. System-tier topology now operational: `docs/architecture.md`, `docs/lifecycle.md`, `docs/operations.md`, and `docs/policies.md` (443 lines combined) authored from existing repo state. Qor-logic itself now seals at `doc_tier: system` -- first plan to do so without amendment. `/qor-substantiate` gains Step 8.5 (dist recompile on seal) + Step Z session rotation. `qor/scripts/session.py::rotate()` writes fresh session_id at seal-end. `qor/scripts/doc_integrity_strict.py` (116 lines, sibling to doc_integrity.py) hosts Check Surface D (term-drift grep) + E (cross-doc conflict), lenient-by-default with `strict=True` routing. CI workflows fixed (fetch-tags: true) so `test_every_changelog_section_has_tag` passes in CI. CLAUDE.md bare-backtick paths converted to markdown links; README.md gains full doctrine inventory section. 573 tests passing on two consecutive runs. SG-Phase30-A (Razor anticipation at module scope) + SG-Phase30-B (metadata-only term declaration at doctrine scope) codified; both countermeasures applied live during pass-1 VETO -> pass-2 PASS amendment.
 
 ## Authoritative source
 

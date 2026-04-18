@@ -531,4 +531,132 @@ SG-Phase25-B (metadata-only feature declaration without enforced behavior)
 
 ---
 
+### Entry #18: VETO -- plan-qor-phase28-documentation-integrity pass 1
+
+**Timestamp**: 2026-04-17
+**Target**: `docs/plan-qor-phase28-documentation-integrity.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #89
+**Session**: `2026-04-17T2335-f284b9`
+
+### Pattern
+
+Four plan-text violations on first audit pass of a doctrine-introduction plan. No implementation risk; all corrections are editorial. The spread of grounds reveals a recurring authoring risk when a plan both (a) creates a new rule and (b) must satisfy that rule itself.
+
+1. **SG-Phase24-B recurrence** -- YAML parsing proposed for glossary frontmatter without naming `yaml.safe_load`. The mitigation test (`tests/test_yaml_safe_load_discipline.py`) already exists; the recurrence is authorial, not systemic. Still, the failure to cite the safe loader at plan-authoring time is exactly what SG-Phase24-B documents.
+
+2. **SG-038 recurrence** -- prose-code mismatch between the schema prose (declaring a `concepts` alias of `terms`) and the adjacent JSON code block (which omits `concepts`). The alias was a leftover from the pre-dialogue draft; the Q3 decision (fold concept-map into glossary) removed the need for it. Prose updated, code did not.
+
+3. **SG-036 new manifestation: doctrine self-application failure.** The plan codifies the rule "every plan declares `doc_tier`, `terms_introduced`, `boundaries`" but does not apply those fields to itself. SG-036 names this as "newly codified doctrine does not become automatically load-bearing in phase N+1 unless the author treats it as active" -- this plan compressed the grace-period into a single-plan failure by creating the doctrine and immediately failing to dogfood it.
+
+4. **Rule 4 gap (Rule = Test).** Plan declared "legacy tier must include rationale" but wired only an event-emission test, not a rationale-presence enforcement test. Operator can declare `doc_tier: legacy` with no rationale; event fires; rule is unenforced.
+
+### Why It Matters
+
+Doctrine-introduction plans carry elevated authoring risk: the plan both introduces a standard and is the first artifact audited against it. Plans like these need a self-dogfood checklist before submission:
+
+- Do I satisfy every rule this plan creates?
+- Is every rule paired with an enforcement test?
+- Are prose and code blocks cross-checked for enumeration drift?
+- Am I citing safe-loaders / hardening defaults by name?
+
+When the author skips this checklist, all four SG categories can light up at once -- as they did here.
+
+### Countermeasure
+
+For plans that introduce new doctrines (not just features), add a `Self-Dogfood` section at the plan's end (above `Delegation`) that explicitly asserts:
+
+- The plan satisfies every rule it introduces (one bullet per rule, pointing at the plan text that applies it).
+- Every new rule has a corresponding test in the Unit Tests list (one bullet per rule-test pair).
+- No bare-word "YAML / TOML / JSON" appears without naming the safe loader.
+- Every enumeration referenced in prose also appears in any adjacent code block (one cross-check bullet per enumeration).
+
+A doctrine-introduction plan that lacks this section should be VETOed on sight.
+
+### Pattern ID
+
+SG-Phase28-A (doctrine-introduction plan without self-dogfood checklist)
+
+---
+
+### Entry #19: VETO -- plan-qor-phase29-audit-stepZ-and-contributing pass 1
+
+**Timestamp**: 2026-04-18
+**Target**: `docs/plan-qor-phase29-audit-stepZ-and-contributing.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #93
+**Session**: `2026-04-17T2335-f284b9`
+
+### Pattern
+
+Two VETO grounds. The first is the important one: **a newly enforced doctrine catches its first real post-authoring violation one phase later.** Phase 28 introduced the `check_orphans` rule (every glossary entry must have a `referenced_by:` consumer OR be newly introduced in the current plan). Phase 28's own seal passed because all its entries' `introduced_in_plan:` matched the then-current plan slug. Phase 29's plan had no terms to register and no expectation that it would inherit enforcement against prior-phase entries -- but when `check_orphans` runs at Phase 29's seal, the grace-period clause no longer applies, and six Phase-28-introduced entries become expired orphans requiring adoption.
+
+This is the doctrine working as designed, but the post-authoring effect was not anticipated by the Phase 29 plan. The plan addressed one glossary entry (`Doctrine` gains `CONTRIBUTING.md` as a consumer) without noticing that five siblings had the same exposure.
+
+The second ground is a SG-038 recurrence in the very section Phase 28 introduced to prevent SG-038 (Self-Dogfood). Count-enumeration drift: "five" declared, six enumerated.
+
+### Why It Matters
+
+Newly codified enforcement doctrines create a pattern: **the first few plans authored after the doctrine lands are the ones most likely to trip it in unexpected ways.** Authors have not yet internalized the forward-propagating implications. Phase 28's authors (the same session as the doctrine's creation) satisfied every rule by intentional construction; Phase 29's authors saw the doctrine as "done" and did not scan the repo for still-exposed prior-phase artifacts.
+
+The second ground compounds the first: even the self-dogfood checklist (itself a Phase 28 invention) carried forward a prose-enumeration inconsistency that the checklist was meant to detect.
+
+### Countermeasure
+
+For any plan authored in the first three phases after a new enforcement doctrine lands, add an explicit step:
+
+1. Run the new doctrine's check helper(s) against the repo state once, BEFORE writing the plan.
+2. Record the helper's output in the plan's "Basis" section.
+3. If the helper reports violations, resolve them IN THE CURRENT PLAN -- do not defer.
+
+This closes the "newly-enforced-doctrine grace gap" surfaced by Phase 29's VETO.
+
+Concretely for Phase 29: amend Phase 2 to extend `referenced_by:` on the six orphan entries, add a test that forbids empty `referenced_by:` on any entry older than the current plan's session.
+
+### Pattern ID
+
+SG-Phase29-A (newly-enforced-doctrine grace gap: plans authored soon after a new enforcement doctrine fail to scan for pre-existing exposures)
+
+---
+
+### Entry #20: VETO -- plan-qor-phase30-system-tier-hardening pass 1
+
+**Timestamp**: 2026-04-18
+**Target**: `docs/plan-qor-phase30-system-tier-hardening.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #97
+**Session**: `2026-04-17T2335-f284b9`
+
+### Pattern
+
+Two VETO grounds. The interesting one is Ground 1: **projected Razor violation from additive edits to an already-near-cap module.** `qor/scripts/doc_integrity.py` sat at 244 lines post-Phase-28 trim. Phase 30's plan proposed adding 2 functions + scope fences (~50-70 lines) to the same module, projecting ~294-314 lines -- clearly over the 250 limit.
+
+Phase 28 tripped this exact limit once already (originally 258 lines; trimmed to 244 under seal-time pressure by stripping section-divider comments). The Phase 30 plan did not acknowledge that recurrence risk, nor propose a split or companion module.
+
+Ground 2 is a classic assignment gap: a term declared in plan top-matter (`Session Rotation`) with `home: doctrine-governance-enforcement.md` but no phase actually modifies either the doctrine body or the glossary file to author the entry. The declaration was a metadata-only claim -- the SG-Phase25-B pattern at doctrine scope rather than skill-frontmatter scope.
+
+### Why It Matters
+
+**Cumulative razor creep at module scope** (adjacent to SG-Phase24-A at CLI-harness scope): monotonically additive edits to a single file across phases eventually trip the 250-line cap. The cap is a *speed bump*, not a floor -- once a module is within ~10-15 lines of it, any future additive phase must budget for a split in its own plan. The alternative (trim-under-pressure each seal) sacrifices readability incrementally and obscures the structural signal that the module needs to bifurcate.
+
+**Metadata-only declarations at doctrine scope**: a plan's top-matter `terms_introduced:` block is a promise. If no phase's Affected Files section fulfills the promise (authoring the glossary entry + editing the declared home), the promise becomes exactly the kind of ghost feature SG-Phase25-B warned about at skill-frontmatter scope, just one layer up.
+
+### Countermeasure
+
+For Governor authoring:
+
+1. **When a plan adds lines to any existing module, include the module's current line count in the plan (or the Basis section) and sum the projected delta.** If the projected total is within 20 lines of the Razor limit, propose the split or trim *in the same plan* -- do not defer.
+2. **Every term in `terms_introduced:` must appear in exactly one phase's Affected Files section, covering both the glossary entry and the declared home.** Add a dogfood bullet explicitly cross-checking this: "Enumeration cross-check: every `terms_introduced:` entry resolves to one or more edits in Phase N's Affected Files."
+
+For Judge auditing:
+
+1. When a plan proposes additive edits to a file, `wc -l` the file and add the plan's projected delta. Flag projections within 10 lines of the 250 cap as Razor-anticipation VETO grounds. Refactor is the *mechanism*; the fix must live in the *plan* before implementation, not be deferred.
+2. Walk the `terms_introduced:` list against each phase's Affected Files; flag any term not assigned to a phase as a metadata-only claim.
+
+### Pattern ID
+
+SG-Phase30-A (projected Razor violation from additive edits to near-cap module) + SG-Phase30-B (metadata-only term declaration at doctrine scope: term in `terms_introduced:` with no phase authoring the glossary entry + home)
+
+---
+
 *Shadow integrity: ACTIVE*

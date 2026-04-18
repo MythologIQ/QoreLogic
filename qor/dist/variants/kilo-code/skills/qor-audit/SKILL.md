@@ -209,6 +209,21 @@ Verify all proposed files connect to build path:
 
 **On PASS verdict overall**: next phase is `/qor-implement`. Per `qor/gates/chain.md`.
 
+#### Documentation Drift (Phase 28 wiring)
+
+Non-VETO advisory. After orphan detection, render a `## Documentation Drift` section into the audit report when the plan's declared `doc_tier` / `terms` / `boundaries` diverge from the repo's glossary and topology. Per `qor/references/doctrine-documentation-integrity.md`, these same divergences hard-block at `/qor-substantiate`; the audit advisory lets the Governor fix drift in a single pass before seal.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import doc_integrity, gate_chain
+plan_artifact = gate_chain.read_phase_artifact("plan", session_id=sid)
+drift_md = doc_integrity.render_drift_section(plan_artifact, repo_root=".")
+# Append drift_md under the Orphan Detection section of AUDIT_REPORT.md
+# (empty string when glossary is clean; no section emitted).
+```
+
+The drift helper never raises. Current-audit verdict stands on its own merits; drift is informational.
+
 ### Step 4: Generate Verdict
 
 Create `.agent/staging/AUDIT_REPORT.md` using template from `references/qor-audit-templates.md`.
@@ -242,6 +257,26 @@ advisory_body = render_advisory_text(result)
 When `result.detected` is True, the pattern has also been appended to the Process Shadow Genome as a severity-3 `repeated_veto_pattern` event (via `maybe_emit_pattern_event` inside `check()` when `session_id` is passed). The advisory is non-blocking; the current-audit verdict stands on its own merits.
 
 Report verdict, risk grade, and next action. Template: `references/qor-audit-templates.md`.
+
+### Step Z: Write Gate Artifact (Phase 29 wiring)
+
+Persist the structured gate artifact at `.qor/gates/<session_id>/audit.json` so `/qor-implement` (and any other downstream phase) can read it via `gate_chain.check_prior_artifact`. Previously missing; Phase 29 closes the chain link.
+
+```python
+import sys; sys.path.insert(0, 'qor/scripts')
+import gate_chain, shadow_process
+
+payload = {
+    "ts": shadow_process.now_iso(),
+    "target": plan_path,          # plan file audited (from Step 2 state verification)
+    "verdict": verdict,           # "PASS" or "VETO" (per qor/gates/schema/audit.schema.json enum)
+    "report_path": ".agent/staging/AUDIT_REPORT.md",
+    "risk_grade": risk_grade,     # "L1" | "L2" | "L3"
+}
+gate_chain.write_gate_artifact(phase="audit", payload=payload, session_id=sid)
+```
+
+Schema at `qor/gates/schema/audit.schema.json` validates before write. A schema violation raises `ValueError` the operator must resolve before proceeding; no silent fallback.
 
 ## Constraints
 
