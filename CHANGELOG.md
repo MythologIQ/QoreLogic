@@ -10,6 +10,24 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-04-20
+
+Phase 39b Phases 1+2: Agent Team A/B orchestration + persona sweep.
+
+### Added
+- **`/qor-ab-run` skill** (`qor/skills/meta/qor-ab-run/`): orchestrates persona-vs-stance Identity Activation A/B measurement via parallel Task-tool subagent dispatch (20 concurrent calls in one message). Zero external dependency, zero marginal cost. `subagent_type: "general"` per doctrine §4. Subagent prompt template with `{VARIANT_IDENTITY_ACTIVATION_BLOCK}` + `{FIXTURES_CONCATENATED}` placeholders.
+- **`qor/scripts/ab_aggregator.py`** (pure Python, no LLM coupling): brace-balanced JSON extractor (malformed-tolerant), per-(skill,variant) mean+stddev aggregation, ±5pp tie-threshold winner declaration, canonical markdown rendering.
+- **Delegation-table** row for `/qor-ab-run`; **`/qor-help` catalog** entry.
+
+### Changed
+- **Persona sweep** (S3 from Phase 39b): 5 decorative `<persona>` tags removed — `qor-status`, `qor-help`, `qor-repo-scaffold`, `qor-bootstrap`, `qor-document`.
+- **R4**: `qor-debug` line 108 `subagent_type: "general"` constraint now cross-references `doctrine-context-discipline.md` §4.
+- **R5**: `qor-document` line 251 split into two discrete sentences — Identity Activation stance (main thread) vs `qor-technical-writer` subagent pairing — citing doctrine §1.2/§1.3 to prevent mechanism conflation.
+
+### Notes
+- **R3 Identity Activation rewrite** for `/qor-audit` + `/qor-substantiate` is **conditional on A/B evidence**. Operator invokes `/qor-ab-run` to produce `docs/phase39-ab-results.md`; `test_identity_activation_matches_ab_winner_if_results_exist` auto-applies the rewrite rule when results declare `winner: "stance"` for a skill. Without evidence, current persona-named Identity Activation is retained.
+- **LOAD_BEARING_PENDING_EVIDENCE registry** (`tests/test_persona_sweep.py`): 19 skills documented as load-bearing by doctrine judgment, awaiting A/B evidence.
+
 ## [0.29.0] - 2026-04-20
 
 Phase 39 Phase 1 seal: context-discipline doctrine + A/B corpus fixtures. Anthropic-SDK harness approach withdrawn in favor of Agent Team orchestration (Phase 39b).
