@@ -45,8 +45,7 @@ This skill is **cross-cutting** — invoked when the Process Shadow Genome thres
 Invoke `qor/scripts/remediate_read_context.py` via its library interface:
 
 ```python
-import sys; sys.path.insert(0, 'qor/scripts')
-import remediate_read_context as rrc
+from qor.scripts import remediate_read_context as rrc
 groups = rrc.load_unaddressed_groups()
 ```
 
@@ -91,18 +90,21 @@ Examples:
 - Escalate a severity level in the shadow rubric
 - Retire a skill that consistently produces low-quality output
 
-### Step 4 — Mark events addressed
+### Step 4 — Mark events addressed_pending (Phase 36 B19 wiring)
 
-Invoke `qor/scripts/remediate_mark_addressed.py`:
+Invoke `qor/scripts/remediate_mark_addressed.py` with the **pending-stage** API:
 
 ```python
-import remediate_mark_addressed as rma
-flipped, missing = rma.mark_addressed(proposal["addressed_event_ids"], session_id=sid)
+from qor.scripts import remediate_mark_addressed as rma
+flipped, missing = rma.mark_addressed_pending(
+    proposal["addressed_event_ids"], session_id=sid
+)
 ```
 
+- Flips `addressed_pending: true` only. `addressed` stays `false`; `addressed_ts` stays `null`; `addressed_reason` stays `null`.
 - Routes write-back to each event's origin file (LOCAL or UPSTREAM) via `shadow_process.id_source_map()` + `write_events_per_source`.
 - Returns `(flipped_count, missing_ids)`. `missing_ids` is the list of IDs not found in either log — surfaced per SG-032 instead of silently dropped.
-- Writes `addressed: true`, `addressed_ts: <ISO-8601>`, `addressed_reason: "remediated"` (schema enum value; detailed reason is recorded in the gate artifact).
+- The `addressed: true` flip is deferred to Step 6 (invoked from `/qor-audit`) and requires a PASS audit with the `reviews-remediate:<path>` operator signal. This two-stage contract codifies "remediation is advisory until reviewed."
 
 ### Step 5 — Emit remediate gate artifact
 
@@ -114,6 +116,24 @@ path = reg.emit(proposal, session_id=sid)
 ```
 
 Writes `.qor/gates/<session_id>/remediate.json` with the proposal plus a `ts` field for downstream audit.
+
+### Step 6 — Review-pass flip (invoked from `/qor-audit`, Phase 36 B19)
+
+This step is NOT called by `/qor-remediate`. It is executed by `/qor-audit` when the operator invokes audit with the `reviews-remediate:<path>` skill arg and the audit reaches a PASS verdict. For completeness the contract is:
+
+```python
+from qor.scripts import remediate_mark_addressed as rma
+flipped, missing = rma.mark_addressed(
+    proposal["addressed_event_ids"],
+    session_id=sid,
+    review_pass_artifact_path=".qor/gates/<sid>/audit.json",
+    remediate_gate_path=".qor/gates/<sid>/remediate.json",
+)
+```
+
+`mark_addressed` verifies the audit artifact's `phase == "audit"`, `verdict == "PASS"`, and `reviews_remediate_gate == remediate_gate_path` before flipping. On any verification failure it raises `ReviewAttestationError` without mutating events. This closes the advisory-until-reviewed loop: Step 4 writes pending state; Step 6 (via operator-explicit audit) completes the flip to `addressed: true`.
+
+See `qor/references/doctrine-governance-enforcement.md` §10.1 "Two-stage remediation flip."
 
 ## Constraints
 

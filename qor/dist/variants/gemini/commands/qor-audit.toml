@@ -21,8 +21,7 @@ Adversarial audit of the Governor's blueprint to generate a binding PASS/VETO ve
 Before activating identity, verify the prior-phase artifact (plan) exists and is well-formed.
 
 ```python
-import sys; sys.path.insert(0, 'qor/scripts')
-import qor_audit_runtime as runtime
+from qor.scripts import qor_audit_runtime as runtime
 
 sid = runtime.session_id()
 result = runtime.check_prior_artifact(session_id=sid)
@@ -36,6 +35,22 @@ elif not result.valid:
 ```
 
 Override is permitted (advisory gate) but logged as severity-1 event in the Process Shadow Genome.
+
+### Step 0.5: Cycle-count escalation check (Phase 37 wiring)
+
+Before engaging adversarial mode, check whether the session has already accumulated three consecutive same-signature VETO audits. If so, the legal next action is `/qor-remediate`, not another audit round.
+
+```python
+from qor.scripts import cycle_count_escalator as cce
+
+rec = cce.check(sid)
+if rec:
+    # Surface to operator. On decline, record the override via
+    # orchestration_override.record and proceed with audit.
+    # See /qor-plan Step 2c for symmetric handling.
+```
+
+See `qor/references/doctrine-governance-enforcement.md` §10.4 "Cycle-count escalation."
 
 ### Step 1: Identity Activation + Mode Selection
 
@@ -180,6 +195,26 @@ Verify system-level coherence and module organization:
 
 **Any violation -> VETO**. **Required next action:** `/qor-organize` (project-level structure is its domain). Per `qor/gates/delegation-table.md`.
 
+#### Infrastructure Alignment Pass (Phase 37 wiring)
+
+Grep-verify every plan claim about filesystem behavior, gate artifact globbing, event types, and cross-module interfaces against current repository code BEFORE implementation. Catches the V10-class failure from Phase 36: plans that reference infrastructure the repo does not actually provide.
+
+```markdown
+### Infrastructure Alignment Audit
+
+For each plan claim in scope, verify against current code:
+
+- [ ] Every cited filesystem path (`.qor/gates/<sid>/X.json`, `docs/Y.md`, etc.) exists in current tree OR is explicitly declared NEW in Affected Files
+- [ ] Every cited glob pattern (`audit*.json`, `plan*.json`) produces the accumulation shape the plan assumes (singleton vs multi-file; check `gate_chain.write_gate_artifact` + `audit_history` semantics)
+- [ ] Every referenced `event_type` appears in `qor/gates/schema/shadow_event.schema.json` enum OR is explicitly declared NEW in the plan
+- [ ] Every cross-module function signature (`module.func(args)`) exists in current source OR is explicitly declared NEW in Affected Files
+- [ ] Every skill reference (`/qor-X` Step N) matches the actual current skill structure
+```
+
+**Any violation -> VETO with `infrastructure-mismatch` category**. **Required next action:** amend the plan to reflect actual infrastructure OR add the missing infrastructure as an explicit Phase Affected File. No implicit dependencies.
+
+See `qor/references/doctrine-shadow-genome-countermeasures.md` `SG-InfrastructureMismatch` for the countermeasure catalog entry.
+
 #### Orphan Detection
 
 Verify all proposed files connect to build path:
@@ -201,8 +236,7 @@ Verify all proposed files connect to build path:
 Non-VETO advisory. After orphan detection, render a `## Documentation Drift` section into the audit report when the plan's declared `doc_tier` / `terms` / `boundaries` diverge from the repo's glossary and topology. Per `qor/references/doctrine-documentation-integrity.md`, these same divergences hard-block at `/qor-substantiate`; the audit advisory lets the Governor fix drift in a single pass before seal.
 
 ```python
-import sys; sys.path.insert(0, 'qor/scripts')
-import doc_integrity, gate_chain
+from qor.scripts import doc_integrity, gate_chain
 plan_artifact = gate_chain.read_phase_artifact("plan", session_id=sid)
 drift_md = doc_integrity.render_drift_section(plan_artifact, repo_root=".")
 # Append drift_md under the Orphan Detection section of AUDIT_REPORT.md
@@ -214,6 +248,36 @@ The drift helper never raises. Current-audit verdict stands on its own merits; d
 ### Step 4: Generate Verdict
 
 Create `.agent/staging/AUDIT_REPORT.md` using template from `references/qor-audit-templates.md`.
+
+#### Step 4.1: Capture `reviews-remediate` operator signal (Phase 36 B19 wiring)
+
+If the operator invoked `/qor-audit` with skill arg of the form `reviews-remediate:<path>`, capture the path. When writing the audit gate artifact payload (Step 4.2 via `gate_chain.write_gate_artifact`), include the `reviews_remediate_gate` field set to that path. Absence of the arg → field is `null` (or omitted). The field is declared in `qor/gates/schema/audit.schema.json` as optional.
+
+This signal is the ONLY trigger for the two-stage addressed flip in `/qor-remediate` Step 6. Operator invokes this variant of audit ONLY when reviewing a remediation proposal; an ordinary plan audit never sets the field.
+
+#### Step 4.2: Review-pass flip (Phase 36 B19 wiring)
+
+After the audit report is written and before the ledger update, if the audit's `reviews_remediate_gate` field is set and the verdict is PASS, invoke the two-stage flip:
+
+```python
+import json
+from qor.scripts import remediate_mark_addressed as rma
+
+reviews_gate = audit_gate_payload.get("reviews_remediate_gate")
+if verdict == "PASS" and reviews_gate:
+    with open(reviews_gate, encoding="utf-8") as f:
+        remediate_proposal = json.load(f)
+    rma.mark_addressed(
+        remediate_proposal["addressed_event_ids"],
+        session_id=sid,
+        review_pass_artifact_path=f".qor/gates/{sid}/audit.json",
+        remediate_gate_path=reviews_gate,
+    )
+```
+
+`mark_addressed` re-verifies the audit artifact before flipping; any mismatch raises `ReviewAttestationError`. PASS audits without the `reviews_remediate_gate` field never touch event state.
+
+See `qor/references/doctrine-governance-enforcement.md` §10.1 "Two-stage remediation flip."
 
 ### Step 5: Update Ledger
 
@@ -230,7 +294,6 @@ If verdict is VETO, document in `docs/SHADOW_GENOME.md` using template from `ref
 Invoke the repeated-VETO pattern detector and populate the Process Pattern Advisory section of the report:
 
 ```python
-import sys; sys.path.insert(0, 'qor/scripts')
 from qor.scripts.veto_pattern import check, render_advisory_text
 
 result = check(ledger_path=None, session_id=sid)  # reads docs/META_LEDGER.md
@@ -250,8 +313,7 @@ Report verdict, risk grade, and next action. Template: `references/qor-audit-tem
 Persist the structured gate artifact at `.qor/gates/<session_id>/audit.json` so `/qor-implement` (and any other downstream phase) can read it via `gate_chain.check_prior_artifact`. Previously missing; Phase 29 closes the chain link.
 
 ```python
-import sys; sys.path.insert(0, 'qor/scripts')
-import gate_chain, shadow_process
+from qor.scripts import gate_chain, shadow_process
 
 payload = {
     "ts": shadow_process.now_iso(),
@@ -259,11 +321,30 @@ payload = {
     "verdict": verdict,           # "PASS" or "VETO" (per qor/gates/schema/audit.schema.json enum)
     "report_path": ".agent/staging/AUDIT_REPORT.md",
     "risk_grade": risk_grade,     # "L1" | "L2" | "L3"
+    "findings_categories": findings_categories,  # Phase 37 B20b: required on VETO
 }
 gate_chain.write_gate_artifact(phase="audit", payload=payload, session_id=sid)
 ```
 
 Schema at `qor/gates/schema/audit.schema.json` validates before write. A schema violation raises `ValueError` the operator must resolve before proceeding; no silent fallback.
+
+**Phase 37 B20b — `findings_categories` mapping discipline**: each VETO finding maps deterministically to one value in the closed 12-value enum. Audit-pass → category map:
+
+| Pass | Category |
+|---|---|
+| Section 4 Razor | `razor-overage` |
+| Ghost UI | `ghost-ui` |
+| Security L3 | `security-l3` |
+| OWASP Top 10 | `owasp-violation` |
+| Orphan Detection | `orphan-file` |
+| Macro-Level Architecture | `macro-architecture` |
+| Dependency Audit | `dependency-unjustified` |
+| Schema-narrative mismatch | `schema-migration-missing` |
+| Plan-internal contradiction | `specification-drift` |
+| Test failure / coverage gap | `test-failure` / `coverage-gap` |
+| Infrastructure Alignment Pass (§Step 3) | `infrastructure-mismatch` |
+
+Any finding that cannot map to an enum value raises `UnmappedCategoryError` before gate artifact emission. No `other` or `uncategorized` fallback — drift must force a deliberate `audit.schema.json` amendment, not silent loss of stall signal. Implemented by `qor/scripts/findings_signature.py`'s validation path.
 
 ## Constraints
 

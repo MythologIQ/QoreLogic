@@ -4,13 +4,19 @@
   "title": "Plan Gate Artifact",
   "type": "object",
   "additionalProperties": true,
-  "required": ["phase", "ts", "session_id", "plan_path", "phases"],
+  "required": ["phase", "ts", "session_id", "plan_path", "phases", "ci_commands"],
   "properties": {
     "phase": { "const": "plan" },
     "ts": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
     "session_id": { "type": "string", "minLength": 3 },
     "plan_path": { "type": "string", "minLength": 1 },
     "phases": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "ci_commands": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "description": "Phase 38 B22: commands the operator runs locally to validate the plan before substantiate. Must match CI for deterministic parity. Required from Phase 38 forward; earlier plans grandfathered at test layer."
+    },
     "open_questions": { "type": "array", "items": { "type": "string" } },
     "doc_tier": { "enum": ["minimal", "standard", "system", "legacy"] },
     "doc_tier_rationale": { "type": "string", "minLength": 1 },

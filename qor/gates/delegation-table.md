@@ -29,6 +29,9 @@ This table is the single source of truth for cross-skill handoffs. Every `/qor-*
 | `qor-debug` | Root cause is process gap (gate skipped, capability shortfall) | `/qor-remediate` | code is fine; the workflow needs adjustment |
 | `qor-debug` | Root cause is code defect | `/qor-implement` (with fix scoped) or `/qor-refactor` | per defect class |
 | any phase | Process Shadow Genome threshold (sev sum >= 10) | `/qor-remediate` | auto-triggered by `qor/scripts/check_shadow_threshold.py` |
+| `qor-plan` | 3rd consecutive same-signature VETO in session | `/qor-remediate` | cycle-count escalation (Phase 37; via `cycle_count_escalator.check`) |
+| `qor-audit` | 3rd consecutive same-signature VETO in session | `/qor-remediate` | cycle-count escalation (Phase 37) |
+| any phase | Operator declines cycle-count escalation | `orchestration_override.record` | logged; session-suppressed; unioned with `gate_override` in gate-loop classifier |
 | any phase | Capability shortfall (codex-plugin, agent-teams missing on host that supports them) | log via `qor_platform.is_available` + `shadow_process.append_event` | non-blocking; logged for trend analysis |
 
 ## Cross-cutting skills (no fixed handoff)

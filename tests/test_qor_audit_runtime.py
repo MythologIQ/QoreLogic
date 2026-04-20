@@ -44,6 +44,7 @@ def test_check_prior_artifact_returns_valid_when_plan_exists(tmp_path, monkeypat
         "session_id": sid,
         "plan_path": "docs/plan.md",
         "phases": ["phase-a"],
+        "ci_commands": ["pytest"],
     }
     (plan_dir / "plan.json").write_text(json.dumps(plan_artifact), encoding="utf-8")
 

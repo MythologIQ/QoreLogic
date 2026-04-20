@@ -4199,6 +4199,702 @@ Phase 32 Self-substantiation: Step 4.7 with strict=True will run against Phase 3
 *Merkle seal: 48039bb420...*
 
 
+### Entry #114: SESSION SEAL -- Phase 34 hotfix substantiated
+
+**Timestamp**: 2026-04-19
+**Phase**: SEAL (hotfix)
+**Author**: Judge
+**Verdict**: PASS (638 tests green on 2 consecutive runs; Phase 33 seal-tag timing fix exercised cleanly)
+
+**Target**: `docs/plan-qor-phase34-cli-version-hotfix.md`
+**Change Class**: `hotfix`
+**Version**: `0.24.0 -> 0.24.1`
+**Tag**: `v0.24.1` (will be created at Step 9.5.5 post-commit)
+
+**Content Hash**: `e96c520bc4a175759ad61f77855191f950a764e2f38bf8f90c754908d26fc22f`
+**Previous Hash**: `48039bb420c440b63de0291401e3611dbc9ef7ec21235cad5129a6ad6f327e3a`
+**Chain Hash**: `a840c3b5eb03e69096e52ce898bb9988c67311f0bd046feaea102bd0681e8d3a`
+
+**Scope**: single CLI hotfix. `qor/cli.py` `__version__` now reads from `importlib.metadata.version("qor-logic")` at import time; hardcoded string `"0.18.0"` (stale since v0.18.0 — six releases) removed. Regression guard `tests/test_cli_version_from_metadata.py` with 2 tests: runtime-lookup parity + Rule-4 structural lint forbidding SemVer string literals on the `__version__` line.
+
+**SG entry**: Entry #24 SG-Phase34-A (hardcoded version drift — third recurrence of the "state duplicated away from source of truth" pattern, after SG-Phase32-B README drift and SG-Phase33-A seal-tag timing).
+
+**Step 6.5 currency check**: hotfix class is exempt from the Phase 33 release-doc rule (change_class=hotfix); no release-doc warnings expected.
+
+**Hotfix justification**: `pip install qor-logic` on v0.24.0 yields `qorlogic --version` → `0.18.0`. User-visible incorrect behavior on the installed artifact. Small surface (one file + one test), unblocks users immediately.
+
+**Decision**: Phase 34 sealed. Phase 35 candidate: extend Rule-4 structural lint to ALL source files — grep for SemVer-shaped string literals outside pyproject.toml / CHANGELOG.md / META_LEDGER.md / SHADOW_GENOME.md. Catches any future hardcoded-version creep in one sweep.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (rotation pending)
+*Merkle seal: a840c3b5eb...*
+
+
+### Entry #115: SESSION SEAL -- Phase 35 substantiated
+
+**Timestamp**: 2026-04-19
+**Phase**: SEAL
+**Author**: Judge
+**Verdict**: PASS (642 tests green on 2 consecutive runs pre-seal; 4 new installed-mode regression guards all green)
+
+**Target**: `docs/plan-qor-phase35-installed-import-fix.md`
+**Change Class**: `feature`
+**Version**: `0.24.1 -> 0.25.0`
+**Tag**: `v0.25.0` (created at Step 9.5.5 post-commit — Phase 33 wiring; third live exercise)
+
+**Content Hash**: `a77969a69cf9e81a0587445b4d9dab9926e7c74bf8ed6577d5e51d7e71a938a4`
+**Previous Hash**: `a840c3b5eb03e69096e52ce898bb9988c67311f0bd046feaea102bd0681e8d3a`
+**Chain Hash**: `85dd865c3dd683467986003e1e0a076f11684ed1c0283b0dbe154fad6c8c1e0b`
+
+**Scope**: operational-breakage fix across seven releases (v0.18.0–v0.24.1). Every `pip install qor-logic` user received a package whose governance skills could not run — 49 skill-prose Python blocks embedded a `sys.path.insert(0, 'qor/scripts')` hack that only worked from the Qor-logic repo root. `qor/reliability/` shipped hyphen-named Python files (`intent-lock.py` etc.) that are not valid module names and only ran via CWD-dependent path invocation. Two intra-`qor/scripts` bare imports (`doc_integrity.py`, `doc_integrity_strict.py`) piggybacked on the hack and broke the same way.
+
+**Fix**: all 49 skill occurrences rewritten to `from qor.scripts import X`. Reliability scripts renamed (`git mv`) to snake_case; skill subprocess invocations rewritten to `python -m qor.reliability.<name>`. Bare imports qualified. Four new regression tests in `tests/test_installed_import_paths.py` lock both structural (no hack pattern remains) and runtime (imports resolve via the module system) contracts. Doctrine-governance-enforcement §9 "Installed-Mode Invariants" codifies the three binding rules.
+
+**Files modified**: 12 skill `.md` files (49 rewrites), 3 reliability files renamed, 2 `qor/scripts/*.py` imports qualified, 2 test files updated for new snake_case paths, 1 new test module (`test_installed_import_paths.py`, 4 tests), 1 doctrine section added, SG Entry #25 written, CHANGELOG 0.25.0 authored, lifecycle.md Step 4.6 annotation, SYSTEM_STATE refreshed.
+
+**Branch base**: phase/35 cut from phase/34 (not main) so the Phase 34 `__version__` fix and the Phase 35 import fix stack in one history. PR #6 (v0.24.1) must merge first; then PR for Phase 35 carries the combined delta to main.
+
+**SG family closure progress**:
+- SG-Phase32-B (README version): closed at Phase 32 seal + Phase 33 release-doc rule.
+- SG-Phase33-A (seal-tag timing): closed at Phase 33 seal. Fix holding on third live exercise (v0.24.0 → v0.24.1 → v0.25.0 all target their own seal commits correctly).
+- SG-Phase34-A (CLI `__version__`): closed at Phase 34 seal.
+- SG-Phase35-A (installed-mode breakage): closed here. Fourth and most operationally-severe recurrence of the "state-duplicated-from-source-of-truth" family.
+
+**Decision**: Phase 35 sealed. PyPI v0.25.0 (when release workflow completes) will be the first truly installable qor-logic release — skills will actually execute post-install. Phase 36 candidate: extend structural lint to all Python source files (sweep for any remaining repo-layout assumptions in the package).
+
+---
+
+### Entry #116: RESEARCH BRIEF -- Persona framing vs. context control
+
+**Timestamp**: 2026-04-19
+**Phase**: RESEARCH (advisory; no code change, no version bump)
+**Author**: Analyst
+**Risk Grade**: L1 (philosophical review; no operational impact pending Governor decision)
+
+**Target**: `.agent/staging/RESEARCH_BRIEF.md` — evaluation of the claim "anthropomorphising subagents is a trap; the real value of subagents is controlled context" against Qor-logic's skill prose, persona frontmatter, and actual subagent invocations.
+
+**Content Hash**: `983ec6781ebafcede607d47d88b6ee85f1183738200939361ff8b5ca204b4f51`
+**Previous Hash**: `85dd865c3dd683467986003e1e0a076f11684ed1c0283b0dbe154fad6c8c1e0b`
+**Chain Hash**: `75a61d348d6a5eece438c4739d0d68ee1d9997470739d0aaf4b05f07a974ccdb`
+
+**Key findings**:
+1. Three structurally different mechanisms — `<persona>` frontmatter, Step 1 "Identity Activation" prose, and actual Task/Agent-tool subagent invocations — all carry the same "persona" vocabulary. Conflation is the root confusion.
+2. `qor-debug` already learned the lesson (line 108: "ALWAYS use `subagent_type: 'general'` (not `ultimate-debugger`)") but the insight was never uplifted to doctrine.
+3. `qor-deep-audit-recon` is the only skill that explicitly names context preservation as the purpose of subagent use (line 68). Pattern is correct; its doctrine home is missing.
+4. Persona framing is load-bearing only in ~2 skills (audit, substantiate), where it codes for cognitive stance; elsewhere it is decorative. Same family as SG Phase 32-35 "state-duplicated-from-source-of-truth" drift chain.
+
+**Recommendations** (priority-ordered):
+- **R1 (HIGH)** Add `qor/references/doctrine-context-discipline.md` distinguishing context-isolation / cognitive-stance / handoff mechanisms.
+- **R2 (MED)** Deprecate `<persona>` frontmatter on decorative-only skills.
+- **R3 (MED)** Rewrite Identity Activation blocks to lead with stance directive, persona name optional.
+- **R4 (MED)** Generalize the `qor-debug` `subagent_type: general` constraint into doctrine.
+- **R5 (LOW)** Disambiguate `qor-document` persona-vs-agent conflation.
+- **R6 (DEFER)** Behavioral A/B to test whether persona-name carries stance lift independent of modifier.
+
+**Decision**: Findings issued. No code change this session. Handoff to Governor: choose whether to authorize a Phase 36 remediation plan (formal `/qor-plan`) vs. a documentation-only pass (`/qor-document` + targeted skill edits). R6 flagged as investigable but not blocking.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (rotation pending) — Entry #116 is advisory, does not unseal
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entry #116 chained onto it)
+
+---
+
+### Entry #117: FAILURE DOCUMENTATION -- SG-PlanAuditLoop-A filed
+
+**Timestamp**: 2026-04-19
+**Phase**: GOVERNANCE (advisory; no code change, no version bump)
+**Author**: Governor (on operator direction — "record this as failure documentation for marked improvement")
+**Risk Grade**: L2 (orchestration-class process failure with framework-level countermeasures; higher than L1 because the gap persists in shipped `/qor-remediate` and can recur)
+
+**Target**: `docs/SHADOW_GENOME.md` Entry #26 (SG-PlanAuditLoop-A) — operator postmortem of plan/audit/replan loop without execution handoff, observed on an external codebase consuming Qor-logic skills. Four verified findings against `qor/skills/sdlc/qor-remediate/SKILL.md`.
+
+**Content Hash**: `c2de50f43598db9ff6244761db87add6abe060efab3f29de817caca2055ac101` (SHADOW_GENOME.md post-write)
+**Previous Hash**: `75a61d348d6a5eece438c4739d0d68ee1d9997470739d0aaf4b05f07a974ccdb`
+**Chain Hash**: `c96e20205d13918a403aebce7555c3e2b37576ed07f71c8d2d3fecbd843809c2`
+
+**Verified findings** (against our source, not external):
+- HIGH — `qor-remediate` Step 4 flips `addressed: true` at line 93-104 before Step 5 emits the review gate artifact; contradicts line 122 constraint that remediation is advisory until reviewed.
+- MED — gate-loop classifier at line 72 keys on `gate_override` events; the observed stall produced zero overrides.
+- MED — no cycle-count auto-escalation from `/qor-plan` / `/qor-audit` to `/qor-remediate` on stable findings-signature failures.
+- LOW — plan constraint mandates CI commands; `plan.schema.json` and body template do not declare the field location.
+
+**Countermeasures filed**: C1-C4 in SG Entry #26, and backlog items B19-B22 in `docs/BACKLOG.md` (priority HIGH/MED/MED/LOW).
+
+**Decision**: Failure documented. `/qor-remediate` currently cannot detect or auto-surface this pattern; the documentation is the mechanical surface until C1-C4 ship. SG Entry #26 remains `addressed: false` until the countermeasures pass their own audit — per the same constraint the HIGH finding corrects.
+
+**Scope note for the pending Phase 36 plan**: Phase 36 (`context-discipline` doctrine, persona-as-context-prioritization) was mid-dialogue when this failure documentation was requested. Governor directives M4 + S3 are registered but plan authoring is paused pending scope decision: (a) fold B19-B22 into Phase 36, or (b) queue as a separate phase. See next session prompt.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (rotation pending) — Entry #117 is advisory failure documentation; does not unseal Phase 35
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#117 chained onto it)
+
+---
+
+### Entry #118: GATE TRIBUNAL — Phase 36 Pass 1 — VETO (L2)
+
+**Timestamp**: 2026-04-19
+**Phase**: GATE
+**Author**: Judge (solo; codex-plugin unavailable, capability_shortfall logged)
+**Verdict**: **VETO**
+**Risk Grade**: L2
+
+**Target**: `docs/plan-qor-phase36-planaudit-loop-countermeasures.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Gate Artifact**: `.qor/gates/2026-04-19T0015-a74026/audit.json`
+
+**Content Hash**: `9a5c9aa295b40c0049a577dbbc4a4b6e5a62dc1a6dd4834235044a2f0cf079c3`
+**Previous Hash**: `c96e20205d13918a403aebce7555c3e2b37576ed07f71c8d2d3fecbd843809c2`
+**Chain Hash**: `f3519c6112c8d47b5cd63fb1cf7ce487065241a44cc79ceeff0fa28ca915c5a6`
+
+**Verdict summary**: Plan correctly identifies SG-PlanAuditLoop-A countermeasures but contains five structural-coherence breaches that would ship a self-inconsistent classifier surface if implemented as-drafted. Same defect class as the state-duplicated-from-source-of-truth family (SG Phase 32-35) — ironic given this plan is designed to catch exactly that family of failure.
+
+**VETO findings** (all must be resolved before re-audit):
+- **V1 (HIGH)** `addressed_pending` added as required schema field with no migration for existing events in `PROCESS_SHADOW_GENOME.md` / `...UPSTREAM.md`. Breaks validation on first read post-Phase-1.
+- **V2 (HIGH)** `findings_signature` source artifact ambiguity: Phase 2 computes from `.agent/staging/AUDIT_REPORT.md` (markdown), Phase 3 from `.qor/gates/*/audit*.json`. Current audit.schema.json carries no structured findings categories. Plan requires undeclared schema change.
+- **V3 (HIGH)** `findings_signature` category list not enumerated. "E.g." categories open the same state-duplication drift the plan is trying to prevent. Closed enum required.
+- **V4 (MED)** `orchestration_override` event_type mismatch with gate-loop classifier. Test asserts gate-loop fires on 2 overrides; classifier keys on `gate_override` not `orchestration_override`. Plan does not declare classifier union or event-type alias.
+- **V5 (MED)** No LOC estimates for 5 new or refactored scripts. Razor (40/250/3) cannot be adversarially pre-audited.
+
+**Secondary findings** (F1-F8) addressed in same amendment pass per report §Secondary findings.
+
+**Cycle count**: 1 (first VETO on this plan). No cycle-count escalation pressure (B21 threshold = 3, and B21 is not yet shipped — this is literally the plan to ship it).
+
+**Decision**: Amend plan to resolve V1-V5 + F1-F8. Re-invoke `/qor-audit`. Not delegating to `/qor-organize` — structural issues are in planning specification, not project topology. Not delegating to `/qor-refactor` — the files do not yet exist; planning artifact is incomplete, not code-shape.
+
+---
+
+*Chain integrity: VALID*
+*Session: open (Phase 36 not yet sealable; Phase 35 seal retained upstream)*
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#118 chained)
+
+---
+
+### Entry #119: GATE TRIBUNAL — Phase 36 Pass 2 — VETO (L1)
+
+**Timestamp**: 2026-04-19
+**Phase**: GATE
+**Author**: Judge (solo; codex-plugin unavailable, capability_shortfall re-logged)
+**Verdict**: **VETO**
+**Risk Grade**: L1 (no HIGH findings; two MED specification gaps)
+
+**Target**: `docs/plan-qor-phase36-planaudit-loop-countermeasures.md` (amended Pass 2)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Gate Artifact**: `.qor/gates/2026-04-20T0208-cf2c2c/audit.json` (session rotated since Pass 1)
+
+**Content Hash**: `a9000f75223fff8c6b5738e1b168ba453f30329e99b9d5c199c4cee2dae26dc0`
+**Previous Hash**: `f3519c6112c8d47b5cd63fb1cf7ce487065241a44cc79ceeff0fa28ca915c5a6`
+**Chain Hash**: `bf98ef9f06ee21d4ff04a8f7bb2c782627ef02a9d822a737dc6deb8cd3e53197`
+
+**Pass 1 findings resolution verified**: V1-V5 + F1-F4, F6-F8 all substantively resolved. F5 appropriately disclosed in `boundaries.limitations`. Amendment is real work, not cosmetic.
+
+**Pass 2 findings issued**:
+- **V6 (MED)** `findings_categories` required-on-VETO narrative not encoded in schema JSON — specification drift (same family the plan targets). Fix: encode `allOf` conditional OR drop narrative claim.
+- **V7 (MED)** Legacy audit gate artifacts without `findings_categories` produce stable empty-list signature → false-positive stall detection. Fix: sentinel value for absent field; escalator excludes sentinel-signed artifacts.
+- **F9 (LOW)** `cycle_count_escalator.check` 8-step pseudocode may exceed 40-LOC function limit; declare internal split.
+- **F10 (LOW)** Undefined behavior when a VETO finding doesn't map to an enum value; pick emission-time behavior.
+- **F11 (LOW)** Cross-session stall invisibility not disclosed; add to `boundaries.non_goals`.
+
+**Signature comparison**:
+- Pass 1 findings_categories: `[schema-migration-missing, macro-architecture, specification-drift, razor-overage]` (4)
+- Pass 2 findings_categories: `[specification-drift, macro-architecture]` (2; different set)
+- Signatures differ → `plan-replay` classifier (if shipped) would NOT fire. This is iterative refinement, not stall.
+
+**Cycle count for Phase 36 audit**: 2. Threshold K=3 not reached.
+
+**Decision**: Amend plan narrowly to resolve V6 + V7 + F9-F11. Narrower scope than Pass 1→Pass 2 amendment. Not delegating (no topology / refactor / remediate triggers). Return to `/qor-plan`.
+
+---
+
+*Chain integrity: VALID*
+*Session: open (Phase 36 not yet sealable; Phase 35 seal retained upstream)*
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#119 chained)
+
+---
+
+### Entry #120: GATE TRIBUNAL — Phase 36 Pass 3 — VETO (L1)
+
+**Timestamp**: 2026-04-20
+**Phase**: GATE
+**Author**: Judge (solo; codex-plugin unavailable, capability_shortfall re-logged)
+**Verdict**: **VETO**
+**Risk Grade**: L1 (no HIGH findings; two MED specification gaps)
+
+**Target**: `docs/plan-qor-phase36-planaudit-loop-countermeasures.md` (Pass 3 amendment)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Gate Artifact**: `.qor/gates/2026-04-20T0208-cf2c2c/audit.json`
+
+**Content Hash**: `d760ec0d4c6193cb4d4bebc8ae0f980cb9c3b22803a0f97d8aebaf44c18bc388`
+**Previous Hash**: `bf98ef9f06ee21d4ff04a8f7bb2c782627ef02a9d822a737dc6deb8cd3e53197`
+**Chain Hash**: `76a6cd594566551757a5ff5a59a4edb466d453d03fbddd63c5478c88451cc7a7`
+
+**Pass 2 resolutions verified**: V6, V7, F9, F10, F11 all substantively resolved (verification table in audit report).
+
+**Pass 3 findings issued**:
+- **V8 (MED)** `check()` orchestrator (Phase 3 `cycle_count_escalator.py`) references local `first_match_ts` that no declared helper returns. Newly introduced by Pass 3's F9 decomposition; the helper function signatures omit the timestamp field.
+- **V9 (MED)** `plan-replay` classifier (Phase 2) consumes `plan_complete` / `implement_complete` / `debug_complete` events that are neither in `shadow_event.schema.json` enum nor emitted by any skill. Pre-existing across Passes 1-3; missed by Judge in prior reviews. Acknowledged as Judge miss, not Governor fault.
+
+**Signature comparison**:
+- Pass 1 categories: `[schema-migration-missing, macro-architecture, specification-drift, razor-overage]` (4)
+- Pass 2 categories: `[specification-drift, macro-architecture]` (2)
+- Pass 3 categories: `[specification-drift, macro-architecture]` (2; **same as Pass 2**)
+- Same-signature run length: **2** (Pass 2 + Pass 3). K=3 threshold NOT yet reached.
+
+**Stall observation (disclosed to Governor)**: If Pass 4 VETOs with the same signature, the plan-replay classifier under design would fire — the stall pattern the plan targets would be triggered in the plan-authoring process itself. Not a Judge decision; stated for transparency.
+
+**Decision**: Narrow amendment to resolve V8 + V9. No delegation triggers. Return to `/qor-plan`. Governor retains the option to step back to `/qor-remediate` if Pass 4 would also VETO on same signature; that remains Governor judgment until classifier ships.
+
+---
+
+*Chain integrity: VALID*
+*Session: open (Phase 36 not yet sealable)*
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#120 chained)
+
+---
+
+### Entry #121: GATE TRIBUNAL — Phase 36 Pass 4 — VETO (L2)
+
+**Timestamp**: 2026-04-20
+**Phase**: GATE
+**Author**: Judge (solo)
+**Verdict**: **VETO**
+**Risk Grade**: L2 (HIGH finding blocks implementation; mechanism non-functional as specified)
+
+**Target**: `docs/plan-qor-phase36-planaudit-loop-countermeasures.md` (Pass 4 amendment)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Gate Artifact**: `.qor/gates/2026-04-20T0208-cf2c2c/audit.json` (overwrites Pass 3 audit — ironically, the very behavior flagged)
+
+**Content Hash**: `b2b395c518177c5b6bd997be4758d5e35d99bafa71da9711c5948f398d97b14f`
+**Previous Hash**: `76a6cd594566551757a5ff5a59a4edb466d453d03fbddd63c5478c88451cc7a7`
+**Chain Hash**: `4cc984b98c9226b9226166340cb88f13198f987c63bec6f4888b68c3b20ee511`
+
+**Pass 3 resolutions verified**: V8 (3-tuple return), V9 (gate-artifact classifier via stall_walk).
+
+**Pass 4 finding**:
+- **V10 (HIGH)** Gate artifact write convention does not accumulate: `gate_chain.write_gate_artifact` writes `.qor/gates/<sid>/<phase>.json` as a singleton, overwriting on re-emission. Phase 3's entire multi-pass stall-detection mechanism assumes accumulation. Shipped implementation would return `count=1` unconditionally → dead code. Pre-existing across all passes; acknowledged as Judge systematic miss (plan-internal consistency verified without plan-to-infrastructure alignment check).
+
+**Signature comparison**:
+- Pass 2/3 signature: `[specification-drift, macro-architecture]` (stable across those 2 passes)
+- Pass 4 signature: `[macro-architecture]` (1 category; **different — run length reset to 1**)
+
+**Meta-loop transparency**: Four passes in. Each pass resolved prior findings and surfaced new ones. Pass 4 found an infrastructure-alignment class that the Judge had been systematically missing. The stall-classifier-under-design would NOT trigger here (signature changed); but the authoring-process stall pattern is increasingly visible at a level below the classifier's design.
+
+**Governor decision territory**:
+- Continue amendment (narrow fix for V10): low additional surface, closer to implement
+- Escalate to `/qor-remediate`: four passes with a new structural issue at each; the defect family is the plan itself — SG-PlanAuditLoop-A is what this phase targets
+
+User direction on prior turn was implement. V10 blocks implement. Judge does not mandate escalation; amendment is still defensible.
+
+---
+
+*Chain integrity: VALID*
+*Session: open*
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#121 chained)
+
+---
+
+### Entry #122: REMEDIATE PROPOSAL — Phase 36 authoring process (4-pass VETO pattern)
+
+**Timestamp**: 2026-04-20
+**Phase**: REMEDIATE (Governor-invoked; process-level, not code)
+**Author**: Governor
+**Gate Artifact**: `.qor/gates/2026-04-20T0208-cf2c2c/remediate.json`
+
+**Trigger**: User explicit invocation of `/qor-remediate` after Pass 4 VETO. Governor judgment: four passes with progressively deeper structural findings (V1-V5, V6-V7, V8-V9, V10) indicates the plan's scope exceeds what can be specified coherently in one phase against current infrastructure.
+
+**Automated classifier output**: capability-shortfall aggregation (3 codex-plugin shortfalls in current session). Classifier does not see the plan-audit loop pattern because `/qor-audit` does not emit per-VETO structured shadow events — the pattern lives in narrative SG + ledger only. This is itself an instance of the V10 class.
+
+**Proposed changes** (skill + doctrine; NOT code):
+
+1. **Rescope Phase 36** to B19 alone (two-stage addressed flip). Extract B20/B21 into Phase 37 with explicit infrastructure design (gate artifact accumulation, findings_categories schema, stall_walk). Extract B22 into Phase 38 (trivial). Context-discipline shifts to Phase 39.
+
+2. **Enhance `/qor-plan` Step 2b Grounding Protocol** with infrastructure alignment check: grep-verify every filesystem path, gate artifact glob, event_type, and cross-module interface reference against current code before finalizing plan. {{verify: …}} tags block submission.
+
+3. **Add SG-InfrastructureMismatch** to `qor/references/doctrine-shadow-genome-countermeasures.md`. Codifies the failure class.
+
+4. **Add 7th audit pass** to `/qor-audit`: "Infrastructure Alignment Pass" — grep-verifies plan claims against actual code. New findings_categories enum value `infrastructure-mismatch`.
+
+**Events marked addressed**: NONE. Capability_shortfall events are unrelated; closing them as "addressed" here would be dishonest. Per B19 (this proposal's primary target), `mark_addressed` should be two-stage anyway — the pending→addressed flip occurs when the rescoped phases ship.
+
+**Next action**: Governor decides — (a) accept this proposal, commit Phase 36 rescope, pivot to Phase 36a (B19 only), OR (b) revise this proposal. Not `/qor-audit` on this artifact; remediate gate artifacts are advisory until reviewed (per skill doctrine; B19 will formalize this post-ship).
+
+---
+
+*Chain integrity: VALID*
+*Session: open*
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#122 chained)
+
+---
+
+### Entry #123: GATE TRIBUNAL — Phase 36 Rescoped Pass 1 — VETO (L1)
+
+**Timestamp**: 2026-04-20
+**Phase**: GATE
+**Author**: Judge (solo)
+**Verdict**: **VETO**
+**Risk Grade**: L1 (single MED wiring gap)
+
+**Target**: `docs/plan-qor-phase36-remediate-two-stage-flip.md` (rescoped plan, Pass 1)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Gate Artifact**: `.qor/gates/2026-04-20T0208-cf2c2c/audit.json`
+
+**Content Hash**: `92e16e10f1039ae67160ed7d3faa5ba8106438e543995e299dc3e0caa3156400`
+**Previous Hash**: `4cc984b98c9226b9226166340cb88f13198f987c63bec6f4888b68c3b20ee511`
+**Chain Hash**: `b0f83a883f171a38ffd7d648324cc9187b919fffb934b1611802de66fdc644b6`
+
+**Pre-audit infrastructure alignment** (new discipline from /qor-remediate proposal):
+- `remediate_propose.py` uses `addressed_event_ids` field name ✓ (plan matches)
+- `tests/test_remediate.py` has 18 existing tests; plan adds 8 ✓
+- `tests/test_shadow_event_schema.py` is new (plan declares NEW) ✓
+- Doctrine §9 exists; §10 is legal next section ✓
+- All referenced skill/schema/script files exist ✓
+
+**Pass 1 finding**:
+- **V1 (MED)** Review-pass flip detection is too coarse: triggering on `remediate.json` file presence fires on any PASS audit in a session with a prior `/qor-remediate` invocation, not specifically on audits reviewing the remediation. The plan's second-level disambiguation (`reviews_remediate_gate` field verification) works but the plan does not declare WHO sets that field. Concrete failure: unrelated PASS audit flips unrelated events. Resolution: pick (a) explicit operator flag, (b) proposal-plan linkage, or (c) manual closure path.
+
+**Signature**: `[macro-architecture]` (1 category). Independent of prior-plan history (different plan file). Rescoped-plan cycle count: 1.
+
+**Decision**: Narrow amendment to resolve V1. No delegation. Return to `/qor-plan`.
+
+---
+
+*Chain integrity: VALID*
+*Session: open*
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#123 chained)
+
+---
+
+### Entry #124: GATE TRIBUNAL — Phase 36 Rescoped Pass 2 — **PASS** (L1)
+
+**Timestamp**: 2026-04-20
+**Phase**: GATE
+**Author**: Judge (solo)
+**Verdict**: **PASS**
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase36-remediate-two-stage-flip.md` (Pass 2 amendment)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Gate Artifact**: `.qor/gates/2026-04-20T0208-cf2c2c/audit.json`
+
+**Content Hash**: `4f8c9254d92d2931e97a60363b09d063532b50ee786db44d87963f99c59ebfb0`
+**Previous Hash**: `b0f83a883f171a38ffd7d648324cc9187b919fffb934b1611802de66fdc644b6`
+**Chain Hash**: `086947a814e37857a2cffcb203ec50cfb3495de0bf96f55c6a62295761e74ac3`
+
+**Verdict**: PASS. V1 resolution verified (explicit `reviews-remediate:<path>` operator signal + `reviews_remediate_gate` schema field + three regression tests). All audit passes clean. No HIGH/MED findings. Cosmetic note: Affected Files summary for `/qor-audit/SKILL.md` retains pre-V1 wording; Changes section is authoritative and test-defended.
+
+**Cycle summary** (Phase 36 total): 5 plan iterations (4 on original `plan-qor-phase36-planaudit-loop-countermeasures.md`, archived; 2 on rescoped `plan-qor-phase36-remediate-two-stage-flip.md`). 5 audit passes including this one. Rescope → PASS in 2 passes vs original's 4+ with no PASS in sight.
+
+**Next action**: `/qor-implement` is now unblocked.
+
+---
+
+*Chain integrity: VALID*
+*Session: open (ready for implement)*
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#124 chained)
+
+---
+
+### Entry #125: IMPLEMENTATION — Phase 36 B19 (two-stage addressed flip)
+
+**Timestamp**: 2026-04-20
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Target**: `docs/plan-qor-phase36-remediate-two-stage-flip.md` (PASS Pass 2)
+
+**Content Hash**: `84951349bec851c36713ec65422186fb30b61b0a3edf2c6c563e9b3db7ae6932` (SHA256 of 8 modified files concatenated)
+**Previous Hash**: `086947a814e37857a2cffcb203ec50cfb3495de0bf96f55c6a62295761e74ac3`
+**Chain Hash**: `869515a615e9a5ff381cbd78b1f81a293466994845fef37ecd100f713b2851bd`
+
+**Files modified**:
+- `qor/scripts/remediate_mark_addressed.py` — rewrite: `ReviewAttestationError` class, `_flip_event_fields` helper, `mark_addressed_pending` (stage 1), `mark_addressed` (stage 2 with artifact verification). ~125 LOC across 4 functions, each under 40-line Razor.
+- `qor/gates/schema/shadow_event.schema.json` — `addressed_pending` optional property + `allOf` `if-then` invariant (`addressed==true AND addressed_reason=="remediated"` implies `addressed_pending==true`).
+- `qor/gates/schema/audit.schema.json` — `reviews_remediate_gate` optional property.
+- `qor/skills/sdlc/qor-remediate/SKILL.md` — Step 4 → `mark_addressed_pending`; new Step 6 "Review-pass flip" documents invocation from `/qor-audit`.
+- `qor/skills/governance/qor-audit/SKILL.md` — Step 4.1 captures `reviews-remediate:<path>` operator arg; Step 4.2 invokes `mark_addressed` on PASS with the signal.
+- `qor/references/doctrine-governance-enforcement.md` — §10.1 "Two-stage remediation flip" + §10.2 "Narrative SG entry closure."
+- `tests/test_shadow_event_schema.py` — NEW (5 tests covering schema invariant).
+- `tests/test_remediate.py` — 10 new tests for two-stage flip + V1 disambiguation; 3 existing `test_mark_addressed_*` updated to pending-stage API.
+
+**Test results**: 654 pytest tests green on 2 consecutive runs. Targeted suite (`test_remediate.py` + `test_shadow_event_schema.py`): 30/30 green. Admission: `qor-remediate`, `qor-audit` both pass. Gate-skill matrix: 28 skills, 106 handoffs, 0 broken. Doc integrity: clean.
+
+**Intent lock**: `2026-04-20T0208-cf2c2c` captured pre-implement per Phase 17 wiring.
+
+**Reality = Promise verification**: all 8 plan-declared files modified or created; no unplanned files in `qor/scripts/` or `tests/`.
+
+**Next action**: `/qor-substantiate` to seal.
+
+---
+
+*Chain integrity: VALID*
+*Session: open (ready for substantiate)*
+*Merkle seal: 85dd865c3d...* (Phase 35 seal retained; Entries #116-#125 chained)
+
+---
+
+### Entry #126: SESSION SEAL -- Phase 36 substantiated
+
+**Timestamp**: 2026-04-20
+**Phase**: SEAL
+**Author**: Judge
+**Verdict**: PASS (654 tests green on 2 consecutive runs pre-seal; 15 new B19 tests all green)
+
+**Target**: `docs/plan-qor-phase36-remediate-two-stage-flip.md`
+**Change Class**: `feature`
+**Version**: `0.25.0 -> 0.26.0`
+**Tag**: `v0.26.0` (created at Step 9.5.5 post-commit — Phase 33 timing)
+
+**Content Hash**: `4f8c9254d92d2931e97a60363b09d063532b50ee786db44d87963f99c59ebfb0`
+**Previous Hash**: `869515a615e9a5ff381cbd78b1f81a293466994845fef37ecd100f713b2851bd`
+**Chain Hash (Merkle seal)**: `8d9f75437c847d3be99627acbf400706ab4a82c81c01c1157a4019b8c741f5e8`
+
+**Scope**: B19 only — two-stage addressed flip in `/qor-remediate`. Scoped down from the original Phase 36 plan (archived at `docs/plan-qor-phase36-planaudit-loop-countermeasures.archived.md`) after a four-pass audit loop surfaced V1-V10 across progressively deeper infrastructure-alignment mismatches. `/qor-remediate` proposal (Entry #122) accepted 2026-04-20; original plan preserved as investigation record on this branch.
+
+**Files modified**:
+- `qor/scripts/remediate_mark_addressed.py` — rewrite: `ReviewAttestationError`, `_flip_event_fields`, `mark_addressed_pending`, `mark_addressed`.
+- `qor/gates/schema/shadow_event.schema.json` — `addressed_pending` optional + `allOf`/`if-then` invariant.
+- `qor/gates/schema/audit.schema.json` — `reviews_remediate_gate` optional field.
+- `qor/skills/sdlc/qor-remediate/SKILL.md` — Step 4 pending variant + new Step 6 review-pass flip doc.
+- `qor/skills/governance/qor-audit/SKILL.md` — Step 4.1 operator-arg capture + Step 4.2 review-pass flip.
+- `qor/references/doctrine-governance-enforcement.md` — §10.1 two-stage flip + §10.2 narrative SG closure.
+- `tests/test_shadow_event_schema.py` — NEW (5 tests).
+- `tests/test_remediate.py` — +10 new; 3 existing updated to pending-stage API.
+- `docs/SYSTEM_STATE.md` — Phase 36 snapshot appended.
+- `pyproject.toml` — version 0.25.0 → 0.26.0.
+- `qor/dist/variants/**` — auto-regenerated for updated skill prose.
+
+**Unplanned artifact committed**: `docs/plan-qor-phase37-stall-detection-infrastructure.md` (Phase 37 plan draft, authored by operator mid-session; referenced by BACKLOG as forward planning; not in Phase 36 Reality=Promise set but documented here).
+
+**SG family closure progress**:
+- SG-PlanAuditLoop-A: **partially closed**. B19 ships the first countermeasure (advisory-until-reviewed enforced mechanically). C2-C4 (stall detection, cycle-count escalation, CI-commands slot) deferred to Phase 37/38.
+- SG-Phase36-A: active; narrow B19 scope did not re-trigger specification-drift pattern.
+
+**Decision**: Phase 36 sealed at v0.26.0. Phase 37 plan draft committed alongside as forward record. Next: push/PR per Step 9.6 operator menu.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 36 substantiated)
+*Merkle seal: 8d9f7543...* (Phase 36 seal on top of Phase 35's 85dd865c3d; Entries #116-#126 chained)
+
+---
+
+### Entry #127: GATE TRIBUNAL — Phase 37 Pass 1 — **PASS** (L1)
+
+**Timestamp**: 2026-04-20
+**Phase**: GATE
+**Author**: Judge (solo)
+**Verdict**: **PASS**
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase37-stall-detection-infrastructure.md` (Pass 1)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Gate Artifact**: `.qor/gates/2026-04-20T0208-cf2c2c/audit.json`
+
+**Content Hash**: `4aba0fc40d637fb02fcc1637bc859970751b4d24e33ba6641a30dcfb83557483`
+**Previous Hash**: `8d9f75437c847d3be99627acbf400706ab4a82c81c01c1157a4019b8c741f5e8`
+**Chain Hash**: `e602b67343806a6a601b3fc14fe5f7e0364d8b42fee43a2464ee47f871e0c76f`
+
+**Verdict**: PASS on first pass. Operator-authored plan absorbs lessons from all 4 Phase 36 audit passes (V1-V10) without re-introducing drift. New Infrastructure Alignment discipline (from /qor-remediate Entry #122) applied by Judge and codified INTO the plan as a new /qor-audit pass — the countermeasure is embedded in the mechanism that will catch future instances of its own failure class.
+
+**Observations (non-VETO)**: O1 LOC budgets absent (function scopes narrow enough), O2 Infrastructure Alignment Pass rubric is prose (matches other passes), O3 singleton-first-then-history ordering tradeoff disclosed.
+
+**Cycle summary** (Phase 37 so far): 1 plan, 1 audit pass, PASS. Fastest clearance of any recent phase — dramatic contrast with Phase 36's 5-total-plan-iterations trajectory.
+
+**Next action**: `/qor-implement` is unblocked. Dependency order: Phase 1 → Phase 2 → Phase 3 → Phase 4.
+
+---
+
+*Chain integrity: VALID*
+*Session: open (Phase 37 ready for implement)*
+*Merkle seal: 8d9f7543...* (Phase 36 retained; Entries #116-#127 chained)
+
+---
+
+### Entry #128: IMPLEMENTATION — Phase 37 (B20 + B21 stall-detection infrastructure)
+
+**Timestamp**: 2026-04-20
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Target**: `docs/plan-qor-phase37-stall-detection-infrastructure.md` (Pass 1 PASS)
+
+**Content Hash**: `9a6d4bf42b1c8d3dd459f4f75d30b21dbf37e91069f949defd2952a5e034223b` (SHA256 of 25 files concatenated)
+**Previous Hash**: `e602b67343806a6a601b3fc14fe5f7e0364d8b42fee43a2464ee47f871e0c76f`
+**Chain Hash**: `ac07f8ac16fd9c7a352437caca1af5c269e83deb576c471067415b22ade94ee0`
+
+**Files modified/created**:
+- `qor/scripts/audit_history.py` — NEW. Append-only JSONL log alongside singleton audit gate artifact. Solves V10.
+- `qor/scripts/findings_signature.py` — NEW. 16-hex-char SHA256 prefix over sorted unique `findings_categories`; LEGACY sentinel for absent field; `UnmappedCategoryError` on non-enum.
+- `qor/scripts/stall_walk.py` — NEW. Shared walker (`run`) returning `(count, signature, first_match_ts)` for both escalator and classifier.
+- `qor/scripts/cycle_count_escalator.py` — NEW. Thin orchestrator with K=3 threshold + suppression marker check.
+- `qor/scripts/orchestration_override.py` — NEW. Severity-2 event + session-scoped suppression marker.
+- `qor/scripts/gate_chain.py` — `write_gate_artifact` calls `audit_history.append` after audit singleton write.
+- `qor/scripts/remediate_pattern_match.py` — gate-loop classifier unions `gate_override | orchestration_override`; plan-replay pattern added (session-scoped, reads stall_walk, dedups vs gate-loop).
+- `qor/gates/schema/shadow_event.schema.json` — event_type enum gains `plan-replay`, `orchestration_override`.
+- `qor/gates/schema/audit.schema.json` — `findings_categories` closed 12-value enum + `allOf` required-on-VETO.
+- `qor/skills/sdlc/qor-plan/SKILL.md` — new Step 2c cycle-count hook.
+- `qor/skills/governance/qor-audit/SKILL.md` — new Step 0.5 cycle-count hook; new Step 3 Infrastructure Alignment Pass (7th adversarial pass); Step Z emits `findings_categories` + mapping discipline.
+- `qor/skills/governance/qor-audit/references/qor-audit-templates.md` — findings_categories slot declared.
+- `qor/gates/delegation-table.md` — 3 new rows (plan cycle-count, audit cycle-count, override decline).
+- `qor/references/doctrine-governance-enforcement.md` — §10.3 audit history + findings signature; §10.4 cycle-count escalation; §10.5 operator override + re-prompt suppression.
+- `qor/references/doctrine-shadow-genome-countermeasures.md` — `SG-InfrastructureMismatch` codified with verification hints.
+- `tests/test_audit_history.py` NEW (5 tests), `test_gate_chain_audit_history.py` NEW (3), `test_findings_signature.py` NEW (9), `test_audit_gate_emits_findings_categories.py` NEW (7), `test_stall_walk.py` NEW (7), `test_cycle_count_escalator.py` NEW (7), `test_orchestration_override.py` NEW (4), `test_skill_integrity.py` NEW (4).
+- `tests/test_remediate.py` +5 new tests for gate-loop union + plan-replay classifier.
+- `tests/test_audit_gate_artifact.py` updated for VETO findings_categories requirement.
+- `CHANGELOG.md` — v0.26.0 section added (CHANGELOG debt from Phase 36; now current).
+
+**Test results**: 705 pytest tests green on 2 consecutive runs. 76 targeted Phase-37 tests green. Admission: `qor-plan`, `qor-audit`, `qor-remediate` all pass. Gate-skill matrix: 28 skills, 108 handoffs, 0 broken. Doc integrity: clean.
+
+**Intent lock**: re-captured post-implement per Phase 17 wiring workaround.
+
+**Next action**: `/qor-substantiate` to seal Phase 37 at v0.27.0.
+
+---
+
+*Chain integrity: VALID*
+*Session: open (ready for substantiate)*
+*Merkle seal: 8d9f7543...* (Phase 36 retained; Entries #116-#128 chained)
+
+---
+
+### Entry #129: SESSION SEAL -- Phase 37 substantiated
+
+**Timestamp**: 2026-04-20
+**Phase**: SEAL
+**Author**: Judge
+**Verdict**: PASS (705 tests green on 2 consecutive runs)
+
+**Target**: `docs/plan-qor-phase37-stall-detection-infrastructure.md`
+**Change Class**: `feature`
+**Version**: `0.26.0 -> 0.27.0`
+**Tag**: `v0.27.0` (created at Step 9.5.5 post-commit — Phase 33 timing)
+
+**Content Hash**: `4aba0fc40d637fb02fcc1637bc859970751b4d24e33ba6641a30dcfb83557483`
+**Previous Hash**: `ac07f8ac16fd9c7a352437caca1af5c269e83deb576c471067415b22ade94ee0`
+**Chain Hash (Merkle seal)**: `401a37cdd3098624dc8c51e517a90c3ad8ecc595987365017a4af929388b5483`
+
+**Scope**: Full stall-detection infrastructure (B20 + B21). Closes C2-C4 countermeasures from SG-PlanAuditLoop-A; combined with Phase 36's B19 (C1), the operator postmortem's full remediation is now shipped. Adds 7th adversarial audit pass (Infrastructure Alignment) codified as `SG-InfrastructureMismatch` countermeasure.
+
+**SG closures**:
+- **SG-PlanAuditLoop-A: FULLY CLOSED** (C1 Phase 36, C2-C4 Phase 37).
+- **SG-Phase36-A**: active; narrow-scope + infrastructure-alignment discipline held across Phase 37's first-pass PASS.
+- **SG-InfrastructureMismatch**: codified in `qor/references/doctrine-shadow-genome-countermeasures.md`.
+
+**Decision**: Phase 37 sealed at v0.27.0. Phase 38 (B22 ci_commands schema slot) begins next per user direction — freeze line set at v0.28.0 for upstream consumer lockdown. Phase 39 (context-discipline) explicitly deferred pending upstream stability.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 37 substantiated)
+*Merkle seal: 401a37cd...* (Phase 37 seal on top of Phase 36's 8d9f7543; Entries #116-#129 chained)
+
+---
+
+### Entry #130: GATE TRIBUNAL — Phase 38 Pass 1 — **PASS** (L1)
+
+**Timestamp**: 2026-04-20
+**Phase**: GATE
+**Author**: Judge (solo)
+**Verdict**: **PASS**
+**Risk Grade**: L1
+
+**Target**: `docs/plan-qor-phase38-ci-commands-schema-slot.md` (Pass 1)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Gate Artifact**: `.qor/gates/2026-04-20T0208-cf2c2c/audit.json`
+
+**Content Hash**: `fb37041180327fb56c4985f0da1c7df3d1f9eebd9285989c83449650e1068a4e`
+**Previous Hash**: `401a37cdd3098624dc8c51e517a90c3ad8ecc595987365017a4af929388b5483`
+**Chain Hash**: `7846f83448ce9ac489fffa09a044bf9c72d59cf6f7ff5a2ec97747f69895fe41`
+
+**Verdict**: PASS on first pass. Trivial-scope plan (1 schema field + 1 skill template section + 1 test file). Second consecutive phase to PASS on first audit under the new Infrastructure Alignment discipline shipped in Phase 37.
+
+**Next action**: `/qor-implement` unblocked.
+
+---
+
+*Chain integrity: VALID*
+*Session: open (Phase 38 ready for implement)*
+*Merkle seal: 401a37cd...* (Phase 37 retained; Entries #116-#130 chained)
+
+---
+
+### Entry #131: IMPLEMENTATION — Phase 38 B22 (`ci_commands` schema slot)
+
+**Timestamp**: 2026-04-20
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Target**: `docs/plan-qor-phase38-ci-commands-schema-slot.md` (Pass 1 PASS)
+
+**Content Hash**: `b9a2adfdac3703988a691d6cf1c5f59d6322cf5be8d2c43d129d89ad3a699874`
+**Previous Hash**: `7846f83448ce9ac489fffa09a044bf9c72d59cf6f7ff5a2ec97747f69895fe41`
+**Chain Hash**: `7899c0879e16a570fd880d6435e56b6ab46d06b1bc83819687efc875d20b726c`
+
+**Files modified**:
+- `qor/gates/schema/plan.schema.json` — added `ci_commands` to `required` + property definition (array, minItems 1, items minLength 1).
+- `qor/skills/sdlc/qor-plan/SKILL.md` §Plan Structure — added `## CI Commands` section to template + Phase 38 B22 contract note.
+- `tests/test_plan_schema_ci_commands.py` — NEW. 6 tests (required-field enforcement, empty-array rejection, empty-string rejection, valid-case acceptance, skill-prose check, grandfathering for pre-Phase-38 markdown plans).
+- Test fixture updates (9 call sites across `test_gates.py`, `test_plan_skill_wiring.py`, `test_plan_schema_doc_integrity.py`, `test_qor_audit_runtime.py`, `test_e2e.py`, `test_gate_chain_audit_history.py`): added `"ci_commands": ["pytest"]` to existing plan payloads so schema-required field is satisfied. These fixtures represent Phase-38-era consumers; adding ci_commands is semantically correct.
+- `CHANGELOG.md` — v0.27.0 section added (Phase 37 CHANGELOG debt; now current).
+
+**Test results**: 711 pytest tests green on 2 consecutive runs. 6 targeted Phase-38 tests green. Admission: `qor-plan` pass. Gate-skill matrix: 28 skills, 108 handoffs, 0 broken. Doc integrity: clean.
+
+**Scope expansion from plan**: Plan did not anticipate 9 existing test fixtures would fail once `ci_commands` became required. Mid-implement test updates were required to satisfy the schema for fixtures that represent plan-gate payloads. This was test-layer mechanical updates, not a plan amendment.
+
+**Intent lock**: `2026-04-20T0208-cf2c2c` captured pre-implement.
+
+**Next action**: `/qor-substantiate` to seal at v0.28.0 (procedural surface freeze line).
+
+---
+
+*Chain integrity: VALID*
+*Session: open (ready for substantiate)*
+*Merkle seal: 401a37cd...* (Phase 37 retained; Entries #116-#131 chained)
+
+---
+
+### Entry #132: SESSION SEAL -- Phase 38 substantiated (**FREEZE LINE v0.28.0**)
+
+**Timestamp**: 2026-04-20
+**Phase**: SEAL
+**Author**: Judge
+**Verdict**: PASS (711 tests green on 2 consecutive runs)
+
+**Target**: `docs/plan-qor-phase38-ci-commands-schema-slot.md`
+**Change Class**: `feature`
+**Version**: `0.27.0 -> 0.28.0`
+**Tag**: `v0.28.0` (created at Step 9.5.5 post-commit — Phase 33 timing)
+
+**Content Hash**: `fb37041180327fb56c4985f0da1c7df3d1f9eebd9285989c83449650e1068a4e`
+**Previous Hash**: `7899c0879e16a570fd880d6435e56b6ab46d06b1bc83819687efc875d20b726c`
+**Chain Hash (Merkle seal)**: `b7c8ed6798f760560e9e747c17a69919ae7e248e018cddfbd7042dcb84401737`
+
+**Scope**: B22 only (`ci_commands` required field in plan.schema.json + skill template section + 6-test suite + 9 existing-fixture updates). Trivial by design — the phase's purpose was to complete the procedural surface before the user-directed freeze line.
+
+**Procedural surface frozen at v0.28.0**:
+- Skill protocols: qor-plan/audit/remediate/implement/substantiate
+- Event-type enum: 9 values (gate_override, regression, hallucination, degradation, capability_shortfall, aged_high_severity_unremediated, repeated_veto_pattern, plan-replay, orchestration_override)
+- Gate-artifact schemas: plan (ci_commands required), audit (findings_categories required on VETO + reviews_remediate_gate optional), shadow_event (addressed_pending optional + invariant)
+- Findings categories: 12-value closed enum
+- Delegation table: 108 handoffs
+- Doctrine §10.1-10.5 (remediation lifecycle)
+- Countermeasure catalog: SG-InfrastructureMismatch
+
+**Deferred beyond freeze**:
+- Phase 39 (context-discipline + persona reshape) — ~30 skill files, M4 A/B harness. Explicitly out of scope pending upstream consumer lockdown.
+
+**Decision**: Phase 38 sealed. v0.28.0 is the stable procedural surface for upstream applications consuming Qor-logic content. Phase 39 does not proceed without explicit operator direction post-upstream-lockdown.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 38 substantiated — **FREEZE LINE**)
+*Merkle seal: b7c8ed67...* (Phase 38 seal on top of Phase 37's 401a37cd; Entries #116-#132 chained)
+
+
 
 
 

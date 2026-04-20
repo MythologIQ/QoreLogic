@@ -36,6 +36,7 @@ def _base_payload(**overrides):
         "session_id": "sess-12345",
         "plan_path": "docs/plan-qor-phase99.md",
         "phases": ["Phase 1"],
+        "ci_commands": ["pytest"],
     }
     payload.update(overrides)
     return payload

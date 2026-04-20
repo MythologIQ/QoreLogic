@@ -63,8 +63,7 @@ Tests, static checks, and refactors are valuable, but cannot compensate for comp
 Verify prior-phase artifact exists and is well-formed before proceeding.
 
 ```python
-import sys; sys.path.insert(0, 'qor/scripts')
-import gate_chain, session
+from qor.scripts import gate_chain, session
 
 sid = session.get_or_create()
 result = gate_chain.check_prior_artifact("plan", session_id=sid)
@@ -138,6 +137,35 @@ Use existing code as foundation for plan. Identify existing abstractions, naming
 
 See `qor/references/doctrine-shadow-genome-countermeasures.md` for the full Grounding Protocol and Shadow Genome countermeasure inventory. Residual `{{verify: ...}}` tags in a plan block its submission.
 
+### Step 2c: Cycle-count escalation check (Phase 37 wiring)
+
+Before authoring a new plan, check whether the session already has three consecutive same-signature VETO audits. If so, the legal next action is `/qor-remediate`, not another plan iteration.
+
+```python
+from qor.scripts import cycle_count_escalator as cce
+
+rec = cce.check(sid)
+if rec:
+    # Surface to operator: "Session has N consecutive VETOs on signature <sig>.
+    # Recommended skill: /qor-remediate. Proceed with plan anyway, or escalate?"
+    # On escalate: exit qor-plan and invoke /qor-remediate.
+    # On decline: record the override and continue.
+    if operator_declines:
+        from qor.scripts import orchestration_override
+        orchestration_override.record(
+            session_id=sid,
+            skill="qor-plan",
+            recommended_skill=rec.suggested_skill,
+            reason="operator elected to continue planning",
+        )
+        # Next cycle_count_escalator.check in this session will see the
+        # suppression marker and skip.
+```
+
+The override event is unioned with `gate_override` in the gate-loop classifier (see `qor/scripts/remediate_pattern_match.py`), so repeated overrides still eventually escalate.
+
+See `qor/references/doctrine-governance-enforcement.md` §10.4 "Cycle-count escalation" + §10.5 "Operator override and re-prompt suppression."
+
 ### Step 3: Create Plan File
 
 Create plan markdown file with specific requirements:
@@ -183,7 +211,14 @@ Create plan markdown file with specific requirements:
 ### Unit Tests
 
 - [test file path] - [what it tests, why important]
+
+## CI Commands
+
+- `<command 1>` — <what it validates>
+- `<command 2>` — <what it validates>
 ```
+
+**Phase 38 B22 contract**: every plan from Phase 38 forward carries a `## CI Commands` section listing the commands the operator runs locally to validate the plan before substantiate. The same list appears in the plan gate artifact's `ci_commands` field (required by `qor/gates/schema/plan.schema.json`). Pre-Phase-38 plans are grandfathered at the test layer; no retroactive migration.
 
 #### Plan Requirements
 
@@ -232,8 +267,7 @@ A reader unfamiliar with code should be able to:
 Persist the structured gate artifact at `.qor/gates/<session_id>/plan.json` so downstream phases can read it via `gate_chain.check_prior_artifact`.
 
 ```python
-import sys; sys.path.insert(0, 'qor/scripts')
-import gate_chain, shadow_process
+from qor.scripts import gate_chain, shadow_process
 
 # Build payload conforming to qor/gates/schema/plan.schema.json
 payload = {

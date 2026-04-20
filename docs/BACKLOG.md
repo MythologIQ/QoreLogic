@@ -68,6 +68,28 @@ Raised by user during Phase 24 substantiation (2026-04-17). Drives Phase 25 plan
 
 Raised by user during Phase 25 audit-pass-2 remediation (2026-04-17).
 
+## Queued for post-Phase-35 (SG-PlanAuditLoop-A countermeasures)
+
+Source: `docs/SHADOW_GENOME.md` Entry #26. Raised by operator postmortem 2026-04-19. Rescope proposal accepted by operator 2026-04-20 (META_LEDGER Entry #122); original Phase 36 plan (`docs/plan-qor-phase36-planaudit-loop-countermeasures.archived.md`) retained as investigation record.
+
+### Phase 36 — B19 only (two-stage addressed flip)
+
+- [x] **[B19] (v0.26.0 — Complete)** Two-stage addressed flip in `/qor-remediate`. Schema: `addressed_pending` optional field with `allOf` invariant enforcing `addressed == true AND addressed_reason == "remediated"` implies `addressed_pending == true`. Refactor: `mark_addressed_pending` (stage 1) + `mark_addressed(review_pass_artifact_path, remediate_gate_path)` (stage 2) with `_flip_event_fields` helper; `ReviewAttestationError` raised on verification failure. Skill prose: `/qor-remediate` Step 4 calls pending variant; new Step 6 documents review-pass flip invoked by `/qor-audit`. `/qor-audit` Step 4.1 captures `reviews-remediate:<path>` operator arg, Step 4.2 invokes `mark_addressed` on PASS with signal. Audit schema gains optional `reviews_remediate_gate` field. Doctrine §10.1 (two-stage flip) + §10.2 (SG narrative closure protocol). 15 new tests across `test_shadow_event_schema.py` (5) + `test_remediate.py` (10); 3 existing `test_mark_addressed_*` updated to pending-stage API. **Plan**: `docs/plan-qor-phase36-remediate-two-stage-flip.md`. Green on 654 tests across 2 consecutive runs.
+
+### Phase 37 — stall-detection infrastructure (B20 + B21)
+
+- [x] **[B20] (v0.27.0 — Complete)** Audit history append-only log. `qor/scripts/audit_history.py` + `gate_chain.write_gate_artifact` hook writes `.qor/gates/<sid>/audit_history.jsonl` alongside singleton `audit.json`. Solves V10 from original Phase 36 plan.
+- [x] **[B20b] (v0.27.0 — Complete)** `findings_categories` closed 12-value enum + `allOf` required-on-VETO in `audit.schema.json`. `qor/scripts/findings_signature.py` computes 16-hex-char prefix over sorted unique categories; LEGACY sentinel for absent field. `UnmappedCategoryError` raised at emission. `/qor-audit` SKILL.md carries the audit-pass → category mapping discipline.
+- [x] **[B21] (v0.27.0 — Complete)** `qor/scripts/stall_walk.py` (shared walker), `cycle_count_escalator.py` (K=3 orchestrator), `orchestration_override.py` (decline handler with session-scoped suppression marker). gate-loop classifier unions `gate_override | orchestration_override`. `/qor-plan` Step 2c + `/qor-audit` Step 0.5 cycle-count hooks. `/qor-audit` gains 7th Infrastructure Alignment Pass (catches V10-class findings at audit time; `infrastructure-mismatch` finding category). Delegation-table rows + doctrine §10.3-10.5 + `SG-InfrastructureMismatch` in shadow-genome-countermeasures catalog.
+
+### Phase 38 — `ci_commands` schema slot (B22)
+
+- [x] **[B22] (v0.28.0 — Complete)** `ci_commands` required field added to `qor/gates/schema/plan.schema.json` (minItems 1, item minLength 1). `/qor-plan` SKILL.md §Plan Structure template carries `## CI Commands` section. Grandfathering at test layer (phase < 38 skipped). 9 test fixtures updated to include `ci_commands` in plan payloads. `tests/test_plan_schema_ci_commands.py` NEW (6 tests). 711 tests green x2.
+
+### Phase 39 — context-discipline doctrine (formerly queued as Phase 37)
+
+See `.agent/staging/RESEARCH_BRIEF.md` and META_LEDGER Entry #116. M4 seeded-defect A/B harness + S3 full justification sweep across ~30 skills.
+
 ---
 
 _Updated by /qor-* commands automatically_

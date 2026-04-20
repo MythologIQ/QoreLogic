@@ -13,6 +13,40 @@
     "verdict": { "type": "string", "enum": ["PASS", "VETO"] },
     "violations": { "type": "array", "items": { "type": "object" } },
     "risk_grade": { "type": "string", "enum": ["L1", "L2", "L3"] },
-    "report_path": { "type": "string" }
-  }
+    "report_path": { "type": "string" },
+    "reviews_remediate_gate": {
+      "description": "Phase 36 V1 resolution: explicit signal that this audit reviews a /qor-remediate proposal. Set by /qor-audit when operator passes skill arg 'reviews-remediate:<path>'. Absence => audit does not trigger two-stage addressed flip in mark_addressed. Value is the path to the remediate gate artifact being reviewed (e.g., '.qor/gates/<sid>/remediate.json').",
+      "type": ["string", "null"]
+    },
+    "findings_categories": {
+      "description": "Phase 37 B20b: closed enum of VETO finding classes. Required when verdict == 'VETO' (enforced by allOf). Drives findings_signature for stall detection. New categories must be added here by deliberate schema amendment; no 'other' escape hatch.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "razor-overage",
+          "ghost-ui",
+          "security-l3",
+          "owasp-violation",
+          "orphan-file",
+          "macro-architecture",
+          "dependency-unjustified",
+          "schema-migration-missing",
+          "specification-drift",
+          "test-failure",
+          "coverage-gap",
+          "infrastructure-mismatch"
+        ]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "verdict": { "const": "VETO" } },
+        "required": ["verdict"]
+      },
+      "then": { "required": ["findings_categories"] }
+    }
+  ]
 }
