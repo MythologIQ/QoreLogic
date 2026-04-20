@@ -69,9 +69,12 @@ def test_audit_step_z_writes_veto_verdict_with_risk_grade(tmp_path, monkeypatch)
         risk_grade="L2",
         report_path=".agent/staging/AUDIT_REPORT.md",
     )
+    # Phase 37 B20b: VETO audits require findings_categories.
+    payload["findings_categories"] = ["specification-drift"]
     written = _write_via_gate_chain(tmp_path, monkeypatch, payload)
     assert written["verdict"] == "VETO"
     assert written["risk_grade"] == "L2"
+    assert written["findings_categories"] == ["specification-drift"]
     jsonschema.validate(written, _schema())
 
 

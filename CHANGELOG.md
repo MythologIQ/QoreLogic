@@ -10,6 +10,41 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-04-20
+
+Procedural surface freeze line. Consolidates phases 36-38 work into a single release: full SG-PlanAuditLoop-A countermeasure set (C1-C4) plus `ci_commands` plan-schema slot. Phase 39 (context-discipline + persona reshape) explicitly deferred pending upstream consumer lockdown.
+
+### Added
+- **Two-stage `addressed` flip in `/qor-remediate`** (B19, SG-PlanAuditLoop-A C1): `mark_addressed_pending` (stage 1) / `mark_addressed(review_pass_artifact_path, remediate_gate_path)` (stage 2). Stage 2 verifies the audit gate artifact is `phase: "audit"`, `verdict: "PASS"`, and its `reviews_remediate_gate` field matches the remediate gate being closed; `ReviewAttestationError` raised on any failure, no event mutation. Schema `shadow_event.addressed_pending` optional boolean + `allOf` invariant enforcing `addressed == true AND addressed_reason == "remediated"` implies `addressed_pending == true` (legacy `issue_created`/`stale` paths unaffected). Schema `audit.reviews_remediate_gate` optional `string | null` for the operator signal.
+- **Stall-detection infrastructure** (B20 + B21, SG-PlanAuditLoop-A C2-C4): append-only `audit_history.jsonl` alongside singleton audit gate artifact; `findings_signature` module (16-hex-char SHA256 prefix over sorted unique categories, `"LEGACY"` sentinel for absent field, `UnmappedCategoryError` on non-enum); shared `stall_walk.run` helper returning `(count, signature, first_match_ts)`; `cycle_count_escalator.check` K=3 orchestrator; `orchestration_override.record` with session-scoped suppression marker.
+- **New 7th `/qor-audit` adversarial pass**: Infrastructure Alignment Pass grep-verifies plan claims (filesystem paths, glob patterns, event types, cross-module signatures, skill-step anchors) against current repo code. New `infrastructure-mismatch` finding category.
+- **Schema `audit.findings_categories`**: closed 12-value enum, required when `verdict == "VETO"` via `allOf`/`if-then` conditional.
+- **Schema `shadow_event.event_type`**: +`plan-replay`, +`orchestration_override`.
+- **Gate-loop classifier union**: `gate_override | orchestration_override` — repeated operator declines escalate via pattern match.
+- **`/qor-plan` Step 2c + `/qor-audit` Step 0.5**: cycle-count hooks surface `/qor-remediate` escalation to operator.
+- **`ci_commands` required field in `qor/gates/schema/plan.schema.json`** (B22): array with `minItems: 1`, items with `minLength: 1`. Plans authored from Phase 38 forward must declare local-validation commands. Pre-Phase-38 plans grandfathered at test layer. Matching `## CI Commands` template section in `/qor-plan` SKILL.md.
+- **Doctrine §10.1-10.5**: Two-stage remediation flip; narrative SG entry closure protocol; audit history + findings signature; cycle-count escalation; operator override + suppression.
+- **`SG-InfrastructureMismatch`**: codified countermeasure catalog entry.
+
+### Changed
+- 9 existing plan-payload test fixtures updated to include `"ci_commands": ["pytest"]` (fixtures represent Phase-38-era consumers of the schema).
+
+## [0.25.0] - 2026-04-19
+
+### Fixed
+- **Installed-mode breakage (SG-Phase35-A)**: package shipped since v0.18.0 was non-functional for `pip install` users. 49 skill-prose Python blocks used `import sys; sys.path.insert(0, 'qor/scripts'); import X` — only works from repo root. Rewritten to `from qor.scripts import X`. `qor/reliability/{intent-lock,skill-admission,gate-skill-matrix}.py` renamed to snake_case; skill subprocess invocations now `python -m qor.reliability.<name>` (path-independent). Two bare intra-`qor/scripts` imports (`doc_integrity.py`, `doc_integrity_strict.py`) qualified. Regression guards in `tests/test_installed_import_paths.py` lock both structural (no hack pattern remains) and runtime (imports resolve) contracts.
+
+### Added
+- **Doctrine `doctrine-governance-enforcement.md` §9 Installed-Mode Invariants**: three binding rules — qualified `qor.scripts.*` / `qor.reliability.*` imports in skill prose, snake_case reliability module names, `python -m` invocation pattern.
+
+### Changed
+- `qor/reliability/` scripts renamed: `intent-lock.py` → `intent_lock.py`, `skill-admission.py` → `skill_admission.py`, `gate-skill-matrix.py` → `gate_skill_matrix.py`. Git history preserved via `git mv`. Only consumer is skill prose (`/qor-implement` Step 5.5, `/qor-substantiate` Step 4.6); both updated. Tests updated accordingly.
+
+## [0.24.1] - 2026-04-19
+
+### Fixed
+- **CLI `__version__` drift (SG-Phase34-A)**: `qor/cli.py` hardcoded `__version__ = "0.18.0"` and never got updated across six releases (v0.18.0 → v0.24.0). `qorlogic --version` printed `0.18.0` even on v0.24.0 installs. `__version__` now reads from `importlib.metadata.version("qor-logic")` at import time; fallback `"0+unknown"` for uninstalled source checkouts. Regression guard `tests/test_cli_version_from_metadata.py` asserts runtime lookup and forbids reintroduction of a SemVer-shaped string literal on the `__version__` line.
+
 ## [0.24.0] - 2026-04-19
 
 ### Fixed

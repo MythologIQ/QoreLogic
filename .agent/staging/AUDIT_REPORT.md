@@ -1,89 +1,72 @@
-# Gate Tribunal Audit Report — Phase 33 (Pass 2)
+# Gate Tribunal Audit Report — Phase 38 Pass 1
 
-**Plan**: `docs/plan-qor-phase33-seal-tag-timing.md` (amended)
+**Plan**: `docs/plan-qor-phase38-ci-commands-schema-slot.md`
 **change_class**: feature
-**target_version**: v0.24.0
+**target_version**: v0.28.0
 **Verdict**: **PASS**
 **Mode**: solo
-**Tribunal Date**: 2026-04-18
-**Risk Grade**: L2
+**Tribunal Date**: 2026-04-20
+**Risk Grade**: L1
 
-## Pass-1 Violations — Remediation Verified
+---
 
-| ID | Violation | Remediation | Status |
-|----|-----------|-------------|--------|
-| V-1 | `create_seal_tag` backwards-compat default | `commit` is now required positional parameter; no HEAD-fallback; test swapped to `raises_without_commit` | RESOLVED |
-| V-2 | Release-doc rule wouldn't fire on self-dogfood | Trigger moved from `pyproject.toml in files_touched` to `plan_payload.change_class ∈ {feature, breaking}`; Step 6.5 wiring passes plan_payload; 6 tests cover feature/breaking/hotfix/both-covered/no-plan-payload cases | RESOLVED |
-| V-3 | Missing positive structural test for Step 9.5.5 | Added `test_skill_step_9_5_5_captures_commit_and_tags` asserting presence of `git rev-parse HEAD` + `create_seal_tag(` with `commit=` kwarg at Step 9.5.5 | RESOLVED |
+## Executive summary
 
-## Audit Passes
+Trivial-scope plan: one schema property addition + one skill-template section + one 6-test file. No infrastructure risk. Applies the Phase 37 Infrastructure Alignment discipline as baseline; all three target files exist and insertion points are legal.
 
-### Security Pass — PASS
+## Audit passes
 
-No auth logic, secrets, or mock security. subprocess calls in proposed code use list-form argv (A03 compliant).
+### Security / OWASP / Ghost UI — N/A / PASS
 
-### OWASP Top 10 Pass — PASS
-
-- A03 Injection: list-form argv throughout; no shell=True.
-- A04 Insecure Design: no insecure-by-default (commit is required, fail-closed on missing).
-- A05 Misconfiguration: no hardcoded secrets.
-- A08 Integrity: no unsafe deserialization.
-
-### Ghost UI Pass — N/A
-
-No UI surface.
+Schema-data change only. No runtime surface, no auth, no subprocess.
 
 ### Section 4 Razor Pass — PASS
 
-- `create_seal_tag`: 13 → 14 lines. OK.
-- `check_documentation_currency`: 23 → ~32 lines. Under 40.
-- `doc_integrity_strict.py`: 194 → ~215 lines. Under 250.
-- `governance_helpers.py`: 151 → ~153 lines. Under 250.
-- Nesting depth ≤ 2 throughout. No nested ternaries.
+| Check | Plan | Status |
+|---|---|---|
+| Max function lines | N/A (no new code) | OK |
+| Max file lines | new test file ~80 LOC | OK |
+| Plan scope | 1 schema delta + 1 skill edit + 1 test file | OK |
 
-### Dependency Pass — PASS
+### Dependency Audit — PASS
 
-No new dependencies.
+No new packages.
 
 ### Macro-Level Architecture Pass — PASS
 
-- Tagging concerns stay in `governance_helpers`.
-- Currency concerns stay in `doc_integrity_strict`.
-- Signature change (`plan_payload=None`) is additive; no reverse imports.
-- Cross-cutting wiring change confined to `/qor-substantiate` Steps 6.5 + 9.5.5.
+- `plan.schema.json` addition is additive; field lands at top-level properties + required.
+- `/qor-plan` SKILL.md template edit is additive to §Plan Structure.
+- Grandfathering rule handled at test layer via phase-number regex — no schema conditional needed.
+- Gate artifact payloads emitted by `/qor-plan` in Phase 36/37 already included `ci_commands`; schema now enforces what practice already does.
+
+### Infrastructure Alignment Pass (Phase 37 discipline, live) — PASS
+
+- `qor/gates/schema/plan.schema.json` — exists ✓
+- `qor/skills/sdlc/qor-plan/SKILL.md` §Plan Structure — exists ✓
+- `tests/test_plan_schema_ci_commands.py` — declared NEW ✓
+- No undeclared dependencies; no filesystem claims beyond the three files listed.
 
 ### Orphan Detection — PASS
 
-| Proposed File | Connection | Status |
-|---|---|---|
-| `tests/test_seal_tag_timing.py` | pytest collection | Connected |
-| `tests/test_substantiate_tag_timing_wired.py` | pytest collection | Connected |
-| `tests/test_release_doc_currency.py` | pytest collection | Connected |
-| `tests/test_sg_phase33_entries.py` | pytest collection | Connected |
-| `qor/scripts/governance_helpers.py` | imported by `/qor-substantiate` SKILL.md | Connected |
-| `qor/scripts/doc_integrity_strict.py` | imported by `doc_integrity` + SKILL.md Step 6.5 | Connected |
-| `qor/skills/governance/qor-substantiate/SKILL.md` | Claude harness | Connected |
-| `qor/references/doctrine-documentation-integrity.md` | cited by doc_integrity module + glossary | Connected |
-| `qor/references/glossary.md` | canonical term home | Connected |
-| `docs/SHADOW_GENOME.md` | referenced by skills + structural tests | Connected |
-| `docs/META_LEDGER.md` | canonical ledger | Connected |
+All three files are either existing (schema, skill) or explicitly declared NEW (test).
 
-## Self-Dogfood Verification
+## Signature / cycle
 
-Phase 33's implement will touch: governance_helpers.py, doc_integrity_strict.py, SKILL.md (substantiate), doctrine files, glossary, SG, META_LEDGER, test files. It will NOT touch README.md or CHANGELOG.md.
+- Pass 1 signature: `[]` (PASS, no findings)
+- Cycle count for Phase 38: 1 → PASS on first pass.
 
-At Phase 33's own substantiate:
-- Step 6.5 runs `check_documentation_currency(implement, ".", plan_payload=<Phase 33 plan>)`.
-- plan_payload.change_class == "feature" ∈ _RELEASE_CLASSES.
-- README.md and CHANGELOG.md are NOT in files_touched.
-- Check emits 2 warnings (missing release-path updates for each).
+## Chain position
 
-This proves the new rule works (self-dogfood). Since Step 6.5 is WARN semantics (not blocker), substantiate still seals. Implementer is expected to author README + CHANGELOG updates during implement OR at substantiate doc stage — the warning is the prompt.
+- Plan artifact: `.qor/gates/<sid>/plan.json` (Pass 1, valid)
+- Audit artifact: to be written
+- Next: `/qor-implement` unblocked.
 
-## Verdict
+## Required next action
 
-**PASS — all 3 Pass-1 violations resolved; no new violations surfaced.**
+**`/qor-implement`** — single-phase trivial implementation.
 
-## Next Action
+---
 
-Proceed to `/qor-implement`.
+*Verdict: PASS (L1)*
+*Mode: solo*
+*Phase 38 Pass 1 cleared on first pass — consistent with Phase 37's first-pass PASS under the same Infrastructure Alignment discipline.*

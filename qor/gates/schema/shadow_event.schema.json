@@ -49,7 +49,9 @@
         "degradation",
         "capability_shortfall",
         "aged_high_severity_unremediated",
-        "repeated_veto_pattern"
+        "repeated_veto_pattern",
+        "plan-replay",
+        "orchestration_override"
       ]
     },
     "severity": {
@@ -84,6 +86,25 @@
       "description": "For aged_high_severity_unremediated: the id of the event being escalated. Null otherwise.",
       "type": ["string", "null"],
       "pattern": "^[0-9a-f]{64}$"
+    },
+    "addressed_pending": {
+      "description": "Phase 36 two-stage flip: true when /qor-remediate has filed a remediation proposal targeting this event; remains true after /qor-audit PASSes the proposal (addressed also flips true). Optional for backward compatibility with legacy events (issue_created/stale closure paths).",
+      "type": "boolean"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "addressed": { "const": true },
+          "addressed_reason": { "const": "remediated" }
+        },
+        "required": ["addressed", "addressed_reason"]
+      },
+      "then": {
+        "properties": { "addressed_pending": { "const": true } },
+        "required": ["addressed_pending"]
+      }
+    }
+  ]
 }

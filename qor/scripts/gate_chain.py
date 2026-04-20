@@ -124,6 +124,14 @@ def write_gate_artifact(
 
     `payload` should include the schema-required fields for the given phase
     (the helper injects `phase` and `session_id` if missing).
+
+    Phase 37 Phase 1: for audit artifacts, also append to the session's
+    `audit_history.jsonl` after the singleton write succeeds. Singleton remains
+    authoritative for chain gating; history log is advisory for stall detection.
     """
     sid = session_id or session.get_or_create()
-    return vga.write_artifact(phase, payload, session_id=sid)
+    path = vga.write_artifact(phase, payload, session_id=sid)
+    if phase == "audit":
+        from qor.scripts import audit_history
+        audit_history.append(payload, session_id=sid)
+    return path

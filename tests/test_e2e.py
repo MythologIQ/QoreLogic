@@ -92,6 +92,7 @@ def test_full_chain_advisory_flow(isolated):
     plan = {
         "phase": "plan", "ts": shadow_process.now_iso(), "session_id": sid,
         "plan_path": "docs/test.md", "phases": ["p1"],
+        "ci_commands": ["pytest"],
     }
     (session_dir / "plan.json").write_text(json.dumps(plan), encoding="utf-8")
 
@@ -224,6 +225,7 @@ def test_session_continuity_across_modules(isolated):
     plan = {
         "phase": "plan", "ts": shadow_process.now_iso(), "session_id": sid_1,
         "plan_path": "x", "phases": ["p"],
+        "ci_commands": ["pytest"],
     }
     (expected_dir / "plan.json").write_text(json.dumps(plan), encoding="utf-8")
 

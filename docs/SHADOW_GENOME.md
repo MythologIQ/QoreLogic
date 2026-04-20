@@ -767,4 +767,290 @@ SG-Phase33-A (seal_tag_timing: tagging before the seal commit targets the pre-se
 
 ---
 
+## Entry #24: hardcoded CLI __version__ drift across six releases
+
+**Timestamp**: 2026-04-19
+**Target**: `qor/cli.py` `__version__ = "0.18.0"`
+**Context**: surfaced during Phase 33 post-seal smoke test. `qorlogic --version` reported `0.18.0` after installing v0.24.0 from PyPI.
+
+### Pattern
+
+`qor/cli.py:13` held a hardcoded string `__version__ = "0.18.0"`. Between v0.18.0 and v0.24.0, the version bump happened six times in `pyproject.toml` (authored by `governance_helpers.bump_version` at `/qor-substantiate` Step 7.5) but the CLI constant was never touched because nothing mechanically linked the two. `pip show qor-logic` reported the correct version (reads pyproject metadata); `qorlogic --version` reported the stale string.
+
+### Why It Matters
+
+Third recurrence of the same root pattern:
+- SG-Phase32-B: README's `## What's new in v0.22.0` heading survived into v0.23.0.
+- SG-Phase33-A: annotated tag placed on pre-seal HEAD targeted stale `pyproject.toml`.
+- SG-Phase34-A (this): CLI `__version__` string literal drifted from pyproject for six releases.
+
+Common mechanism: **state duplicated away from its single source of truth drifts silently because nothing mechanically updates the duplicate at version-bump time.** Whenever governance owns the canonical version (pyproject.toml), any other place that names a version must either be mechanically regenerated from that canonical OR read it at runtime.
+
+### Countermeasure
+
+Two-layer fix:
+
+1. **Immediate (this hotfix)**: replace the hardcoded literal with runtime lookup:
+   ```python
+   from importlib import metadata
+   try:
+       __version__ = metadata.version("qor-logic")
+   except metadata.PackageNotFoundError:
+       __version__ = "0+unknown"
+   ```
+   Once-and-done; future bumps never need a cli.py edit.
+
+2. **Regression guard (this hotfix)**: `tests/test_cli_version_from_metadata.py` carries two tests:
+   - `test_cli_version_matches_package_metadata`: asserts module-level `__version__` agrees with `importlib.metadata.version("qor-logic")`.
+   - `test_cli_version_not_hardcoded_literal`: Rule-4 structural lint — `cli.py` source must not carry a SemVer-shaped string literal on any `__version__ = ...` line. Prevents regression to hardcoding.
+
+3. **Future Phase 35 candidate**: extend the Rule-4 structural lint to ALL source files — grep for SemVer-shaped string literals outside `pyproject.toml`, `CHANGELOG.md`, `META_LEDGER.md`, and `SHADOW_GENOME.md` (the legitimate holders of historical version strings). Any match in `qor/**/*.py` that's not fetching from metadata becomes a seal-time failure. Catches any future hardcoded-version creep across the codebase in one sweep.
+
+### Pattern ID
+
+SG-Phase34-A (hardcoded version drift: module-level constant duplicating pyproject version drifted across six releases because nothing mechanically coupled the two)
+
+---
+
+## Entry #25: installed-mode breakage across seven releases
+
+**Timestamp**: 2026-04-19
+**Target**: `qor/skills/**/SKILL.md` Python blocks + `qor/reliability/*.py` subprocess invocations + 2 bare intra-`qor/scripts` imports
+**Context**: surfaced when user reported `pip install qor-logic` produces a package whose skills cannot actually execute because every governance-helper import fails with `ModuleNotFoundError`.
+
+### Pattern
+
+Skill prose (SKILL.md Python blocks) embedded the CWD-dependent hack `import sys; sys.path.insert(0, 'qor/scripts'); import gate_chain`. Works if CWD happens to be the Qor-logic repo root; fails on every `pip install` user because the operator's CWD is their own project root, not the Qor-logic repo, and `qor/scripts/` does not exist there. 49 occurrences across 12 skill files shipped this broken pattern from v0.18.0 onward.
+
+Compound breakage: `qor/reliability/` shipped hyphen-named files (`intent-lock.py`, `skill-admission.py`, `gate-skill-matrix.py`) — invalid Python module names. Skill prose invoked them as `python qor/reliability/intent-lock.py ARGS`, CWD-dependent and non-importable. Intra-`qor/scripts` bare imports (`doc_integrity.py: import shadow_process`; `doc_integrity_strict.py: from doc_integrity import parse_glossary`) piggybacked on the hack — only worked when some earlier skill code had prepended `qor/scripts/` to `sys.path`.
+
+### Why It Matters
+
+Fourth recurrence of the broader "**installed artifact diverges from dev-environment artifact**" family, after SG-Phase32-B (README version), SG-Phase33-A (seal-tag timing), SG-Phase34-A (CLI `__version__`). The three earlier drifts were cosmetic/metadata. This one is operational: the package's headline feature (runnable governance skills) was non-functional for every user who ran `pip install qor-logic` from outside the repo clone. The Release workflow published a broken package to PyPI for six sequential releases (v0.18.0–v0.24.1) without any regression guard catching it, because the repo's own tests always ran from repo root where the CWD assumption happens to hold.
+
+### Countermeasure
+
+Phase 35 ships:
+
+1. **Runtime fix**: all 49 skill-prose occurrences rewritten to `from qor.scripts import X`. Reliability scripts renamed to snake_case; skill invocations rewritten to `python -m qor.reliability.<name>`. Two bare imports qualified.
+
+2. **Regression guards** (`tests/test_installed_import_paths.py`): four tests locking structural (no hack patterns) + runtime (imports resolve) contracts.
+
+3. **Doctrine**: `doctrine-governance-enforcement.md` §9 "Installed-Mode Invariants" codifies the three rules so future skill authoring cannot re-introduce the pattern.
+
+4. **Phase 36 candidate**: extend the structural lint to any Python source file embedding repo-layout assumptions (`sys.path.insert.*qor/`, bare in-tree imports, `Path("qor/...")` literals). Sweep for where else the same family might hide.
+
+### Pattern ID
+
+SG-Phase35-A (installed-mode breakage: skill Python blocks + subprocess invocations + bare intra-package imports assumed repo-root CWD; package was non-functional for pip-installed users across v0.18.0–v0.24.1)
+
+---
+
+## Entry #26: plan/audit/replan loop without execution handoff
+
+**Timestamp**: 2026-04-19
+**Target**: `/qor-plan` ↔ `/qor-audit` ↔ `/qor-remediate` orchestration boundary
+**Context**: External postmortem from an operator running Qor-logic skills on another codebase. Reported verbatim by the operator for pattern capture. The loop consumed multiple planning/audit cycles without converting remediation plans into code changes; observed blockers remained on-disk unchanged across cycles.
+
+### Pattern
+
+Operator enters `/qor-plan` → `/qor-audit` returns VETO on structural findings. Operator narrows the remediation plan and re-enters `/qor-audit`. Audit re-inspects repo state (not plan intent), finds the same unresolved structural issues, returns VETO again. Operator re-narrows the plan. Repeat.
+
+Observed concrete blockers that persisted unchanged across multiple plan/audit cycles (external system):
+
+- `docs/CONCEPT.md` still missing
+- `src/matchmaker/loop.ts` still depended on `src/router.ts`
+- Router still owned `lastPairAt`
+- Files marked for relocation still located under `src/`
+- Razor overages still present
+- Test suite not green
+
+**What iterated**: remediation design. **What did not iterate**: remediation execution. The loop was planning/audit → planning/audit, bypassing `/qor-implement` entirely because VETO was treated as binding (correct gate behavior in isolation) without a mechanical surface for "plan is already correct; execute it."
+
+### Root-cause classification (per operator)
+
+- **Not primarily `/qor-audit`**: audit checked actual repo state and correctly returned VETO each cycle. Audit behaving as designed.
+- **Partly `/qor-plan`**: planning flow kept regenerating plans instead of forcing handoff to `/qor-implement` once the remediation was already obvious. No cycle-count threshold exists for "stop replanning."
+- **Primarily orchestration**: operator allowed the loop to continue instead of either (a) running the already-obvious implementation pass, or (b) explicitly bypassing Qor gating to patch directly. Neither was done cleanly.
+
+### Why existing countermeasures did not catch this
+
+Verified against `qor/skills/sdlc/qor-remediate/SKILL.md`:
+
+1. **HIGH — Step 4 closes events before downstream review** (lines 93-104 vs constraint at line 122). `mark_addressed` writes `addressed: true` immediately; the gate artifact for downstream audit is not emitted until Step 5. Per line 122 constraint, remediation is advisory until reviewed — but Step 4 already flipped the flag. Unresolved process failures can appear "addressed" in the shadow log before any review gate accepts them. This masks recurrence.
+
+2. **MED — `gate-loop` detector too narrow** (line 72). Defines gate-loop as ≥2 `gate_override` events in the same group. The observed loop produced zero overrides — plans failed audit cleanly and restarted planning. The classifier would not have fired. A second, complementary pattern is needed: `plan-replay` or `replan-without-implement`, triggered by N consecutive `/qor-plan` invocations targeting stable findings-signature with no intervening `/qor-implement` in the session timeline.
+
+3. **MED — no automatic escalation** from `/qor-plan` or `/qor-audit` to `/qor-remediate` on repeat-failure. Current delegation (per `qor/gates/delegation-table.md`): audit VETO → `/qor-refactor` or `/qor-organize`; plan complete → `/qor-audit`. Cycle-count escalation is absent. After K audit VETOs citing the same findings class, the legal next move should be `/qor-remediate` (process-level concern), not another `/qor-plan` round.
+
+4. **LOW — CI-command field in plan has no template slot.** `qor/skills/sdlc/qor-plan/SKILL.md` §Constraints mandates CI commands in every plan; the plan-body template and `plan.schema.json` do not declare where they live. Inconsistent plan shape predictably results.
+
+### Why It Matters
+
+The loop is not a gate failure — it is a *gate success* that stalls. Each individual skill behaves correctly; the composition produces stall. This is exactly the class of process failure that `/qor-remediate` was designed to catch, and the current classifier does not catch it. Without a countermeasure, the loop is repeatable by design: any remediation plan whose audit still finds remaining blockers triggers replan-without-implement by default, and nothing in the current framework surfaces the stall to the operator.
+
+Operator's own summary: *"We iterated on remediation design, not remediation execution."*
+
+### Countermeasure (proposed; not yet implemented)
+
+Handoffs required, in priority order:
+
+**C1 (HIGH) — Fix Step 4/Step 5 ordering in `/qor-remediate`.** `addressed: true` must not be written until the gate artifact has been consumed by a downstream review (at minimum, a subsequent `/qor-audit` cycle that PASSes on the remediation proposal). Two-stage flip: `addressed_pending: true` at Step 4; `addressed: true` only after review-pass. Requires schema update + `mark_addressed` refactor + regression test asserting no event carries `addressed: true` without a paired review-pass event.
+
+**C2 (MED) — Add `plan-replay` classifier** to `/qor-remediate` Step 2. Pattern definition: ≥K consecutive `plan_complete` events in a session timeline with no intervening `implement_complete` or `debug_complete`, optionally filtered by findings-signature stability across the plan cycles. K=2 is aggressive; K=3 is safer. Tuning is a live question.
+
+**C3 (MED) — Automatic `/qor-remediate` escalation** from `/qor-plan` and `/qor-audit` on cycle-count threshold. Planner / auditor consult session history; on Nth consecutive failure against stable findings signature, the "next action" emission switches from `/qor-audit` / `/qor-refactor` to `/qor-remediate` with `escalation_reason: "cycle-count"`. Operator may override but the override is recorded as a severity-2 `orchestration_override` shadow event — which then feeds back into the gate-loop classifier.
+
+**C4 (LOW) — Plan template must carry a `ci_commands` field** with a schema-enforced location. Removes the inconsistency by making the field non-optional in shape, not just in constraint prose.
+
+None of C1-C4 remove the operator's responsibility to close the loop. What they add is a mechanical surface for the stall pattern: classifier, escalation trigger, event-state integrity. The operator-judgment layer (the "plan is already correct; execute it" call) remains in the operator.
+
+### What this entry is NOT
+
+This entry does not propose or execute fixes. Per `/qor-remediate` doctrine, remediation is advisory until reviewed. The fixes above are the review input; the review is the next `/qor-plan` cycle that consumes this SG entry as source material.
+
+Not closing this SG entry as addressed. `addressed: false` until the countermeasures ship and pass their own audit.
+
+### Pattern ID
+
+SG-PlanAuditLoop-A (plan/audit/replan loop without execution handoff: the framework continued to accept new plan submissions against stable findings-signature failures, producing no code change across multiple cycles; no mechanical stall surface existed — see C1-C4 countermeasures)
+
+---
+
+## Entry #27: VETO — plan-qor-phase36-planaudit-loop-countermeasures v1
+
+**Timestamp**: 2026-04-19
+**Target**: `docs/plan-qor-phase36-planaudit-loop-countermeasures.md`
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #118
+**Pass**: 1
+
+### Failure Patterns
+
+**Schema-migration blindness.** Phase 1 adds a required field (`addressed_pending`) to the shadow_event schema with zero migration strategy for existing events. Every event currently in `PROCESS_SHADOW_GENOME.md` and `...UPSTREAM.md` would fail validation on first post-seal read. Same class as hardcoded-version drift (SG Phase 34): the schema is a source of truth, and any change to its required set is a migration event.
+
+**Cross-phase source artifact inconsistency.** Phase 2's `findings_signature` computes from an audit-report markdown file; Phase 3's `cycle_count_escalator` computes from audit gate artifacts. These are different artifact classes — one narrative, one schema-validated JSON. The audit gate schema does not currently carry findings categories. The plan requires a schema extension that it does not declare. State-duplicated-from-source-of-truth in planning form: the same concept ("findings signature") lives in two places without a canonical source.
+
+**Open-enum invitation.** Plan's `findings_signature` hashes categories described as "e.g., razor-overage, import-coupling, ...". "E.g." instead of a closed enum opens the same drift the plan is trying to prevent (Phase 32-35 family). Category stability depends on audit emission discipline, not a mechanical constraint. One string-casing drift and signatures stop matching semantic equivalents — stall classifier goes blind.
+
+**Event-type/classifier mismatch.** Plan adds `orchestration_override` as a new event_type and asserts via test that the gate-loop classifier fires on two of them. Gate-loop classifier keys on `gate_override`, not `orchestration_override`. Plan mechanism does not match plan test — internal inconsistency at the specification level.
+
+**Razor pre-audit impossibility.** Five new or refactored scripts; zero LOC estimates. Judge cannot pre-check Section 4 compliance. Not a Razor violation (code isn't written yet), but a blocker to pre-implementation audit.
+
+### Lesson
+
+The plan to catch plan/audit/replan stalls is itself a stall-prone plan-specification artifact. Meta-lesson: specification precision requirements apply recursively. A plan that declares multi-phase state changes, cross-phase data flows, and schema-enum additions must close those contracts in the plan, not in the implementation-discovery phase.
+
+Intent was correct. Specification was under-closed. Exactly the failure mode the Judge exists to catch pre-implementation — and exactly the recurrence class the plan aims to add machinery for. The machinery must be specified to the precision it is designed to enforce.
+
+### Remediation
+
+5 mandatory V-items + 8 F-items in audit report §Mandated amendments / §Secondary findings. Governor amends and resubmits. Not a `/qor-organize` handoff (no topology issue); not a `/qor-refactor` handoff (no code yet). Return to `/qor-plan`.
+
+### Pattern ID
+
+SG-Phase36-A (pending): specification drift in a plan whose explicit purpose was to add anti-drift machinery. Not sealed as a canonical pattern until the amendment outcome shows whether this is a one-time planning miss or a recurring authoring pattern that needs its own countermeasure in `/qor-plan`.
+
+---
+
+## Entry #28: VETO — plan-qor-phase36-planaudit-loop-countermeasures v2
+
+**Timestamp**: 2026-04-19
+**Target**: `docs/plan-qor-phase36-planaudit-loop-countermeasures.md` (Pass 2)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #119
+**Pass**: 2
+
+### Pass 1 → Pass 2 progression
+
+Pass 1 issued 5 VETO findings (V1-V5) + 8 secondary (F1-F8). Pass 2 amendment resolved V1-V5, F1-F4, F6-F8 substantively; F5 disclosed in limitations. Signature shifted: Pass 1 emitted 4 categories (`schema-migration-missing`, `macro-architecture`, `specification-drift`, `razor-overage`); Pass 2 emits 2 (`specification-drift`, `macro-architecture`). Different signatures — `plan-replay` classifier would not fire. This is iterative refinement, not stall.
+
+### Failure Patterns (Pass 2)
+
+**Schema narrative vs schema JSON drift (V6).** Plan text states `findings_categories` is required on VETO artifacts; the JSON schema snippet in the plan does not encode this. The plan's own grounding-protocol claim (specification must close contracts in the plan itself) is violated by the plan. Second-order occurrence of the state-duplicated-from-source-of-truth family (SG Phase 32-35) — the CLAIM and the SCHEMA are two copies of one contract, and they disagree.
+
+**Legacy-artifact false-positive stall (V7).** `findings_signature` treats absent `findings_categories` as empty-list → stable hash. Any session containing ≥3 pre-Phase-36 VETO audit artifacts (such as the Pass 1 audit from earlier this session) would produce three identical "empty" signatures, firing cycle-count escalation on what is actually legacy data. The mechanism must distinguish "field absent" from "categories empty."
+
+### Lesson
+
+Second-order drift: amendments resolve named findings but can introduce fresh ones from the same family. The Judge caught one instance of specification-drift (V6) as part of resolving three others (V2, V3, V4). Progress is real; completeness is not. This is exactly the expected behavior when the defect family is recursive — each round surfaces instances previously hidden behind coarser drift.
+
+Not a stall signal. Pass 1→Pass 2 signature changed; Pass 2→Pass 3 amendment will be narrower (no HIGH findings to resolve, only two MED + three LOW).
+
+### Remediation
+
+5 items (V6, V7, F9, F10, F11) in audit report §Mandated amendments. Governor amends and resubmits. No delegation triggers (topology, code-shape, remediate all unaffected). Return to `/qor-plan`.
+
+### Pattern ID
+
+SG-Phase36-A (still pending): one more instance of specification drift, surfaced by the Judge in adversarial mode. Pattern is provisionally a recurring authoring concern rather than a one-time miss. If Pass 3 introduces a fresh drift instance, escalate to a proper Pattern ID with countermeasure proposal for `/qor-plan` grounding protocol.
+
+---
+
+## Entry #29: VETO — plan-qor-phase36-planaudit-loop-countermeasures v3
+
+**Timestamp**: 2026-04-20
+**Target**: `docs/plan-qor-phase36-planaudit-loop-countermeasures.md` (Pass 3)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #120
+**Pass**: 3
+
+### Pass 2 → Pass 3 progression
+
+Pass 2 findings V6, V7, F9, F10, F11 all resolved (verified). One new drift (V8) was introduced by Pass 3's F9 decomposition — the function-split specification omitted the timestamp field the orchestrator needs. One pre-existing drift (V9) surfaced for the first time — `plan-replay` classifier consumes event types that are never emitted. Judge acknowledges V9 as prior-pass miss; not Governor fault.
+
+### Failure Patterns (Pass 3)
+
+**Decomposition omitted data carrier (V8).** Pass 3 split `cycle_count_escalator.check` into four functions with explicit return types. The orchestrator body references a value (`first_match_ts`) that is not in any helper's return signature. Inline handwaving via `<ts of earliest matching audit in the run>` — pseudocode placeholder where a declared data flow was required. Third-order drift: resolving F9 (decomposition clarity) introduced V8 (interface incompleteness).
+
+**Classifier input plumbing never declared (V9).** Phase 2's `plan-replay` classifier triggers on `plan_complete`/`implement_complete`/`debug_complete` events. These events exist nowhere in the event_type enum and no skill emits them. The classifier has output plumbing (enum addition for `plan-replay`) but no input plumbing. Functional wiring reversed: pattern-output is declared; pattern-input data source is implicit and unsatisfied.
+
+### Lesson
+
+Third consecutive pass with specification-drift findings in the same defect family. Pattern is crystallizing: amendments against tight scope still leak drift instances — because the defect class (SG Phase 32-35 family) is recursive. Each pass resolves named instances while the authoring surface keeps exposing new ones.
+
+Signature-stability observation: Pass 2 and Pass 3 emit identical findings categories `[specification-drift, macro-architecture]`. If Pass 4 also VETOs on this signature, the classifier under design would fire at K=3 — the plan-for-stall-detection iterating against a stable findings signature is itself a textbook stall. The irony is not lost on the Judge.
+
+### Remediation
+
+2 V-items (V8, V9) in audit report §Mandated amendments. Narrow. No LOW findings. Governor amends and resubmits. No delegation triggers — structural issues remain in specification, not topology / code / process.
+
+### Pattern ID
+
+SG-Phase36-A (confirmed recurring): three consecutive passes with specification-drift findings confirms this is a recurring authoring pattern, not a one-time miss. Deserves its own countermeasure in `/qor-plan` grounding protocol. Current candidate countermeasure: when plan declares multi-function decomposition, lint that every value referenced in one function's body originates from a declared return or parameter (catches V8 class). When plan declares a classifier, lint that every event type in the classifier trigger exists in the event-type enum (catches V9 class). Deferrable to a follow-up phase; not required to land Phase 36.
+
+---
+
+## Entry #30: VETO — plan-qor-phase36-remediate-two-stage-flip v1 (rescoped)
+
+**Timestamp**: 2026-04-20
+**Target**: `docs/plan-qor-phase36-remediate-two-stage-flip.md` (Pass 1 of rescoped plan)
+**Audit Report**: `.agent/staging/AUDIT_REPORT.md`
+**Ledger Entry**: #123
+**Pass**: 1 (of rescoped plan)
+
+### Scope context
+
+Rescope accepted 2026-04-20 after 4 passes on prior Phase 36 plan surfaced V1-V10. Rescoped plan targets B19 only — zero infrastructure dependency. Smaller scope = smaller finding surface.
+
+### Failure Pattern
+
+**Review-pass detection coarseness.** Plan's `/qor-audit` Step 4 integration detects "this audit reviews a remediation" via `remediate.json` file presence in the session. File presence is too weak a signal — any session that invoked `/qor-remediate` carries `remediate.json` indefinitely. PASS audits on unrelated plans later in the same session would fire the flip. Second-level disambiguation via `reviews_remediate_gate` field verification exists in the plan but its set-path is undefined.
+
+Not a specification drift or infrastructure mismatch in the SG-Phase36-A family — this is a domain-logic wiring gap. Distinct class from prior passes.
+
+### Lesson
+
+Even with tight scope and infrastructure-alignment discipline, domain-logic wiring requires explicit intent signals. "Detect by file presence" is a common attractor because it requires no ceremony, but it conflates "remediate was invoked" with "this audit reviews that invocation." Intent must be carried explicitly.
+
+### Remediation
+
+V1 resolution: pick (a) operator flag, (b) proposal-plan linkage, or (c) manual closure. Narrow amendment.
+
+### Pattern ID
+
+No new SG pattern ID. V1 is a standard wiring-clarity finding, not a member of any recurring family documented in the shadow log.
+
+---
+
 *Shadow integrity: ACTIVE*

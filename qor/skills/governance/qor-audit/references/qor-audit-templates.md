@@ -195,3 +195,9 @@ Every AUDIT_REPORT.md produced by `/qor-audit` MUST carry the canonical marker `
 ```
 
 Lint: `tests/test_audit_drift_auto_invoked.py::test_audit_template_has_drift_marker` asserts the marker is present in this template.
+
+## Findings Categories slot (Phase 37 B20b wiring)
+
+Every AUDIT_REPORT.md produced with `verdict: VETO` MUST populate a `findings_categories` field in the emitted audit gate artifact drawn from the closed 12-value enum (see `qor/gates/schema/audit.schema.json`). Unmapped findings raise `UnmappedCategoryError` at gate emission per `qor/scripts/findings_signature.py`. The audit report markdown does not need a visible categories section; the structured gate artifact is the canonical record.
+
+Lint: `tests/test_audit_gate_emits_findings_categories.py` asserts schema enforcement and skill-prose references.

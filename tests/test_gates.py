@@ -80,6 +80,7 @@ VALID_ARTIFACTS = {
     "plan": {
         "phase": "plan", "ts": "2026-04-15T18:00:00Z",
         "session_id": "s-abc", "plan_path": "docs/plan.md", "phases": ["p1"],
+        "ci_commands": ["pytest"],
     },
     "audit": {
         "phase": "audit", "ts": "2026-04-15T18:00:00Z",
@@ -257,6 +258,7 @@ def test_write_artifact_round_trips(tmp_path, monkeypatch):
         "ts": "2026-04-15T18:00:00Z",
         "plan_path": "docs/plan.md",
         "phases": ["p1", "p2"],
+        "ci_commands": ["pytest"],
     }, session_id=sid)
     assert out.exists()
     data = json.loads(out.read_text())
@@ -290,6 +292,7 @@ def test_write_gate_artifact_creates_file_at_correct_path(tmp_path, monkeypatch)
         "ts": "2026-04-15T18:00:00Z",
         "plan_path": "docs/plan.md",
         "phases": ["p1"],
+        "ci_commands": ["pytest"],
     }
     out = gate_chain.write_gate_artifact("plan", payload, session_id=sid)
     assert out == gates / sid / "plan.json"
@@ -324,6 +327,7 @@ def test_write_gate_artifact_uses_session_get_or_create_when_sid_none(tmp_path, 
         "ts": "2026-04-15T18:00:00Z",
         "plan_path": "docs/plan.md",
         "phases": ["p1"],
+        "ci_commands": ["pytest"],
     }
     out = gate_chain.write_gate_artifact("plan", payload)
     assert marker.exists()  # session.get_or_create was invoked
@@ -343,6 +347,7 @@ def test_write_gate_artifact_respects_explicit_session_id(tmp_path, monkeypatch)
         "ts": "2026-04-15T18:00:00Z",
         "plan_path": "docs/plan.md",
         "phases": ["p1"],
+        "ci_commands": ["pytest"],
     }
     out = gate_chain.write_gate_artifact("plan", payload, session_id=explicit_sid)
     assert out == gates / explicit_sid / "plan.json"
@@ -365,6 +370,7 @@ def test_write_gate_artifact_returns_path(tmp_path, monkeypatch):
         "ts": "2026-04-15T18:00:00Z",
         "plan_path": "docs/plan.md",
         "phases": ["p1"],
+        "ci_commands": ["pytest"],
     }
     result = gate_chain.write_gate_artifact("plan", payload, session_id=sid)
     from pathlib import Path

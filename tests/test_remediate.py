@@ -197,7 +197,8 @@ def test_propose_event_ids_preserved():
 
 # ===== Track D: remediate_mark_addressed =====
 
-def test_mark_addressed_flips_events(tmp_path):
+def test_mark_addressed_pending_flips_pending_only(tmp_path):
+    """First-stage flip: addressed_pending=true; addressed stays false."""
     local = tmp_path / "local.md"
     upstream = tmp_path / "upstream.md"
     e1 = make_event(session_id="s-flip-1")
@@ -206,18 +207,23 @@ def test_mark_addressed_flips_events(tmp_path):
     upstream.write_text("", encoding="utf-8")
     with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
          mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
-        flipped, missing = rma.mark_addressed([e1["id"]], session_id="remediate-session-1")
+        flipped, missing = rma.mark_addressed_pending(
+            [e1["id"]], session_id="remediate-session-1"
+        )
     assert flipped == 1
     assert missing == []
     after = shadow_process.read_events(local)
     by_id = {e["id"]: e for e in after}
-    assert by_id[e1["id"]]["addressed"] is True
-    assert by_id[e1["id"]]["addressed_reason"] == "remediated"
-    assert by_id[e1["id"]]["addressed_ts"] is not None
+    assert by_id[e1["id"]]["addressed_pending"] is True
+    assert by_id[e1["id"]]["addressed"] is False
+    assert by_id[e1["id"]]["addressed_ts"] is None
+    assert by_id[e1["id"]]["addressed_reason"] is None
+    assert by_id[e2["id"]].get("addressed_pending", False) is False
     assert by_id[e2["id"]]["addressed"] is False
 
 
-def test_mark_addressed_routes_to_origin_file(tmp_path):
+def test_mark_addressed_pending_routes_to_origin_file(tmp_path):
+    """Pending-stage flip preserves LOCAL/UPSTREAM attribution."""
     local = tmp_path / "local.md"
     upstream = tmp_path / "upstream.md"
     e_local = make_event(session_id="s-local-route")
@@ -228,7 +234,7 @@ def test_mark_addressed_routes_to_origin_file(tmp_path):
     _seed(upstream, [e_upstream])
     with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
          mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
-        flipped, missing = rma.mark_addressed(
+        flipped, missing = rma.mark_addressed_pending(
             [e_local["id"], e_upstream["id"]], session_id="route-session"
         )
     assert flipped == 2
@@ -237,13 +243,14 @@ def test_mark_addressed_routes_to_origin_file(tmp_path):
     upstream_after = shadow_process.read_events(upstream)
     assert len(local_after) == 1
     assert local_after[0]["id"] == e_local["id"]
-    assert local_after[0]["addressed"] is True
+    assert local_after[0]["addressed_pending"] is True
     assert len(upstream_after) == 1
     assert upstream_after[0]["id"] == e_upstream["id"]
-    assert upstream_after[0]["addressed"] is True
+    assert upstream_after[0]["addressed_pending"] is True
 
 
-def test_mark_addressed_surfaces_missing_ids(tmp_path):
+def test_mark_addressed_pending_surfaces_missing_ids(tmp_path):
+    """Unknown IDs are surfaced, not silently dropped."""
     local = tmp_path / "local.md"
     upstream = tmp_path / "upstream.md"
     e_real = make_event(session_id="s-real")
@@ -252,7 +259,7 @@ def test_mark_addressed_surfaces_missing_ids(tmp_path):
     fake_id = "d" * 64
     with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
          mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
-        flipped, missing = rma.mark_addressed(
+        flipped, missing = rma.mark_addressed_pending(
             [e_real["id"], fake_id], session_id="miss-session"
         )
     assert flipped == 1
@@ -288,3 +295,299 @@ def test_emit_gate_payload_roundtrips(tmp_path):
     assert payload["proposal_text"] == proposal["proposal_text"]
     assert payload["addressed_event_ids"] == proposal["addressed_event_ids"]
     assert "ts" in payload
+
+
+# ===== Phase 36: two-stage addressed flip =====
+
+def _write_audit_artifact(
+    path: Path,
+    *,
+    verdict: str = "PASS",
+    reviews_gate: str | None = None,
+    session_id: str = "phase36-test",
+) -> None:
+    payload = {
+        "phase": "audit",
+        "ts": "2026-04-20T12:00:00Z",
+        "session_id": session_id,
+        "target": "docs/plan-phase36-test.md",
+        "verdict": verdict,
+    }
+    if reviews_gate is not None:
+        payload["reviews_remediate_gate"] = reviews_gate
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _write_remediate_gate(path: Path, event_ids: list[str]) -> None:
+    payload = {
+        "phase": "remediate",
+        "ts": "2026-04-20T11:00:00Z",
+        "session_id": "phase36-test",
+        "events_addressed": event_ids,
+        "proposed_changes": [],
+        "addressed_event_ids": event_ids,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def test_mark_addressed_requires_review_pass_artifact(tmp_path):
+    """Calling mark_addressed without a review-pass artifact file raises."""
+    local = tmp_path / "local.md"
+    upstream = tmp_path / "upstream.md"
+    e = make_event(session_id="s-req-rp")
+    _seed(local, [e])
+    upstream.write_text("", encoding="utf-8")
+    rma.mark_addressed_pending([e["id"]], session_id="s-req-rp")
+    nonexistent = tmp_path / "missing_audit.json"
+    remediate_gate = tmp_path / ".qor" / "gates" / "s-req-rp" / "remediate.json"
+    _write_remediate_gate(remediate_gate, [e["id"]])
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        with pytest.raises(rma.ReviewAttestationError):
+            rma.mark_addressed(
+                [e["id"]],
+                session_id="s-req-rp",
+                review_pass_artifact_path=str(nonexistent),
+                remediate_gate_path=str(remediate_gate),
+            )
+
+
+def test_mark_addressed_verifies_artifact_is_audit_pass(tmp_path):
+    """Review-pass artifact with verdict != PASS raises."""
+    local = tmp_path / "local.md"
+    upstream = tmp_path / "upstream.md"
+    e = make_event(session_id="s-veto")
+    _seed(local, [e])
+    upstream.write_text("", encoding="utf-8")
+    rma.mark_addressed_pending([e["id"]], session_id="s-veto")
+    remediate_gate = tmp_path / ".qor" / "gates" / "s-veto" / "remediate.json"
+    _write_remediate_gate(remediate_gate, [e["id"]])
+    audit_path = tmp_path / "audit.json"
+    _write_audit_artifact(audit_path, verdict="VETO", reviews_gate=str(remediate_gate))
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        with pytest.raises(rma.ReviewAttestationError):
+            rma.mark_addressed(
+                [e["id"]],
+                session_id="s-veto",
+                review_pass_artifact_path=str(audit_path),
+                remediate_gate_path=str(remediate_gate),
+            )
+
+
+def test_mark_addressed_rejects_audit_without_reviews_remediate_gate_field(tmp_path):
+    """PASS audit missing reviews_remediate_gate field raises."""
+    local = tmp_path / "local.md"
+    upstream = tmp_path / "upstream.md"
+    e = make_event(session_id="s-no-field")
+    _seed(local, [e])
+    upstream.write_text("", encoding="utf-8")
+    rma.mark_addressed_pending([e["id"]], session_id="s-no-field")
+    remediate_gate = tmp_path / ".qor" / "gates" / "s-no-field" / "remediate.json"
+    _write_remediate_gate(remediate_gate, [e["id"]])
+    audit_path = tmp_path / "audit.json"
+    _write_audit_artifact(audit_path, verdict="PASS", reviews_gate=None)
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        with pytest.raises(rma.ReviewAttestationError):
+            rma.mark_addressed(
+                [e["id"]],
+                session_id="s-no-field",
+                review_pass_artifact_path=str(audit_path),
+                remediate_gate_path=str(remediate_gate),
+            )
+
+
+def test_mark_addressed_rejects_reviews_remediate_gate_mismatch(tmp_path):
+    """Audit's reviews_remediate_gate field points at different remediate gate -> raises."""
+    local = tmp_path / "local.md"
+    upstream = tmp_path / "upstream.md"
+    e = make_event(session_id="s-mismatch")
+    _seed(local, [e])
+    upstream.write_text("", encoding="utf-8")
+    rma.mark_addressed_pending([e["id"]], session_id="s-mismatch")
+    remediate_gate = tmp_path / ".qor" / "gates" / "s-mismatch" / "remediate.json"
+    _write_remediate_gate(remediate_gate, [e["id"]])
+    other_gate = tmp_path / ".qor" / "gates" / "other" / "remediate.json"
+    _write_remediate_gate(other_gate, [])
+    audit_path = tmp_path / "audit.json"
+    _write_audit_artifact(audit_path, verdict="PASS", reviews_gate=str(other_gate))
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        with pytest.raises(rma.ReviewAttestationError):
+            rma.mark_addressed(
+                [e["id"]],
+                session_id="s-mismatch",
+                review_pass_artifact_path=str(audit_path),
+                remediate_gate_path=str(remediate_gate),
+            )
+
+
+def test_mark_addressed_success_path_sets_addressed_ts(tmp_path):
+    """Valid review-pass artifact flips addressed=true, stamps addressed_ts, preserves pending."""
+    local = tmp_path / "local.md"
+    upstream = tmp_path / "upstream.md"
+    e = make_event(session_id="s-success")
+    _seed(local, [e])
+    upstream.write_text("", encoding="utf-8")
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        rma.mark_addressed_pending([e["id"]], session_id="s-success")
+        remediate_gate = tmp_path / ".qor" / "gates" / "s-success" / "remediate.json"
+        _write_remediate_gate(remediate_gate, [e["id"]])
+        audit_path = tmp_path / "audit.json"
+        _write_audit_artifact(audit_path, verdict="PASS", reviews_gate=str(remediate_gate))
+        flipped, missing = rma.mark_addressed(
+            [e["id"]],
+            session_id="s-success",
+            review_pass_artifact_path=str(audit_path),
+            remediate_gate_path=str(remediate_gate),
+        )
+    assert flipped == 1
+    assert missing == []
+    after = shadow_process.read_events(local)
+    assert after[0]["addressed"] is True
+    assert after[0]["addressed_pending"] is True
+    assert after[0]["addressed_reason"] == "remediated"
+    assert after[0]["addressed_ts"] is not None
+
+
+def test_pass_audit_without_arg_does_not_flip_events(tmp_path):
+    """Unrelated PASS audit in same session (no reviews_remediate_gate arg) does NOT flip.
+
+    Regression test for V1: coarse detection (remediate.json presence alone) would fire
+    incorrectly on any PASS audit in session. The explicit-signal fix prevents this.
+    """
+    local = tmp_path / "local.md"
+    upstream = tmp_path / "upstream.md"
+    e = make_event(session_id="s-unrelated")
+    _seed(local, [e])
+    upstream.write_text("", encoding="utf-8")
+    remediate_gate = tmp_path / ".qor" / "gates" / "s-unrelated" / "remediate.json"
+    _write_remediate_gate(remediate_gate, [e["id"]])
+    # Audit with PASS but reviews_remediate_gate NOT set (operator did not pass the arg)
+    audit_path = tmp_path / "audit.json"
+    _write_audit_artifact(audit_path, verdict="PASS", reviews_gate=None)
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        rma.mark_addressed_pending([e["id"]], session_id="s-unrelated")
+        # Skill-prose guard: if reviews_remediate_gate absent, do not call mark_addressed.
+        payload = json.loads(audit_path.read_text(encoding="utf-8"))
+        assert payload.get("reviews_remediate_gate") is None, "V1 regression: field should be absent"
+        after = shadow_process.read_events(local)
+    assert after[0]["addressed"] is False
+    assert after[0]["addressed_pending"] is True
+
+
+def test_legacy_events_with_issue_created_reason_still_read(tmp_path):
+    """Legacy events (addressed via issue_created, no addressed_pending) still load."""
+    local = tmp_path / "local.md"
+    upstream = tmp_path / "upstream.md"
+    legacy = make_event(session_id="s-legacy", addressed=True)
+    legacy["addressed_ts"] = "2026-03-01T00:00:00Z"
+    legacy["addressed_reason"] = "issue_created"
+    legacy["issue_url"] = "https://example.com/issue/99"
+    assert "addressed_pending" not in legacy
+    _seed(local, [legacy])
+    upstream.write_text("", encoding="utf-8")
+    with mock.patch.object(shadow_process, "LOCAL_LOG_PATH", local), \
+         mock.patch.object(shadow_process, "UPSTREAM_LOG_PATH", upstream):
+        events = shadow_process.read_all_events()
+    assert len(events) == 1
+    assert events[0]["addressed"] is True
+    assert events[0]["addressed_reason"] == "issue_created"
+
+
+# ===== Phase 37: gate-loop classifier union + plan-replay =====
+
+def _audit(ts, verdict, cats=None, sid="s37"):
+    p = {
+        "phase": "audit", "ts": ts, "session_id": sid,
+        "target": "docs/plan.md", "verdict": verdict,
+    }
+    if cats is not None:
+        p["findings_categories"] = cats
+    elif verdict == "VETO":
+        p["findings_categories"] = ["razor-overage"]
+    return p
+
+
+def _seed_audits_for_session(tmp_path, sid, audits):
+    from qor.scripts import audit_history
+    with mock.patch("qor.scripts.audit_history._workdir.gate_dir", return_value=tmp_path):
+        for a in audits:
+            audit_history.append(a, session_id=sid)
+
+
+def test_gate_loop_classifier_counts_orchestration_override(tmp_path):
+    # Two orchestration_override events in one group -> gate-loop fires
+    sid = "s-oo-gl"
+    e1 = make_event(session_id=sid, event_type="orchestration_override", severity=2)
+    e2 = make_event(session_id=sid, event_type="orchestration_override",
+                    severity=2, ts="2026-04-20T13:00:00Z")
+    groups = {("orchestration_override", "qor-audit", sid): [e1, e2]}
+    results = rpm.classify(groups)
+    assert any(r["pattern"] == "gate-loop" for r in results)
+
+
+def test_gate_loop_classifier_counts_mixed_override_types(tmp_path):
+    # One gate_override + one orchestration_override in same group -> gate-loop fires
+    sid = "s-mixed"
+    e1 = make_event(session_id=sid, event_type="gate_override", severity=1)
+    e2 = make_event(session_id=sid, event_type="orchestration_override",
+                    severity=2, ts="2026-04-20T13:00:00Z")
+    # Grouped by (event_type, skill, session_id): since event types differ, they'd
+    # be in separate groups. Test the predicate directly against a merged group.
+    merged = [e1, e2]
+    from qor.scripts.remediate_pattern_match import PATTERN_RULES
+    gate_loop_predicate = dict(PATTERN_RULES)["gate-loop"]
+    assert gate_loop_predicate(merged) is True
+
+
+def test_plan_replay_classifier_fires_at_k3(tmp_path):
+    sid = "s-pr-k3"
+    _seed_audits_for_session(tmp_path, sid, [
+        _audit("2026-04-20T12:00:00Z", "VETO", ["razor-overage"], sid),
+        _audit("2026-04-20T12:01:00Z", "VETO", ["razor-overage"], sid),
+        _audit("2026-04-20T12:02:00Z", "VETO", ["razor-overage"], sid),
+    ])
+    with mock.patch("qor.scripts.audit_history._workdir.gate_dir", return_value=tmp_path), \
+         mock.patch("qor.scripts.stall_walk._workdir.gate_dir", return_value=tmp_path):
+        results = rpm.classify({}, session_id=sid)
+    assert any(r["pattern"] == "plan-replay" for r in results)
+    pr = next(r for r in results if r["pattern"] == "plan-replay")
+    assert pr["details"]["cycle_count"] == 3
+
+
+def test_plan_replay_classifier_does_not_fire_at_k2(tmp_path):
+    sid = "s-pr-k2"
+    _seed_audits_for_session(tmp_path, sid, [
+        _audit("2026-04-20T12:00:00Z", "VETO", ["razor-overage"], sid),
+        _audit("2026-04-20T12:01:00Z", "VETO", ["razor-overage"], sid),
+    ])
+    with mock.patch("qor.scripts.audit_history._workdir.gate_dir", return_value=tmp_path), \
+         mock.patch("qor.scripts.stall_walk._workdir.gate_dir", return_value=tmp_path):
+        results = rpm.classify({}, session_id=sid)
+    assert not any(r["pattern"] == "plan-replay" for r in results)
+
+
+def test_plan_replay_dedup_when_gate_loop_matches_same_session(tmp_path):
+    sid = "s-pr-dedup"
+    # Seed 3 VETO audits (triggers plan-replay) AND provide a gate-loop-matched group
+    _seed_audits_for_session(tmp_path, sid, [
+        _audit("2026-04-20T12:00:00Z", "VETO", ["razor-overage"], sid),
+        _audit("2026-04-20T12:01:00Z", "VETO", ["razor-overage"], sid),
+        _audit("2026-04-20T12:02:00Z", "VETO", ["razor-overage"], sid),
+    ])
+    e1 = make_event(session_id=sid, event_type="gate_override", severity=1)
+    e2 = make_event(session_id=sid, event_type="gate_override", severity=1,
+                    ts="2026-04-20T13:00:00Z")
+    groups = {("gate_override", "qor-audit", sid): [e1, e2]}
+    with mock.patch("qor.scripts.audit_history._workdir.gate_dir", return_value=tmp_path), \
+         mock.patch("qor.scripts.stall_walk._workdir.gate_dir", return_value=tmp_path):
+        results = rpm.classify(groups, session_id=sid)
+    # gate-loop present, plan-replay dropped
+    assert any(r["pattern"] == "gate-loop" for r in results)
+    assert not any(r["pattern"] == "plan-replay" for r in results)

@@ -92,6 +92,16 @@ A plan document encodes the same spec in two places: prose descriptions and code
 
 **Verification hint**: Judge cross-checks prose claims against code blocks during audit; any mismatch is VETO-grade. Optional future enforcement: lint plans for prose+code consistency on named enumerations. Source incident: Phase 17a v1 (Entry #44 V-1).
 
+## SG-InfrastructureMismatch: plan claims contradict current repository infrastructure
+
+A plan references filesystem paths, gate artifact glob patterns, event types, cross-module function signatures, or skill-step anchors that current code does not actually provide. Plan-internal consistency passes (prose matches code blocks, tests match implementation) but plan-to-infrastructure alignment fails silently. The defect only surfaces at implement-time or (worse) at ship-time when the intended behavior is mechanically impossible.
+
+**Source incident**: Phase 36 Pass 4 V10. Original `plan-qor-phase36-planaudit-loop-countermeasures.md` built a stall-detection mechanism on the assumption that `.qor/gates/<sid>/audit*.json` globbing would yield multiple audit artifacts per session. Verified against actual code: `gate_chain.write_gate_artifact` writes singleton and overwrites on re-emission. The entire mechanism would have shipped as dead code. The Judge missed this across four audit passes because verification was limited to plan-internal consistency.
+
+**Countermeasure** (codified in Phase 37): `/qor-audit` gains a seventh adversarial pass — Infrastructure Alignment Pass — that grep-verifies every plan claim against current repository code before PASS verdict. Violations map to the `infrastructure-mismatch` finding category (Phase 37 `findings_categories` enum). `/qor-plan` Step 2b Grounding Protocol also gains an infrastructure alignment sub-check: every `{{verify: <claim> }}` tag that survives to plan submission must be resolved before audit can clear it.
+
+**Verification hint**: for every filesystem path cited, run `ls -la <path>` or `git ls-files <path>`. For every glob pattern, verify against a live session's gate directory shape. For every event type, grep `qor/gates/schema/shadow_event.schema.json` for the literal enum value. For every cross-module function cited, `grep -n "def <name>" <module>`. Unresolved → VETO.
+
 ## Phase 24-26 narrative SG entries (see `docs/SHADOW_GENOME.md`)
 
 The following pattern IDs were surfaced as narrative Shadow Genome entries during audit tribunals in Phases 24, 25, and 26. Promotion into full structured countermeasure form (with grep/test verification hint) is queued; in the meantime, citing the pattern by ID in a plan or audit report references the narrative entry in `docs/SHADOW_GENOME.md`.
