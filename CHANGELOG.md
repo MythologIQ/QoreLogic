@@ -10,6 +10,21 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-04-24
+
+Phase 41: ledger_hash verifier regex robustness. Resolves GitHub issue #13.
+
+### Added
+- **Fenced-form Content/Previous Hash parsing**: `qor/scripts/ledger_hash.py` `CONTENT_HASH_RE` and `PREV_HASH_RE` now accept both inline-backtick `` `<hex>` `` and fenced `= <hex>` forms, symmetric with `CHAIN_HASH_RE`. Real ledgers using fenced Content/Previous markup now verify cleanly where they previously skipped.
+
+### Changed
+- **Bounded-span discipline** (issue #13 root cause): all three hash-field regexes now use a non-greedy span bounded by negative lookahead on the next `**FieldName**:` marker; cannot sweep across field boundaries into unrelated hex values (e.g., a `**Plan Hash**` value previously captured as `Content Hash`). The `re.DOTALL` flag is no longer needed; `[\s\S]` is explicit inside the bounded span.
+- **`CHAIN_HASH_RE` bold anchor**: now requires `\*\*Chain Hash\*\*` per Phase 41's anchor-symmetry rule. Prose mentions of "Chain Hash" no longer capture unrelated backtick-hex values.
+- **`qor-validate` SKILL.md** (Steps 3, 4, 7): replaced three stale references to `.claude/commands/scripts/validate-ledger.py` (a stub path not produced by `qorlogic install`) with the canonical `qor/scripts/ledger_hash.py` module + `qorlogic verify-ledger` CLI. Variant SKILL.md files regenerated via `python -m qor.scripts.dist_compile`.
+
+### Fixed
+- **Existing test fixtures using unanchored `Chain Hash = {hash}` markup** (5 lines across 3 tests in `tests/test_ledger_hash.py`) updated to bold-anchored form, plus `capsys`-based stdout assertions (`OK   Entry #N:`) preventing vacuous-green regression where `rc == 0` is satisfied by silent-skip rather than verified-chain.
+
 ## [0.30.0] - 2026-04-20
 
 Phase 39b Phases 1+2: Agent Team A/B orchestration + persona sweep.

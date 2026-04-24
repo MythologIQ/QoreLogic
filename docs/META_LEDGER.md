@@ -5123,6 +5123,27 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 *Session: SEALED* (Phase 43 hotfix substantiated)
 *Merkle seal: cc60be96...* (Phase 43 seal on top of Phase 42's d94cc0d4; Entries #138-#140 chained)
 
+---
+
+### Entry #141: GATE TRIBUNAL — Phase 41 Pass 3 — **PASS** (L2) — feature/v0.31.0
+
+**Timestamp**: 2026-04-24T22:50:00Z
+**Phase**: GATE
+**Author**: Judge
+**Risk Grade**: L2
+**Verdict**: PASS
+
+**Target**: `docs/plan-qor-phase41-ledger-regex-robustness.md` (Pass 3)
+**Session**: `2026-04-24T1948-2cfc13`
+
+**Content Hash**: `9b070094df9e7bc186df2ab67071a97340054c654a8ac57e4dd251ff4c415011`
+**Previous Hash**: `cc60be96df5eb276537570cb6903d1b1a0a6bc9f0293093fe4263da201dec2f2`
+**Chain Hash**: `ef936b6f715976e35143cea82a19c32784ddd2ba7a1f2549b6df07192cf02bf0`
+
+**Decision**: Phase 41 Pass 3 reclassification verified. Branch rebased on post-Phase-39b main (pyproject at 0.30.0) — `bump_version('feature')` will compute v0.31.0 cleanly. Phase 33 doctrine release-doc currency satisfied: CHANGELOG.md ## [0.31.0] section added with three-axis content; README.md badges refreshed. All six audit passes clear. No new violations. Gate OPEN for `/qor-implement` (consolidated; substantive code/test work already on this rebased branch).
+
+**Pre-rebase history note**: original Pass 1 (hotfix VETOed for coverage-gap) commits `de9d0f2`/`546731a` preserved on the discarded reflog; Pass 2 amendment commits `2765a55`/`5d57c57` preserved; Pass 3 reclassification commits `8d73040`/`a25f6a5` preserved; pre-rebase implement `8611610` preserved. This consolidated entry on rebased history records the resolved Pass 3 PASS state.
+
 
 
 
