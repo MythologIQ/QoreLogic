@@ -65,11 +65,11 @@ Ask the user: "docs/META_LEDGER.md not found. Should I correct it by running 'qo
 
 Extract all ledger entries:
 
-Reference implementation: `.claude/commands/scripts/validate-ledger.py`.
+Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qorlogic verify-ledger docs/META_LEDGER.md`.
 
 ### Step 4: Verify Chain
 
-Reference implementation: `.claude/commands/scripts/validate-ledger.py`.
+Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qorlogic verify-ledger docs/META_LEDGER.md`.
 
 ### Step 5: Generate Report
 
@@ -97,7 +97,7 @@ Template: `references/qor-validate-reports.md`.
 
 For thorough validation, recalculate content hashes:
 
-Reference implementation: `.claude/commands/scripts/validate-ledger.py`.
+Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qorlogic verify-ledger docs/META_LEDGER.md`.
 
 Template: `references/qor-validate-reports.md`.
 

@@ -5123,6 +5123,93 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 *Session: SEALED* (Phase 43 hotfix substantiated)
 *Merkle seal: cc60be96...* (Phase 43 seal on top of Phase 42's d94cc0d4; Entries #138-#140 chained)
 
+---
+
+### Entry #141: GATE TRIBUNAL — Phase 41 Pass 3 — **PASS** (L2) — feature/v0.31.0
+
+**Timestamp**: 2026-04-24T22:50:00Z
+**Phase**: GATE
+**Author**: Judge
+**Risk Grade**: L2
+**Verdict**: PASS
+
+**Target**: `docs/plan-qor-phase41-ledger-regex-robustness.md` (Pass 3)
+**Session**: `2026-04-24T1948-2cfc13`
+
+**Content Hash**: `9b070094df9e7bc186df2ab67071a97340054c654a8ac57e4dd251ff4c415011`
+**Previous Hash**: `cc60be96df5eb276537570cb6903d1b1a0a6bc9f0293093fe4263da201dec2f2`
+**Chain Hash**: `ef936b6f715976e35143cea82a19c32784ddd2ba7a1f2549b6df07192cf02bf0`
+
+**Decision**: Phase 41 Pass 3 reclassification verified. Branch rebased on post-Phase-39b main (pyproject at 0.30.0) — `bump_version('feature')` will compute v0.31.0 cleanly. Phase 33 doctrine release-doc currency satisfied: CHANGELOG.md ## [0.31.0] section added with three-axis content; README.md badges refreshed. All six audit passes clear. No new violations. Gate OPEN for `/qor-implement` (consolidated; substantive code/test work already on this rebased branch).
+
+**Pre-rebase history note**: original Pass 1 (hotfix VETOed for coverage-gap) commits `de9d0f2`/`546731a` preserved on the discarded reflog; Pass 2 amendment commits `2765a55`/`5d57c57` preserved; Pass 3 reclassification commits `8d73040`/`a25f6a5` preserved; pre-rebase implement `8611610` preserved. This consolidated entry on rebased history records the resolved Pass 3 PASS state.
+
+---
+
+### Entry #142: IMPLEMENTATION — Phase 41 (ledger_hash regex robustness + qor-validate)
+
+**Timestamp**: 2026-04-24T22:55:00Z
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L2
+
+**Session**: `2026-04-24T1948-2cfc13`
+**Plan**: `docs/plan-qor-phase41-ledger-regex-robustness.md` (Pass 3)
+**Audit**: entry #141 (PASS)
+
+**Files Modified**:
+- `qor/scripts/ledger_hash.py` — replaced three hash-field regexes with `**Field**`-anchored, bounded-span composition (`_HASH_SPAN` + `_HASH_VALUE`); accept both inline-backtick and fenced forms on all three fields. `verify()` extraction reads from two alternation groups uniformly. `re.DOTALL` no longer needed.
+- `qor/skills/governance/qor-validate/SKILL.md` — replaced three stale `.claude/commands/scripts/validate-ledger.py` references (Steps 3, 4, 7) with `qor/scripts/ledger_hash.py` module + `qorlogic verify-ledger` CLI.
+- `qor/dist/variants/{claude,codex,gemini,kilo-code}/skills/qor-validate/*` — regenerated via `python -m qor.scripts.dist_compile`.
+- `tests/test_ledger_hash.py` — added 8 regression tests; amended 3 existing tests to use bold-anchored markup with capsys assertions on `OK   Entry #N:` (vacuous-green prevention).
+- `tests/test_qor_validate_skill_references.py` — NEW; lints source SKILL + every shipped variant for stale path absence and canonical marker presence.
+
+**Content Hash**: `b94b8a7cec6de7b7076357d4c49ffeff39727bf74cd56e458685c7edc9d2977b`
+**Previous Hash**: `ef936b6f715976e35143cea82a19c32784ddd2ba7a1f2549b6df07192cf02bf0`
+**Chain Hash**: `4ae4f943f76a98cf83a660f6fe0f7c0fe4692aba44f1c0f1f5f7e153fcd46f4c`
+
+**Tests**: 31 ledger_hash + qor-validate-references tests pass. Full suite verification deferred to `/qor-substantiate` Step 4.
+
+**Razor compliance**: `verify()` 40 lines (at limit); `ledger_hash.py` 196 lines; nesting depth 3; no nested ternaries.
+
+**Intent lock**: captured against post-rebase HEAD (uses Phase 43's new ancestry-verify, so post-implement-commit verify will pass without re-capture).
+
+**Decision**: Issue #13 remediated. Verifier regexes are bold-anchored, field-bounded, and symmetric across inline/fenced forms. SKILL documentation references the canonical module and CLI. Ready for `/qor-substantiate`.
+
+---
+
+### Entry #143: SESSION SEAL -- Phase 41 feature substantiated
+
+**Timestamp**: 2026-04-24T23:00:00Z
+**Phase**: SEAL (feature)
+**Author**: Judge
+**Verdict**: PASS (762 tests green; 1 skipped)
+
+**Target**: `docs/plan-qor-phase41-ledger-regex-robustness.md`
+**Change Class**: `feature`
+**Version**: `0.30.0 -> 0.31.0`
+**Tag**: `v0.31.0` (created at Step 9.5.5 post-commit; LOCAL ONLY pending PR merge per Phase 40 doctrine)
+
+**Content Hash (session seal)**: `3a58ebd4033a6ef4682c8ec28f456a4d355124a7b6779f9a94f85637dbeb2ded`
+**Previous Hash**: `4ae4f943f76a98cf83a660f6fe0f7c0fe4692aba44f1c0f1f5f7e153fcd46f4c`
+**Chain Hash (Merkle seal)**: `c8cbb19e1746e743c5faca910821c81ac53f395bddbc4b879b9abcbf67a19255`
+
+**Scope**: Closes GitHub issue #13. Three-axis feature: (1) fenced-form Content/Previous Hash parsing as new capability; (2) bounded-span discipline eliminating a class of cross-field-bleed accidents; (3) qor-validate SKILL canonical references restoring first-time correctness.
+
+**Reliability sweep**: intent-lock VERIFIED on first try post-implement-commit (Phase 43's ancestry fix working live; first session to demonstrate the new semantics across two consecutive phases without re-capture-as-workaround). skill-admission ADMITTED. gate-skill-matrix clean (29 skills, 112 handoffs, 0 broken; up from 28/108 pre-Phase-39b due to qor-ab-run addition).
+
+**Razor**: `verify()` 40 lines (at limit but compliant); `qor/scripts/ledger_hash.py` 196 lines; nesting depth 3; no nested ternaries.
+
+**Phase 33 release-doc currency**: CHANGELOG.md `## [0.31.0]` section + README.md Tests/Ledger badges in `implement.files_touched`. Passes.
+
+**Decision**: Phase 41 feature sealed at v0.31.0. Tag LOCAL ONLY until PR merge per Phase 40 doctrine.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 41 feature substantiated)
+*Merkle seal: c8cbb19e...* (Phase 41 seal on top of Phase 43's cc60be96; Entries #141-#143 chained)
+
 
 
 
