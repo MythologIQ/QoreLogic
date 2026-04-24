@@ -1,6 +1,6 @@
 {
   "schema_version": "1",
-  "generated_ts": "2026-04-20T19:23:47Z",
+  "generated_ts": "2026-04-24T22:47:11Z",
   "files": [
     {
       "id": "agent-architect.md",
@@ -90,13 +90,13 @@
       "id": "qor-ab-run",
       "source_path": "skills/qor-ab-run/references/ab-subagent-prompt.md",
       "install_rel_path": "skills/qor-ab-run/references/ab-subagent-prompt.md",
-      "sha256": "51de9312074969eb0aeb303c862c71d5733c982dce14a0fc43f48d616fbb0a5b"
+      "sha256": "ff94f83fa11ed2110c0f47b3ce7c09cd69cb521541ca8190c1f4e67f7d528254"
     },
     {
       "id": "qor-ab-run",
       "source_path": "skills/qor-ab-run/SKILL.md",
       "install_rel_path": "skills/qor-ab-run/SKILL.md",
-      "sha256": "dd93f371dc8dab1f67030c9e06c93093ebd05c324772ff5213b7032843f575d9"
+      "sha256": "aa7b1632ff3daa1ab38f3add95a0b8c1e607ef1c851f3ef3cb12d686d78c4271"
     },
     {
       "id": "qor-audit",
@@ -378,7 +378,7 @@
       "id": "qor-validate",
       "source_path": "skills/qor-validate/SKILL.md",
       "install_rel_path": "skills/qor-validate/SKILL.md",
-      "sha256": "9fb3188624c7e0d2da1ad5b71ee33b37962e3798ebdc96b6f45d4a48010e7a05"
+      "sha256": "3dae793e7ded3abba3b57bd529246a41f26c18547b42fb86585a53195261dd25"
     },
     {
       "id": "track-shadow-genome.md",

@@ -83,15 +83,18 @@ def _atomic_write_json(path: Path, data: dict) -> None:
 
 
 ENTRY_RE = re.compile(r"^### Entry #(\d+):", re.MULTILINE)
-CONTENT_HASH_RE = re.compile(r"\*\*Content Hash\*\*.*?`([0-9a-f]{64})`", re.DOTALL)
-PREV_HASH_RE = re.compile(r"\*\*Previous Hash\*\*.*?`([0-9a-f]{64})`", re.DOTALL)
-# Chain Hash accepts either form: `= <hex>` (fenced/equation) or `` `<hex>` `` (inline backtick).
-# The inline-backtick form is symmetric with CONTENT_HASH_RE / PREV_HASH_RE; the equation form
-# preserves backward compatibility with legacy entries written before Phase 23.
-CHAIN_HASH_RE = re.compile(
-    r"Chain Hash.*?(?:=\s*([0-9a-f]{64})\b|`([0-9a-f]{64})`)",
-    re.DOTALL,
-)
+
+# Phase 41 (issue #13): all three hash fields require the `**Field**` bold anchor,
+# accept either inline-backtick `<hex>` or fenced `= <hex>` forms, and use a bounded
+# non-greedy span that stops at the next `**FieldName**` marker. This prevents the
+# pre-Phase-41 defects where CHAIN_HASH_RE matched prose mentions and where unbounded
+# `.*?` under re.DOTALL swept across field boundaries into unrelated hex values.
+_HASH_SPAN = r"(?:(?!\n\s*\*\*[A-Z])[\s\S])*?"
+_HASH_VALUE = r"(?:`([0-9a-f]{64})`|=\s*([0-9a-f]{64})\b)"
+
+CONTENT_HASH_RE = re.compile(rf"\*\*Content Hash\*\*{_HASH_SPAN}{_HASH_VALUE}")
+PREV_HASH_RE = re.compile(rf"\*\*Previous Hash\*\*{_HASH_SPAN}{_HASH_VALUE}")
+CHAIN_HASH_RE = re.compile(rf"\*\*Chain Hash\*\*{_HASH_SPAN}{_HASH_VALUE}")
 
 
 def verify(ledger_md: Path) -> int:
@@ -117,10 +120,12 @@ def verify(ledger_md: Path) -> int:
         if not (ch and ph and xh):
             skipped += 1
             continue
-        # CHAIN_HASH_RE has two alternation groups; exactly one is populated.
+        # Each regex has two alternation groups (inline-backtick or fenced); exactly one is populated.
+        content_val = ch.group(1) or ch.group(2)
+        previous_val = ph.group(1) or ph.group(2)
         recorded = xh.group(1) or xh.group(2)
-        new_expected = chain_hash(ch.group(1), ph.group(1))
-        old_expected = legacy_chain_hash(ch.group(1), ph.group(1))
+        new_expected = chain_hash(content_val, previous_val)
+        old_expected = legacy_chain_hash(content_val, previous_val)
         if new_expected == recorded or old_expected == recorded:
             print(f"OK   Entry #{num}: chain hash verified")
         else:

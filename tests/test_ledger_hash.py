@@ -191,8 +191,14 @@ SHA256(content_hash + previous_hash)
     assert rc == 1
 
 
-def test_verify_clean_synthetic_ledger(tmp_path):
-    """Build a known-good 2-entry ledger; verify passes."""
+def test_verify_clean_synthetic_ledger(tmp_path, capsys):
+    """Build a known-good 2-entry ledger; verify passes and both entries exercise chain math.
+
+    Phase 41: uses bold-anchored `**Chain Hash**:` form. Capsys assertion
+    guards against vacuous-green regression -- if a future regex change
+    silently skips these entries, `OK   Entry #N:` lines disappear even
+    though `rc == 0` is still satisfied by the skipped-no-errors path.
+    """
     content_a = "a" * 64
     prev_a = "0" * 64
     chain_a = lh.chain_hash(content_a, prev_a)
@@ -203,15 +209,18 @@ def test_verify_clean_synthetic_ledger(tmp_path):
     fake_ledger.write_text(f"""### Entry #1: TEST
 **Content Hash**: `{content_a}`
 **Previous Hash**: `{prev_a}`
-Chain Hash = {chain_a}
+**Chain Hash**: `{chain_a}`
 
 ### Entry #2: TEST
 **Content Hash**: `{content_b}`
 **Previous Hash**: `{chain_a}`
-Chain Hash = {chain_b}
+**Chain Hash**: `{chain_b}`
 """, encoding="utf-8")
     rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
     assert rc == 0
+    assert "OK   Entry #1:" in out
+    assert "OK   Entry #2:" in out
 
 
 def test_verify_skips_entries_without_required_markers(tmp_path):
@@ -232,11 +241,14 @@ def test_verify_skips_entries_without_required_markers(tmp_path):
 
 # ----- V-10 (Phase 12 v2 audit) parser-robustness tests, split per V-B -----
 
-def test_verify_handles_non_monotonic_entry_numbers(tmp_path):
+def test_verify_handles_non_monotonic_entry_numbers(tmp_path, capsys):
     """Verify() doesn't crash if entry numbers are not strictly monotonic.
 
     Real ledgers may have skipped or out-of-order numbers due to history rewrites
     or manual entry corrections. Parser must process each entry independently.
+
+    Phase 41: uses bold-anchored `**Chain Hash**:` form with capsys assertion to
+    guard against vacuous-green regression.
     """
     content_a = "a" * 64
     prev_a = "0" * 64
@@ -247,17 +259,20 @@ def test_verify_handles_non_monotonic_entry_numbers(tmp_path):
 
 **Content Hash**: `{content_a}`
 **Previous Hash**: `{prev_a}`
-Chain Hash = {chain_a}
+**Chain Hash**: `{chain_a}`
 
 ### Entry #2: EARLIER NUMBER LATER
 
 **Content Hash**: `{content_a}`
 **Previous Hash**: `{prev_a}`
-Chain Hash = {chain_a}
+**Chain Hash**: `{chain_a}`
 """, encoding="utf-8")
     # Should not crash on out-of-order numbers
     rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
     assert rc == 0
+    assert "OK   Entry #5:" in out
+    assert "OK   Entry #2:" in out
 
 
 def test_verify_handles_missing_hash_markers_gracefully(tmp_path):
@@ -304,8 +319,13 @@ def test_verify_accepts_inline_backtick_chain_hash(tmp_path):
     assert rc == 0
 
 
-def test_verify_accepts_mixed_chain_hash_forms(tmp_path):
-    """A ledger with one `= <hex>` entry and one `` `<hex>` `` entry verifies clean."""
+def test_verify_accepts_mixed_chain_hash_forms(tmp_path, capsys):
+    """A ledger with one fenced `= <hex>` entry and one inline `` `<hex>` `` entry verifies clean.
+
+    Phase 41: equation-form entry is bold-anchored and fenced (the only form
+    the stricter regex accepts for `= <hex>`). Capsys assertion guards against
+    vacuous-green regression.
+    """
     content_a = "a" * 64
     prev_a = "0" * 64
     chain_a = lh.chain_hash(content_a, prev_a)
@@ -316,7 +336,11 @@ def test_verify_accepts_mixed_chain_hash_forms(tmp_path):
     fake_ledger.write_text(f"""### Entry #1: EQUATION FORM
 **Content Hash**: `{content_a}`
 **Previous Hash**: `{prev_a}`
-Chain Hash = {chain_a}
+**Chain Hash**:
+```
+SHA256(content_hash + previous_hash)
+= {chain_a}
+```
 
 ### Entry #2: INLINE FORM
 **Content Hash**: `{content_b}`
@@ -324,7 +348,10 @@ Chain Hash = {chain_a}
 **Chain Hash**: `{chain_b}`
 """, encoding="utf-8")
     rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
     assert rc == 0
+    assert "OK   Entry #1:" in out
+    assert "OK   Entry #2:" in out
 
 
 def test_verify_detects_tampered_inline_backtick_chain(tmp_path):
@@ -360,3 +387,203 @@ def test_verify_handles_malformed_numeric_id(tmp_path):
 """, encoding="utf-8")
     rc = lh.verify(fake_ledger)
     assert rc == 0  # No crash, no errors
+
+
+# ----- Phase 41 regression tests (issue #13) -----
+
+def test_verify_chain_anchor_rejects_prose_mention(tmp_path, capsys):
+    """Prose containing the phrase 'Chain Hash' must not capture unrelated backtick-hex.
+
+    Under the pre-Phase-41 regex, CHAIN_HASH_RE lacked the **...** bold anchor,
+    so prose like 'the chain hash is then computed' captured the first
+    backtick-hex that followed -- often the content_hash value from an earlier
+    field. The stricter anchor `\\*\\*Chain Hash\\*\\*` rejects prose mentions.
+    """
+    content_a = "a" * 64
+    prev_a = "0" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+    unrelated_hex = "c" * 64  # appears in prose, must not be captured
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: PROSE MENTION
+
+**Decision**: The Chain Hash field below is the load-bearing value; `{unrelated_hex}` in this sentence is prose only.
+
+**Content Hash**: `{content_a}`
+**Previous Hash**: `{prev_a}`
+**Chain Hash**: `{chain_a}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+
+
+def test_verify_fenced_content_with_trailing_inline_hash(tmp_path, capsys):
+    """Fenced Content Hash must not bleed into a later inline-backtick hex field.
+
+    Pre-Phase-41 behavior: CONTENT_HASH_RE only accepted inline-backtick form,
+    so with a fenced Content Hash the regex would silently sweep forward under
+    re.DOTALL and capture a later Plan Hash's backtick-hex value as content.
+    """
+    content_a = "a" * 64
+    prev_a = "0" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+    plan_hex = "d" * 64  # unrelated; must not be captured as content
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: FENCED CONTENT + INLINE PLAN
+
+**Content Hash**:
+```
+SHA256(stuff)
+= {content_a}
+```
+
+**Previous Hash**: `{prev_a}`
+**Chain Hash**: `{chain_a}`
+**Plan Hash**: `{plan_hex}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+
+
+def test_verify_fenced_previous_with_trailing_inline_hash(tmp_path, capsys):
+    """Fenced Previous Hash must not bleed into a later inline-backtick hex field."""
+    content_a = "a" * 64
+    prev_a = "f" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+    plan_hex = "d" * 64
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: FENCED PREVIOUS + INLINE PLAN
+
+**Content Hash**: `{content_a}`
+**Previous Hash**:
+```
+SHA256(prior entry content)
+= {prev_a}
+```
+
+**Chain Hash**: `{chain_a}`
+**Plan Hash**: `{plan_hex}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+
+
+def test_verify_bounded_span_stops_at_next_field(tmp_path, capsys):
+    """When a field's hex value is absent, the regex must not sweep into the next field.
+
+    Entry has broken markup: Content Hash header with no hex value before the
+    next **Previous Hash** marker. The bounded span stops at the next
+    `\\*\\*FieldName\\*\\*` marker; CONTENT_HASH_RE returns None; the entry is
+    routed to the skipped counter rather than falsely verified with Previous
+    Hash's value captured as content.
+    """
+    prev_a = "0" * 64
+    chain_mismatch = "e" * 64  # unrelated to any valid chain computation
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: BROKEN MARKUP
+
+**Content Hash**:
+
+**Previous Hash**: `{prev_a}`
+**Chain Hash**: `{chain_mismatch}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out + capsys.readouterr().err
+    # Entry must be skipped (no content hash), not FAIL on bogus chain math
+    assert rc == 0
+    assert "OK   Entry #1:" not in out
+    assert "FAIL Entry #1" not in out
+
+
+def test_verify_accepts_fenced_content_hash(tmp_path, capsys):
+    """**Content Hash** in fenced `= <hex>` form verifies clean (symmetric with chain hash)."""
+    content_a = "a" * 64
+    prev_a = "0" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: FENCED CONTENT
+**Content Hash**:
+```
+SHA256(file bytes)
+= {content_a}
+```
+**Previous Hash**: `{prev_a}`
+**Chain Hash**: `{chain_a}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+
+
+def test_verify_accepts_fenced_previous_hash(tmp_path, capsys):
+    """**Previous Hash** in fenced `= <hex>` form verifies clean."""
+    content_a = "a" * 64
+    prev_a = "f" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: FENCED PREVIOUS
+**Content Hash**: `{content_a}`
+**Previous Hash**:
+```
+SHA256(prior content)
+= {prev_a}
+```
+**Chain Hash**: `{chain_a}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+
+
+def test_verify_accepts_mixed_content_hash_forms(tmp_path, capsys):
+    """A ledger mixing inline-backtick and fenced Content Hash forms verifies clean."""
+    content_a = "a" * 64
+    prev_a = "0" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+    content_b = "b" * 64
+    chain_b = lh.chain_hash(content_b, chain_a)
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: FENCED CONTENT
+**Content Hash**:
+```
+SHA256(file bytes)
+= {content_a}
+```
+**Previous Hash**: `{prev_a}`
+**Chain Hash**: `{chain_a}`
+
+### Entry #2: INLINE CONTENT
+**Content Hash**: `{content_b}`
+**Previous Hash**: `{chain_a}`
+**Chain Hash**: `{chain_b}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+    assert "OK   Entry #2:" in out
+
+
+def test_verify_real_ledger_still_passes():
+    """Regression: the repo's own docs/META_LEDGER.md still verifies after regex changes.
+
+    Guards against regressions introduced by the new bounded-span rule and
+    anchor tightening. If this fails after the Phase 41 patch, the regex
+    changes have broken the load-bearing real ledger.
+    """
+    rc = lh.verify(LEDGER_MD)
+    assert rc == 0

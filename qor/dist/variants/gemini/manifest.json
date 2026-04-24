@@ -1,6 +1,6 @@
 {
   "schema_version": "1",
-  "generated_ts": "2026-04-20T19:23:47Z",
+  "generated_ts": "2026-04-24T22:47:11Z",
   "files": [
     {
       "id": "agent-agent-architect.toml",
@@ -258,7 +258,7 @@
       "id": "qor-validate.toml",
       "source_path": "commands/qor-validate.toml",
       "install_rel_path": "commands/qor-validate.toml",
-      "sha256": "29f8ff6db0f93efeb52cb936a427e89262c5b3a5ae7b14aa56d05f26471c0934"
+      "sha256": "c27adf6790779f5886d7182589ce5f3d2bfbe4133eaf8405bdc35585731a4acf"
     },
     {
       "id": "track-shadow-genome.toml",

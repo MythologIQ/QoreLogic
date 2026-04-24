@@ -5144,6 +5144,38 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 
 **Pre-rebase history note**: original Pass 1 (hotfix VETOed for coverage-gap) commits `de9d0f2`/`546731a` preserved on the discarded reflog; Pass 2 amendment commits `2765a55`/`5d57c57` preserved; Pass 3 reclassification commits `8d73040`/`a25f6a5` preserved; pre-rebase implement `8611610` preserved. This consolidated entry on rebased history records the resolved Pass 3 PASS state.
 
+---
+
+### Entry #142: IMPLEMENTATION — Phase 41 (ledger_hash regex robustness + qor-validate)
+
+**Timestamp**: 2026-04-24T22:55:00Z
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L2
+
+**Session**: `2026-04-24T1948-2cfc13`
+**Plan**: `docs/plan-qor-phase41-ledger-regex-robustness.md` (Pass 3)
+**Audit**: entry #141 (PASS)
+
+**Files Modified**:
+- `qor/scripts/ledger_hash.py` — replaced three hash-field regexes with `**Field**`-anchored, bounded-span composition (`_HASH_SPAN` + `_HASH_VALUE`); accept both inline-backtick and fenced forms on all three fields. `verify()` extraction reads from two alternation groups uniformly. `re.DOTALL` no longer needed.
+- `qor/skills/governance/qor-validate/SKILL.md` — replaced three stale `.claude/commands/scripts/validate-ledger.py` references (Steps 3, 4, 7) with `qor/scripts/ledger_hash.py` module + `qorlogic verify-ledger` CLI.
+- `qor/dist/variants/{claude,codex,gemini,kilo-code}/skills/qor-validate/*` — regenerated via `python -m qor.scripts.dist_compile`.
+- `tests/test_ledger_hash.py` — added 8 regression tests; amended 3 existing tests to use bold-anchored markup with capsys assertions on `OK   Entry #N:` (vacuous-green prevention).
+- `tests/test_qor_validate_skill_references.py` — NEW; lints source SKILL + every shipped variant for stale path absence and canonical marker presence.
+
+**Content Hash**: `b94b8a7cec6de7b7076357d4c49ffeff39727bf74cd56e458685c7edc9d2977b`
+**Previous Hash**: `ef936b6f715976e35143cea82a19c32784ddd2ba7a1f2549b6df07192cf02bf0`
+**Chain Hash**: `4ae4f943f76a98cf83a660f6fe0f7c0fe4692aba44f1c0f1f5f7e153fcd46f4c`
+
+**Tests**: 31 ledger_hash + qor-validate-references tests pass. Full suite verification deferred to `/qor-substantiate` Step 4.
+
+**Razor compliance**: `verify()` 40 lines (at limit); `ledger_hash.py` 196 lines; nesting depth 3; no nested ternaries.
+
+**Intent lock**: captured against post-rebase HEAD (uses Phase 43's new ancestry-verify, so post-implement-commit verify will pass without re-capture).
+
+**Decision**: Issue #13 remediated. Verifier regexes are bold-anchored, field-bounded, and symmetric across inline/fenced forms. SKILL documentation references the canonical module and CLI. Ready for `/qor-substantiate`.
+
 
 
 
