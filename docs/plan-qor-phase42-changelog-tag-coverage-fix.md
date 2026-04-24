@@ -3,7 +3,9 @@
 **change_class**: hotfix
 **target_version**: v0.28.2
 **doc_tier**: minimal
-**pass**: 1
+**pass**: 2
+
+**Pass 2 delta**: Added `CHANGELOG.md` backfill for `## [0.28.1]` (Phase 40 retrospective) and `## [0.28.2]` (this hotfix). Addresses audit VETO V1 (coverage-gap) documented in `.agent/staging/AUDIT_REPORT.md` (Phase 42 Pass 1) and `docs/SHADOW_GENOME.md` Entry #31. Without the backfill, Phase 42's own merge would surface a latent failure in the symmetric `test_every_tag_has_changelog_section` when v0.28.1 + v0.28.2 tags exist on origin without matching CHANGELOG sections.
 
 **Scope**: One-function assertion relaxation in `tests/test_changelog_tag_coverage.py`. Pre-release CHANGELOG sections (version > highest existing git tag) are exempt from the "must have matching tag" rule. No production code changes.
 
@@ -29,11 +31,12 @@ Those tags will be recreated on the respective phase 39/39b merge commits by the
 
 This is operator-executed at the start of `/qor-substantiate`, not embedded in the skill.
 
-## Phase 1 — relax the orphan-section assertion
+## Phase 1 — relax the orphan-section assertion + backfill CHANGELOG
 
 ### Affected Files
 
 - `tests/test_changelog_tag_coverage.py` — new TDD fixtures added first; then the assertion in `test_every_changelog_section_has_tag` is narrowed to "orphan sections at or below the highest existing tag are violations; sections above are exempt."
+- `CHANGELOG.md` — backfill `## [0.28.1] - 2026-04-20` (Phase 40 release-workflow guard hotfix) and add `## [0.28.2] - 2026-04-24` (this hotfix) ahead of the existing `## [0.28.0]` entry. Each section gets a single short paragraph referencing the META_LEDGER seal entry. No new tests for this file — the existing `test_every_tag_has_changelog_section` and the newly-relaxed `test_every_changelog_section_has_tag` will both enforce correctness after the sections land.
 
 ### Unit Tests
 
@@ -79,7 +82,25 @@ def test_every_changelog_section_has_tag():
     )
 ```
 
-`test_every_tag_has_changelog_section` is unchanged — its assertion direction was already sound (origin's tag set is a subset of local's; absent tags are impossible to orphan).
+`test_every_tag_has_changelog_section` is unchanged — its assertion direction is already sound. The CHANGELOG backfill (below) brings its current-state inputs into compliance.
+
+### CHANGELOG backfill content
+
+`CHANGELOG.md` edit inserts two sections between the existing header block and `## [0.28.0]`:
+
+```markdown
+## [0.28.2] - 2026-04-24
+
+### Fixed
+- `test_every_changelog_section_has_tag` no longer blocks phase-seal PRs whose CHANGELOG sections are above the highest existing tag. Pre-release sections are now exempt from the match-a-tag rule, resolving the chicken-and-egg collision with Phase 40's LOCAL-ONLY tag doctrine. See META_LEDGER Entry #[N] (Phase 42 seal).
+
+## [0.28.1] - 2026-04-20
+
+### Fixed
+- `.github/workflows/release.yml` now verifies the tag's commit is reachable from `origin/main` before publishing to PyPI; refuses publish otherwise. Closes the pre-merge-publish defect that shipped v0.24.1, v0.25.0, and v0.28.0 from unmerged PR branches. See META_LEDGER Entry #133 (Phase 40 seal).
+```
+
+Entry number for the v0.28.2 section is filled in at `/qor-substantiate` time when the seal entry is written; placeholder `#[N]` flagged here so the implementer knows to replace it.
 
 ## CI Commands
 
