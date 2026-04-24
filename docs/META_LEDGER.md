@@ -5176,6 +5176,40 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 
 **Decision**: Issue #13 remediated. Verifier regexes are bold-anchored, field-bounded, and symmetric across inline/fenced forms. SKILL documentation references the canonical module and CLI. Ready for `/qor-substantiate`.
 
+---
+
+### Entry #143: SESSION SEAL -- Phase 41 feature substantiated
+
+**Timestamp**: 2026-04-24T23:00:00Z
+**Phase**: SEAL (feature)
+**Author**: Judge
+**Verdict**: PASS (762 tests green; 1 skipped)
+
+**Target**: `docs/plan-qor-phase41-ledger-regex-robustness.md`
+**Change Class**: `feature`
+**Version**: `0.30.0 -> 0.31.0`
+**Tag**: `v0.31.0` (created at Step 9.5.5 post-commit; LOCAL ONLY pending PR merge per Phase 40 doctrine)
+
+**Content Hash (session seal)**: `3a58ebd4033a6ef4682c8ec28f456a4d355124a7b6779f9a94f85637dbeb2ded`
+**Previous Hash**: `4ae4f943f76a98cf83a660f6fe0f7c0fe4692aba44f1c0f1f5f7e153fcd46f4c`
+**Chain Hash (Merkle seal)**: `c8cbb19e1746e743c5faca910821c81ac53f395bddbc4b879b9abcbf67a19255`
+
+**Scope**: Closes GitHub issue #13. Three-axis feature: (1) fenced-form Content/Previous Hash parsing as new capability; (2) bounded-span discipline eliminating a class of cross-field-bleed accidents; (3) qor-validate SKILL canonical references restoring first-time correctness.
+
+**Reliability sweep**: intent-lock VERIFIED on first try post-implement-commit (Phase 43's ancestry fix working live; first session to demonstrate the new semantics across two consecutive phases without re-capture-as-workaround). skill-admission ADMITTED. gate-skill-matrix clean (29 skills, 112 handoffs, 0 broken; up from 28/108 pre-Phase-39b due to qor-ab-run addition).
+
+**Razor**: `verify()` 40 lines (at limit but compliant); `qor/scripts/ledger_hash.py` 196 lines; nesting depth 3; no nested ternaries.
+
+**Phase 33 release-doc currency**: CHANGELOG.md `## [0.31.0]` section + README.md Tests/Ledger badges in `implement.files_touched`. Passes.
+
+**Decision**: Phase 41 feature sealed at v0.31.0. Tag LOCAL ONLY until PR merge per Phase 40 doctrine.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 41 feature substantiated)
+*Merkle seal: c8cbb19e...* (Phase 41 seal on top of Phase 43's cc60be96; Entries #141-#143 chained)
+
 
 
 
