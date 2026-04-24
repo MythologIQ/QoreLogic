@@ -89,12 +89,19 @@ ENTRY_RE = re.compile(r"^### Entry #(\d+):", re.MULTILINE)
 # non-greedy span that stops at the next `**FieldName**` marker. This prevents the
 # pre-Phase-41 defects where CHAIN_HASH_RE matched prose mentions and where unbounded
 # `.*?` under re.DOTALL swept across field boundaries into unrelated hex values.
+#
+# Phase 44: hash field labels MAY carry an optional parenthetical suffix inside the
+# bold markers (e.g., `**Chain Hash (Merkle seal)**:`, `**Content Hash (session seal)**:`).
+# This is the standard SESSION SEAL convention since Phase 23. The Phase 41 strict
+# anchor `\*\*Field\*\*` did not match these and silently skipped seal entries; the
+# `(?:\s*\([^)]+\))?` segment restores coverage without weakening bold-anchor protection.
 _HASH_SPAN = r"(?:(?!\n\s*\*\*[A-Z])[\s\S])*?"
 _HASH_VALUE = r"(?:`([0-9a-f]{64})`|=\s*([0-9a-f]{64})\b)"
+_FIELD_SUFFIX = r"(?:\s*\([^)]+\))?"
 
-CONTENT_HASH_RE = re.compile(rf"\*\*Content Hash\*\*{_HASH_SPAN}{_HASH_VALUE}")
-PREV_HASH_RE = re.compile(rf"\*\*Previous Hash\*\*{_HASH_SPAN}{_HASH_VALUE}")
-CHAIN_HASH_RE = re.compile(rf"\*\*Chain Hash\*\*{_HASH_SPAN}{_HASH_VALUE}")
+CONTENT_HASH_RE = re.compile(rf"\*\*Content Hash{_FIELD_SUFFIX}\*\*{_HASH_SPAN}{_HASH_VALUE}")
+PREV_HASH_RE = re.compile(rf"\*\*Previous Hash{_FIELD_SUFFIX}\*\*{_HASH_SPAN}{_HASH_VALUE}")
+CHAIN_HASH_RE = re.compile(rf"\*\*Chain Hash{_FIELD_SUFFIX}\*\*{_HASH_SPAN}{_HASH_VALUE}")
 
 
 def verify(ledger_md: Path) -> int:

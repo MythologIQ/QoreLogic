@@ -5229,6 +5229,35 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 
 **Decision**: Phase 44 plan addresses real Phase 41 regression (8 SESSION SEAL / REMEDIATE PROPOSAL entries silently skipped by the strict `\*\*Field\*\*` anchor against the standard `\*\*Field (suffix)\*\*` markup convention). Three-regex relaxation adds optional parenthetical suffix `(?:\s*\([^)]+\))?` inside bold markers; preserves Phase 41's bold-anchor + bounded-span + two-form value protections. TDD coverage includes anti-vacuous-green guard against real ledger that would have caught the original regression. Branch base v0.31.0; bump('hotfix') → v0.31.1 cleanly. All six audit passes clear. SG-AdjacentState-A advisory: this regression is a fourth-instance member of the family (Phase 41 plan didn't enumerate all real-ledger field-label conventions); Phase 44's anti-vacuous-green guard provides structural countermeasure. Gate OPEN for `/qor-implement`.
 
+---
+
+### Entry #145: IMPLEMENTATION — Phase 44 (parenthetical-suffix on hash field labels)
+
+**Timestamp**: 2026-04-24T23:20:00Z
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L1
+
+**Session**: `2026-04-24T1948-2cfc13`
+**Plan**: `docs/plan-qor-phase44-regex-parenthetical-suffix.md` (Pass 1)
+**Audit**: entry #144 (PASS)
+
+**Files Modified**:
+- `qor/scripts/ledger_hash.py` — added `_FIELD_SUFFIX = r"(?:\s*\([^)]+\))?"` constant; spliced into all three hash regexes between the field name and closing bold markers. Restores chain-verification coverage for `**Chain Hash (Merkle seal)**:` / `**Content Hash (session seal)**:` markup that Phase 41's strict anchor silently skipped. Bold-anchor protection, bounded-span discipline, and inline/fenced value acceptance all preserved.
+- `tests/test_ledger_hash.py` — added 5 TDD tests: 3 synthetic (Chain/Content/Previous Hash with parenthetical suffix), 2 real-ledger anti-vacuous-green guards (every modern SESSION SEAL entry verifies; no silent skips for modern entries with hash markup). The original-plan test for REMEDIATE PROPOSAL #122 was dropped during implement: that entry legitimately has no hash markup at all (process-level proposal, not a sealed entry), so it's correctly excluded by the no-silent-skips test's hash-markup filter.
+
+**Content Hash**: `4a0e26796b5d7f79a95983ef37da81253180e73b679e41908ef08f9b6c6f2196`
+**Previous Hash**: `06801c29fa62661f40ce51226cba0db403d91be285388aaae6c84b77faad44e9`
+**Chain Hash**: `7201d838ff930177d4d9972ba5bd4c9257c6c9ce1d3395266e9b16370ce6ec62`
+
+**Verification metric**: pre-fix `verify` reported 104 OK / 39 skipped; post-fix reports 112 OK / 32 skipped. Net +8 entries restored to verification (the 7 seal entries originally identified plus this phase's own audit Entry #144). #122 remains correctly skipped (no hash markup by design).
+
+**Razor compliance**: `verify()` 40 lines (unchanged); `ledger_hash.py` 199 lines (was 196, +3 for `_FIELD_SUFFIX` constant + comment); nesting depth 3; no nested ternaries.
+
+**Intent lock**: captured against post-rebase HEAD.
+
+**Decision**: Phase 41 regression resolved. The Phase 44 anti-vacuous-green tests would have caught the original regression at audit time. Ready for `/qor-substantiate`.
+
 
 
 

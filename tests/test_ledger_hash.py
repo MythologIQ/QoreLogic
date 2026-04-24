@@ -587,3 +587,140 @@ def test_verify_real_ledger_still_passes():
     """
     rc = lh.verify(LEDGER_MD)
     assert rc == 0
+
+
+# ----- Phase 44 regression tests (parenthetical-suffix on hash labels) -----
+
+def test_verify_accepts_chain_hash_with_merkle_seal_suffix(tmp_path, capsys):
+    """`**Chain Hash (Merkle seal)**:` is the standard SESSION SEAL convention.
+
+    Phase 41's strict `\\*\\*Chain Hash\\*\\*` anchor missed this form and
+    silently skipped 7+ ledger entries. Phase 44 relaxes the anchor to accept
+    an optional parenthetical suffix inside the bold markers.
+    """
+    content_a = "a" * 64
+    prev_a = "0" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: SESSION SEAL
+**Content Hash**: `{content_a}`
+**Previous Hash**: `{prev_a}`
+**Chain Hash (Merkle seal)**: `{chain_a}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+
+
+def test_verify_accepts_content_hash_with_session_seal_suffix(tmp_path, capsys):
+    """`**Content Hash (session seal)**:` is the SESSION SEAL convention paired with Chain Hash."""
+    content_a = "a" * 64
+    prev_a = "0" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: SESSION SEAL
+**Content Hash (session seal)**: `{content_a}`
+**Previous Hash**: `{prev_a}`
+**Chain Hash (Merkle seal)**: `{chain_a}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+
+
+def test_verify_accepts_previous_hash_with_arbitrary_suffix(tmp_path, capsys):
+    """Symmetric handling: Previous Hash with parenthetical suffix also matches.
+
+    Real ledgers don't use this convention for Previous Hash today, but the
+    regex change applies symmetrically; this test guards against future drift.
+    """
+    content_a = "a" * 64
+    prev_a = "0" * 64
+    chain_a = lh.chain_hash(content_a, prev_a)
+
+    fake_ledger = tmp_path / "ledger.md"
+    fake_ledger.write_text(f"""### Entry #1: SESSION SEAL
+**Content Hash**: `{content_a}`
+**Previous Hash (sealed reference)**: `{prev_a}`
+**Chain Hash**: `{chain_a}`
+""", encoding="utf-8")
+    rc = lh.verify(fake_ledger)
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "OK   Entry #1:" in out
+
+
+def test_verify_real_ledger_seal_entries_verify_clean(capsys):
+    """Anti-vacuous-green guard: every modern SESSION SEAL entry must verify (not skip).
+
+    Phase 41's regex tightening silently skipped seal entries with parenthetical
+    field labels (`**Chain Hash (Merkle seal)**:`); the original Phase 41 test
+    only asserted `rc == 0`, which was satisfied by silent skip rather than
+    verified chain. This test counts verified entries against a known list of
+    SESSION SEAL entry numbers and would have caught the regression.
+    """
+    rc = lh.verify(LEDGER_MD)
+    out = capsys.readouterr().out
+    assert rc == 0
+
+    # SESSION SEAL entries with the parenthetical-suffix convention (post-Phase-23 modern format).
+    # Hard-coded list reflects current state of docs/META_LEDGER.md; if a future seal entry uses a
+    # different convention, this list must be updated explicitly (anti-vacuous-green by design).
+    expected_seal_entries = [126, 129, 132, 133, 137, 140, 143]
+    for entry_num in expected_seal_entries:
+        assert f"OK   Entry #{entry_num}:" in out, (
+            f"SESSION SEAL entry #{entry_num} did not verify; suggests regex regression "
+            f"on parenthetical field labels."
+        )
+
+
+def test_verify_real_ledger_no_silent_skips_for_modern_entries(capsys):
+    """Generalization: every modern entry (>= #116) with hash markup must verify, not skip.
+
+    Whitelist below documents legitimate exceptions — entries that genuinely lack the
+    three hash fields by design (e.g., narrative-only entries between sealed phases).
+    Any modern numbered entry not in the whitelist and not in the OK output indicates
+    a regex regression.
+    """
+    import re as _re
+    text = LEDGER_MD.read_text(encoding="utf-8")
+    parts = lh.ENTRY_RE.split(text)
+
+    # Whitelist of modern entries that legitimately lack one of the three hash fields.
+    # Each entry is a narrative or bookkeeping record without full chain markup.
+    legitimate_skip_whitelist = {
+        # Currently empty: all modern hash-bearing entries should verify.
+        # If a new narrative entry is added without hash markup, document it here
+        # with a one-line rationale.
+    }
+
+    rc = lh.verify(LEDGER_MD)
+    out = capsys.readouterr().out
+    assert rc == 0
+
+    modern_entries_with_hash_markup = []
+    for i in range(1, len(parts), 2):
+        num = int(parts[i])
+        if num < 116:
+            continue
+        body = parts[i + 1] if i + 1 < len(parts) else ""
+        # An entry "has hash markup" if it contains at least one bold "Hash" field marker.
+        if _re.search(r"\*\*(Content Hash|Previous Hash|Chain Hash)", body):
+            modern_entries_with_hash_markup.append(num)
+
+    silent_skips = []
+    for num in modern_entries_with_hash_markup:
+        if num in legitimate_skip_whitelist:
+            continue
+        if f"OK   Entry #{num}:" not in out:
+            silent_skips.append(num)
+
+    assert not silent_skips, (
+        f"Modern entries with hash markup that did NOT verify (silent skip):\n  "
+        + "\n  ".join(f"#{n}" for n in silent_skips)
+        + "\nAdd to legitimate_skip_whitelist with rationale, or fix the regex."
+    )
