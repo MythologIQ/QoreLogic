@@ -145,6 +145,156 @@ def test_intent_lock_capture_rejects_non_pass_audit(tmp_path: Path) -> None:
     assert "audit not PASS" in (result.stdout + result.stderr)
 
 
+# ---- Phase 43: ancestry-based HEAD verification (6 tests) ----
+
+
+def _capture_lock(repo: Path, session: str, plan: Path, audit: Path) -> subprocess.CompletedProcess:
+    return _run(
+        [sys.executable, str(INTENT_LOCK), "capture",
+         "--session", session,
+         "--plan", str(plan),
+         "--audit", str(audit),
+         "--repo", str(repo)],
+    )
+
+
+def _verify_lock(repo: Path, session: str) -> subprocess.CompletedProcess:
+    return _run(
+        [sys.executable, str(INTENT_LOCK), "verify",
+         "--session", session,
+         "--repo", str(repo)],
+    )
+
+
+def _add_commit(repo: Path, name: str, content: str, msg: str) -> None:
+    (repo / name).write_text(content, encoding="utf-8")
+    _run(["git", "add", name], cwd=repo)
+    _run(["git", "commit", "-q", "-m", msg], cwd=repo)
+
+
+def test_intent_lock_verify_allows_forward_head_advancement(tmp_path: Path) -> None:
+    """verify exits 0 when HEAD has advanced past capture (legitimate implement commit)."""
+    _init_git_repo(tmp_path)
+    plan = tmp_path / "plan.md"
+    plan.write_text("stable plan", encoding="utf-8")
+    audit = tmp_path / "audit.md"
+    audit.write_text("Verdict: PASS", encoding="utf-8")
+
+    cap = _capture_lock(tmp_path, "sess-fwd", plan, audit)
+    assert cap.returncode == 0
+
+    # Mimic the implement commit advancing HEAD.
+    _add_commit(tmp_path, "impl.txt", "implementation", "implement: feature work")
+
+    ver = _verify_lock(tmp_path, "sess-fwd")
+    assert ver.returncode == 0, ver.stderr
+    assert "VERIFIED: sess-fwd" in ver.stdout
+
+
+def test_intent_lock_verify_detects_history_rewrite(tmp_path: Path) -> None:
+    """verify exits 1 with DRIFT: head when capture-HEAD is no longer reachable."""
+    _init_git_repo(tmp_path)
+    plan = tmp_path / "plan.md"
+    plan.write_text("plan", encoding="utf-8")
+    audit = tmp_path / "audit.md"
+    audit.write_text("Verdict: PASS", encoding="utf-8")
+
+    # Add a commit so we can reset back past it.
+    _add_commit(tmp_path, "before.txt", "before capture", "pre-capture commit")
+
+    cap = _capture_lock(tmp_path, "sess-rewrite", plan, audit)
+    assert cap.returncode == 0
+
+    # Reset HEAD back past the captured commit, then add a divergent commit.
+    _run(["git", "reset", "-q", "--hard", "HEAD~1"], cwd=tmp_path)
+    _add_commit(tmp_path, "divergent.txt", "divergent", "divergent commit after rewrite")
+
+    ver = _verify_lock(tmp_path, "sess-rewrite")
+    assert ver.returncode == 1
+    assert "DRIFT: head" in (ver.stdout + ver.stderr)
+
+
+def test_intent_lock_verify_detects_branch_switch_to_divergent(tmp_path: Path) -> None:
+    """verify exits 1 when current HEAD is on a divergent branch from capture-HEAD."""
+    _init_git_repo(tmp_path)
+    plan = tmp_path / "plan.md"
+    plan.write_text("plan", encoding="utf-8")
+    audit = tmp_path / "audit.md"
+    audit.write_text("Verdict: PASS", encoding="utf-8")
+
+    # Build branch-A with a unique commit; capture there.
+    _run(["git", "checkout", "-q", "-b", "branch-a"], cwd=tmp_path)
+    _add_commit(tmp_path, "a.txt", "branch-a", "branch-a commit")
+
+    cap = _capture_lock(tmp_path, "sess-branch", plan, audit)
+    assert cap.returncode == 0
+
+    # Build branch-B from the seed commit (divergent from branch-a's HEAD).
+    _run(["git", "checkout", "-q", "-b", "branch-b", "main"], cwd=tmp_path)
+    if _run(["git", "rev-parse", "branch-b"], cwd=tmp_path).returncode != 0:
+        # Fallback: some git versions default to "master" on init.
+        _run(["git", "checkout", "-q", "-b", "branch-b", "master"], cwd=tmp_path)
+    _add_commit(tmp_path, "b.txt", "branch-b", "branch-b commit")
+
+    ver = _verify_lock(tmp_path, "sess-branch")
+    assert ver.returncode == 1
+    assert "DRIFT: head" in (ver.stdout + ver.stderr)
+
+
+def test_intent_lock_verify_detects_plan_drift_after_forward_head(tmp_path: Path) -> None:
+    """Plan-hash drift is detected even after legitimate HEAD advancement."""
+    _init_git_repo(tmp_path)
+    plan = tmp_path / "plan.md"
+    plan.write_text("plan v1", encoding="utf-8")
+    audit = tmp_path / "audit.md"
+    audit.write_text("Verdict: PASS", encoding="utf-8")
+
+    cap = _capture_lock(tmp_path, "sess-plan-drift-fwd", plan, audit)
+    assert cap.returncode == 0
+
+    _add_commit(tmp_path, "impl.txt", "implementation", "implement")
+    plan.write_text("plan v2 (mutated)", encoding="utf-8")
+
+    ver = _verify_lock(tmp_path, "sess-plan-drift-fwd")
+    assert ver.returncode == 1
+    assert "DRIFT: plan" in (ver.stdout + ver.stderr)
+
+
+def test_intent_lock_verify_detects_audit_drift_after_forward_head(tmp_path: Path) -> None:
+    """Audit-hash drift is detected even after legitimate HEAD advancement."""
+    _init_git_repo(tmp_path)
+    plan = tmp_path / "plan.md"
+    plan.write_text("plan", encoding="utf-8")
+    audit = tmp_path / "audit.md"
+    audit.write_text("Verdict: PASS", encoding="utf-8")
+
+    cap = _capture_lock(tmp_path, "sess-audit-drift-fwd", plan, audit)
+    assert cap.returncode == 0
+
+    _add_commit(tmp_path, "impl.txt", "implementation", "implement")
+    audit.write_text("Verdict: PASS\n(amended notes)", encoding="utf-8")
+
+    ver = _verify_lock(tmp_path, "sess-audit-drift-fwd")
+    assert ver.returncode == 1
+    assert "DRIFT: audit" in (ver.stdout + ver.stderr)
+
+
+def test_intent_lock_verify_ancestry_uses_subprocess_list_argv() -> None:
+    """Structural lint: verify() must use list-form subprocess.run for the ancestry check.
+
+    Guards against shell=True regression that would open A03 injection vectors via
+    a tampered head_commit value in the fingerprint JSON.
+    """
+    src = INTENT_LOCK.read_text(encoding="utf-8")
+    # The ancestry call must exist as a list (square-bracket argv) and must NOT pass shell=True.
+    assert "merge-base" in src and "is-ancestor" in src, "ancestry check missing"
+    # No shell=True anywhere in the module.
+    assert "shell=True" not in src, "shell=True forbidden"
+    # The ancestry check must be invoked with list-form argv: search for the literal pattern.
+    pattern = re.compile(r'\[\s*"git"\s*,\s*"merge-base"\s*,\s*"--is-ancestor"', re.MULTILINE)
+    assert pattern.search(src), "merge-base --is-ancestor must be invoked via list-form argv"
+
+
 # ---- Track 2: skill-admission (3 tests) ----
 
 

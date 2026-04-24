@@ -106,8 +106,20 @@ def verify(args: argparse.Namespace) -> int:
         print("DRIFT: audit", file=sys.stderr)
         return 1
 
-    current_head = _head_commit(repo)
-    if current_head != data["head_commit"]:
+    # Phase 43: ancestry check instead of strict equality.
+    # Allows legitimate forward progress (the implement commit advancing HEAD
+    # between Step 5.5 capture and substantiate Step 4.6 verify) while still
+    # catching history rewrites, hard resets, and branch switches to divergent
+    # histories. The captured HEAD must remain reachable from current HEAD.
+    captured_head = data["head_commit"]
+    result = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", captured_head, "HEAD"],
+        cwd=str(repo),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
         print("DRIFT: head", file=sys.stderr)
         return 1
 
