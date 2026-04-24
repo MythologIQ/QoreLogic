@@ -5060,6 +5060,35 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 
 **Decision**: All six audit passes clear. No violations. Gate OPEN for `/qor-implement`.
 
+---
+
+### Entry #139: IMPLEMENTATION — Phase 43 (intent-lock ancestry verify)
+
+**Timestamp**: 2026-04-24T22:35:00Z
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L1
+
+**Session**: `2026-04-24T1948-2cfc13`
+**Plan**: `docs/plan-qor-phase43-intent-lock-ancestry-verify.md` (Pass 2)
+**Audit**: entry #138 (PASS)
+
+**Files Modified**:
+- `qor/reliability/intent_lock.py` — replaced strict HEAD-equality check in `verify()` with `git merge-base --is-ancestor` ancestry check. Captured HEAD must be reachable from current HEAD (allows legitimate forward commits like the implement commit between Step 5.5 capture and Step 4.6 verify); catches history rewrites, hard resets, and branch switches to divergent histories. Plan-hash and audit-hash equality checks unchanged.
+- `tests/test_reliability_scripts.py` — added 6 TDD tests for the new semantics: forward-advancement allowance (positive), history-rewrite detection (negative), branch-switch-to-divergent detection (negative), plan-drift-after-forward-head ordering, audit-drift-after-forward-head ordering, and a structural lint asserting list-form `subprocess.run` argv (A03 regression guard against shell=True drift).
+
+**Content Hash**: `45a7c6106116a54ff258c3b41e51d752016b9ca75a5d6dcbe75912191d31da07`
+**Previous Hash**: `ac1cff050e106a09ba72519fd57c0c864877a2bdf88c4ecd1ab87de9784c0046`
+**Chain Hash**: `bb1f872fb1b839b5928ce83f906347716f6e3b254271c4e6a295f4a27578f793`
+
+**Tests**: 10 intent-lock tests in `test_reliability_scripts.py` pass (original 4 + 6 new). Full suite verification deferred to `/qor-substantiate` Step 4.
+
+**Razor compliance**: `verify()` 30 → 37 lines; `intent_lock.py` 149 → 156 lines; nesting depth ≤ 2; no nested ternaries.
+
+**Intent lock**: captured against post-rebase HEAD.
+
+**Decision**: Intent-lock now allows legitimate forward HEAD progress between capture and verify, eliminating the re-capture-as-SOP anti-pattern observed in Phase 41 and Phase 42 substantiate. Real anti-drift threats (history rewrites, resets, branch switches) still detected. Ready for `/qor-substantiate`.
+
 
 
 
