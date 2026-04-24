@@ -5003,6 +5003,42 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 
 **Decision**: Phase 42 fix in place. `test_every_changelog_section_has_tag` now exempts pre-release CHANGELOG sections above the highest existing tag; `test_every_tag_has_changelog_section` passes against the backfilled CHANGELOG. PRs #10 and #11 can rebase on merged Phase 42 and pass CI cleanly. Ready for `/qor-substantiate`.
 
+---
+
+### Entry #137: SESSION SEAL -- Phase 42 hotfix substantiated
+
+**Timestamp**: 2026-04-24T21:25:00Z
+**Phase**: SEAL (hotfix)
+**Author**: Judge
+**Verdict**: PASS (716 tests green on 2 consecutive runs)
+
+**Target**: `docs/plan-qor-phase42-changelog-tag-coverage-fix.md`
+**Change Class**: `hotfix`
+**Version**: `0.28.1 -> 0.28.2`
+**Tag**: `v0.28.2` (created at Step 9.5.5 post-commit; LOCAL ONLY pending PR merge per Phase 40 doctrine)
+
+**Content Hash (session seal)**: `f95a3449cca01155130588c8311d4cae153d39a99896a1d0463ce6a543ce436b`
+**Previous Hash**: `6486c68c98cef31af1bd29d64f10bc637cfeec2b11f3e09f82878721481e0cc5`
+**Chain Hash (Merkle seal)**: `d94cc0d4fdc90d1aa9364b6677cf20121482930a0261fb779168c9c6d938fc53`
+
+**Scope**: Unblocks PRs #10 and #11 by breaking the chicken-and-egg CI failure in `test_every_changelog_section_has_tag`. Pre-release CHANGELOG sections (versions above the highest existing git tag) are now exempt from the match-a-tag rule, resolving the collision with Phase 40's LOCAL-ONLY tag doctrine. CHANGELOG.md backfilled with v0.28.1 (Phase 40 retrospective) and v0.28.2 (this hotfix) so the symmetric `test_every_tag_has_changelog_section` is satisfied against origin tags.
+
+**Reliability sweep**: intent-lock VERIFIED, skill-admission ADMITTED, gate-skill-matrix clean (28 skills, 108 handoffs, 0 broken).
+
+**Razor**: `_released_orphans` 4 body lines; `_parse_semver` 2 body lines; test file 55 → 114 lines; nesting depth ≤ 2; no nested ternaries.
+
+**Orphan tag cleanup**: `v0.29.0` and `v0.30.0` deleted locally (never on origin; artifacts of unmerged phase 39/39b seals). Will be recreated on respective merge commits per Phase 40 deploy doctrine.
+
+**Intent lock**: captured pre-implement; re-captured post-implement commit and VERIFIED at seal time. Plan and audit content hashes unchanged between captures.
+
+**Decision**: Phase 42 hotfix sealed at v0.28.2. Tag LOCAL ONLY until PR merge per Phase 40 doctrine. After merge to main, v0.28.2 tag pushes and unblocks PRs #10/#11 rebases.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 42 hotfix substantiated)
+*Merkle seal: d94cc0d4...* (Phase 42 seal on top of Phase 40's dea2e429; Entries #134-#137 chained)
+
 
 
 

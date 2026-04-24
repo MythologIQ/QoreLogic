@@ -13,7 +13,7 @@ file is the user-facing narrative.
 ## [0.28.2] - 2026-04-24
 
 ### Fixed
-- `test_every_changelog_section_has_tag` no longer blocks phase-seal PRs whose CHANGELOG sections are above the highest existing tag. Pre-release sections are now exempt from the match-a-tag rule, resolving the chicken-and-egg collision with Phase 40's LOCAL-ONLY tag doctrine. See `docs/META_LEDGER.md` Phase 42 seal entry.
+- `test_every_changelog_section_has_tag` no longer blocks phase-seal PRs whose CHANGELOG sections are above the highest existing tag. Pre-release sections are now exempt from the match-a-tag rule, resolving the chicken-and-egg collision with Phase 40's LOCAL-ONLY tag doctrine. See `docs/META_LEDGER.md` Entry #137 (Phase 42 seal).
 
 ## [0.28.1] - 2026-04-20
 
