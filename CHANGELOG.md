@@ -10,6 +10,41 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-04-20
+
+Phase 39b Phases 1+2: Agent Team A/B orchestration + persona sweep.
+
+### Added
+- **`/qor-ab-run` skill** (`qor/skills/meta/qor-ab-run/`): orchestrates persona-vs-stance Identity Activation A/B measurement via parallel Task-tool subagent dispatch (20 concurrent calls in one message). Zero external dependency, zero marginal cost. `subagent_type: "general"` per doctrine §4. Subagent prompt template with `{VARIANT_IDENTITY_ACTIVATION_BLOCK}` + `{FIXTURES_CONCATENATED}` placeholders.
+- **`qor/scripts/ab_aggregator.py`** (pure Python, no LLM coupling): brace-balanced JSON extractor (malformed-tolerant), per-(skill,variant) mean+stddev aggregation, ±5pp tie-threshold winner declaration, canonical markdown rendering.
+- **Delegation-table** row for `/qor-ab-run`; **`/qor-help` catalog** entry.
+
+### Changed
+- **Persona sweep** (S3 from Phase 39b): 5 decorative `<persona>` tags removed — `qor-status`, `qor-help`, `qor-repo-scaffold`, `qor-bootstrap`, `qor-document`.
+- **R4**: `qor-debug` line 108 `subagent_type: "general"` constraint now cross-references `doctrine-context-discipline.md` §4.
+- **R5**: `qor-document` line 251 split into two discrete sentences — Identity Activation stance (main thread) vs `qor-technical-writer` subagent pairing — citing doctrine §1.2/§1.3 to prevent mechanism conflation.
+
+### Changed
+- **R3 Identity Activation rewrite** for `/qor-audit` + `/qor-substantiate` is **conditional on A/B evidence**. Operator invokes `/qor-ab-run` to produce `docs/phase39-ab-results.md`; `test_identity_activation_matches_ab_winner_if_results_exist` auto-applies the rewrite rule when results declare `winner: "stance"` for a skill. Without evidence, current persona-named Identity Activation is retained.
+- **LOAD_BEARING_PENDING_EVIDENCE registry** (`tests/test_persona_sweep.py`): 19 skills documented as load-bearing by doctrine judgment, awaiting A/B evidence.
+
+## [0.29.0] - 2026-04-20
+
+Phase 39 Phase 1 seal: context-discipline doctrine + A/B corpus fixtures. Anthropic-SDK harness approach withdrawn in favor of Agent Team orchestration (Phase 39b).
+
+### Added
+- **`doctrine-context-discipline.md`**: codifies personas as context-prioritization scaffolds for edge-case determinations, evaluated by performance/accuracy/results. Five sections cover the three-mechanism distinction (frontmatter tag vs Identity Activation prose vs subagent invocation), persona evaluation protocol, stance directive discipline, subagent invocation rule (`general` by default; persona-typed requires evidence), and verification protocol requiring `<persona-evidence>` pointers for retained tags. `doctrine-governance-enforcement.md` §11 cross-references.
+- **A/B corpus fixtures**: 20 seeded defects at `tests/fixtures/ab_corpus/` spanning 10 `findings_categories` (2 per category; `coverage-gap` and `dependency-unjustified` omitted per plan). Each fixture carries `# SEEDED TEST DEFECT — NOT EXECUTABLE` header. MANIFEST.json uses `line_start`/`line_end` for multi-line defect ranges. 4 hand-authored Identity Activation variant files under `tests/fixtures/ab_corpus/variants/`. Consumed by the Phase 39b Agent Team A/B skill.
+- **Tests**: `tests/test_doctrine_context_discipline.py` (3 structural assertions).
+
+### Changed
+- Phase 39 Phase 2 scope narrowed: Anthropic-SDK harness (`ab_harness.py`, `ab_live_run.py`, optional `anthropic` dep) withdrawn. Phase 39b will ship `/qor-ab-run` skill that orchestrates the A/B cycle via parallel Task-tool subagents within Claude Code — no external API dependency, no credential management, aligned with the doctrine's "controlled context via subagents" principle.
+
+## [0.28.3] - 2026-04-24
+
+### Fixed
+- **Intent-lock HEAD-drift** (Phase 43): `qor/reliability/intent_lock.py` `verify()` now uses `git merge-base --is-ancestor` instead of strict HEAD equality. Captured HEAD must be reachable from current HEAD; current HEAD may be any forward descendant. Eliminates the re-capture-as-SOP anti-pattern observed in Phase 41 and Phase 42 substantiate where the implement commit between Step 5.5 capture and Step 4.6 verify always tripped `DRIFT: head`. Real anti-drift threats (history rewrites, hard resets, branch switches to divergent histories) still caught. See `docs/META_LEDGER.md` Entry #140 (Phase 43 seal).
+
 ## [0.28.2] - 2026-04-24
 
 ### Fixed
