@@ -10,6 +10,11 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.31.1] - 2026-04-24
+
+### Fixed
+- **Phase 41 regex regression** (Phase 44): `qor/scripts/ledger_hash.py` now accepts the standard SESSION SEAL convention `**Chain Hash (Merkle seal)**:` and `**Content Hash (session seal)**:` markup. The strict `**Field**` anchor introduced in Phase 41 silently skipped 7 ledger entries with parenthetical-suffix labels (entries #126, #129, #132, #133, #137, #140, #143). Verifier metric: pre-fix 104 OK / 39 skipped; post-fix 112 OK / 32 skipped. Anti-vacuous-green guard added to `tests/test_ledger_hash.py` asserting that every modern entry (≥ #116) with hash markup verifies, would have caught the original Phase 41 regression at audit time. See `docs/META_LEDGER.md` Entry #146 (Phase 44 seal).
+
 ## [0.31.0] - 2026-04-24
 
 Phase 41: ledger_hash verifier regex robustness. Resolves GitHub issue #13.

@@ -5210,6 +5210,92 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 *Session: SEALED* (Phase 41 feature substantiated)
 *Merkle seal: c8cbb19e...* (Phase 41 seal on top of Phase 43's cc60be96; Entries #141-#143 chained)
 
+---
+
+### Entry #144: GATE TRIBUNAL — Phase 44 Pass 1 — **PASS** (L1)
+
+**Timestamp**: 2026-04-24T23:10:00Z
+**Phase**: GATE
+**Author**: Judge
+**Risk Grade**: L1
+**Verdict**: PASS
+
+**Target**: `docs/plan-qor-phase44-regex-parenthetical-suffix.md`
+**Session**: `2026-04-24T1948-2cfc13`
+
+**Content Hash**: `dc8495c2caf3fd46a2a8f022f11c063842cb28ef0ccbc4c07bb33d297c25d48d`
+**Previous Hash**: `c8cbb19e1746e743c5faca910821c81ac53f395bddbc4b879b9abcbf67a19255`
+**Chain Hash**: `06801c29fa62661f40ce51226cba0db403d91be285388aaae6c84b77faad44e9`
+
+**Decision**: Phase 44 plan addresses real Phase 41 regression (8 SESSION SEAL / REMEDIATE PROPOSAL entries silently skipped by the strict `\*\*Field\*\*` anchor against the standard `\*\*Field (suffix)\*\*` markup convention). Three-regex relaxation adds optional parenthetical suffix `(?:\s*\([^)]+\))?` inside bold markers; preserves Phase 41's bold-anchor + bounded-span + two-form value protections. TDD coverage includes anti-vacuous-green guard against real ledger that would have caught the original regression. Branch base v0.31.0; bump('hotfix') → v0.31.1 cleanly. All six audit passes clear. SG-AdjacentState-A advisory: this regression is a fourth-instance member of the family (Phase 41 plan didn't enumerate all real-ledger field-label conventions); Phase 44's anti-vacuous-green guard provides structural countermeasure. Gate OPEN for `/qor-implement`.
+
+---
+
+### Entry #145: IMPLEMENTATION — Phase 44 (parenthetical-suffix on hash field labels)
+
+**Timestamp**: 2026-04-24T23:20:00Z
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L1
+
+**Session**: `2026-04-24T1948-2cfc13`
+**Plan**: `docs/plan-qor-phase44-regex-parenthetical-suffix.md` (Pass 1)
+**Audit**: entry #144 (PASS)
+
+**Files Modified**:
+- `qor/scripts/ledger_hash.py` — added `_FIELD_SUFFIX = r"(?:\s*\([^)]+\))?"` constant; spliced into all three hash regexes between the field name and closing bold markers. Restores chain-verification coverage for `**Chain Hash (Merkle seal)**:` / `**Content Hash (session seal)**:` markup that Phase 41's strict anchor silently skipped. Bold-anchor protection, bounded-span discipline, and inline/fenced value acceptance all preserved.
+- `tests/test_ledger_hash.py` — added 5 TDD tests: 3 synthetic (Chain/Content/Previous Hash with parenthetical suffix), 2 real-ledger anti-vacuous-green guards (every modern SESSION SEAL entry verifies; no silent skips for modern entries with hash markup). The original-plan test for REMEDIATE PROPOSAL #122 was dropped during implement: that entry legitimately has no hash markup at all (process-level proposal, not a sealed entry), so it's correctly excluded by the no-silent-skips test's hash-markup filter.
+
+**Content Hash**: `4a0e26796b5d7f79a95983ef37da81253180e73b679e41908ef08f9b6c6f2196`
+**Previous Hash**: `06801c29fa62661f40ce51226cba0db403d91be285388aaae6c84b77faad44e9`
+**Chain Hash**: `7201d838ff930177d4d9972ba5bd4c9257c6c9ce1d3395266e9b16370ce6ec62`
+
+**Verification metric**: pre-fix `verify` reported 104 OK / 39 skipped; post-fix reports 112 OK / 32 skipped. Net +8 entries restored to verification (the 7 seal entries originally identified plus this phase's own audit Entry #144). #122 remains correctly skipped (no hash markup by design).
+
+**Razor compliance**: `verify()` 40 lines (unchanged); `ledger_hash.py` 199 lines (was 196, +3 for `_FIELD_SUFFIX` constant + comment); nesting depth 3; no nested ternaries.
+
+**Intent lock**: captured against post-rebase HEAD.
+
+**Decision**: Phase 41 regression resolved. The Phase 44 anti-vacuous-green tests would have caught the original regression at audit time. Ready for `/qor-substantiate`.
+
+---
+
+### Entry #146: SESSION SEAL -- Phase 44 hotfix substantiated
+
+**Timestamp**: 2026-04-24T23:25:00Z
+**Phase**: SEAL (hotfix)
+**Author**: Judge
+**Verdict**: PASS (767 tests green, 1 skipped)
+
+**Target**: `docs/plan-qor-phase44-regex-parenthetical-suffix.md`
+**Change Class**: `hotfix`
+**Version**: `0.31.0 -> 0.31.1`
+**Tag**: `v0.31.1` (created at Step 9.5.5 post-commit; LOCAL ONLY pending PR merge per Phase 40 doctrine)
+
+**Content Hash (session seal)**: `68ee2a9eb638e8b4a0d058b87873c93977b857d92d947eb95d3727f8d034733a`
+**Previous Hash**: `7201d838ff930177d4d9972ba5bd4c9257c6c9ce1d3395266e9b16370ce6ec62`
+**Chain Hash (Merkle seal)**: `1e663a6c5cb1787afe12558fb57549649c7fe6c86b99962464689dee868244e8`
+
+**Scope**: Closes Phase 41 regression. Hash field labels now optionally accept a parenthetical suffix inside the bold markers (e.g., `**Chain Hash (Merkle seal)**:`). Restores chain-verification coverage for 7 ledger entries silently skipped since Phase 41. Anti-vacuous-green guard installed against the real ledger.
+
+**Reliability sweep**: intent-lock VERIFIED (post-implement-commit; ancestry fix from Phase 43 working as designed across third consecutive phase), skill-admission ADMITTED, gate-skill-matrix clean (29 skills, 112 handoffs, 0 broken).
+
+**Razor**: `verify()` 40 lines (unchanged); `qor/scripts/ledger_hash.py` 199 lines; nesting depth 3; no nested ternaries.
+
+**Verifier metric**: pre-fix 104 OK / 39 skipped; post-fix 112 OK / 32 skipped. Net +8 entries restored to verification.
+
+**SG-AdjacentState-A formalization**: this is the fourth instance of the family pattern (Phase 41 V1 coverage-gap, Phase 42 V1 coverage-gap, Phase 43 V1 specification-drift, Phase 44 root cause itself). The anti-vacuous-green real-ledger guard introduced in this phase provides the structural countermeasure that prevents recurrence beyond this fix's specific case. Provisional family ID promoted to formal: **SG-AdjacentState-A**.
+
+**Phase 33 release-doc currency**: hotfix exempt; CHANGELOG.md ## [0.31.1] entry voluntarily added for clarity (anti-vacuous-green test will surface any tag without CHANGELOG section anyway).
+
+**Decision**: Phase 44 hotfix sealed at v0.31.1. Tag LOCAL ONLY until PR merge per Phase 40 doctrine.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 44 hotfix substantiated)
+*Merkle seal: 1e663a6c...* (Phase 44 seal on top of Phase 41's c8cbb19e; Entries #144-#146 chained)
+
 
 
 
