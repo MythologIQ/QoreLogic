@@ -5258,6 +5258,44 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 
 **Decision**: Phase 41 regression resolved. The Phase 44 anti-vacuous-green tests would have caught the original regression at audit time. Ready for `/qor-substantiate`.
 
+---
+
+### Entry #146: SESSION SEAL -- Phase 44 hotfix substantiated
+
+**Timestamp**: 2026-04-24T23:25:00Z
+**Phase**: SEAL (hotfix)
+**Author**: Judge
+**Verdict**: PASS (767 tests green, 1 skipped)
+
+**Target**: `docs/plan-qor-phase44-regex-parenthetical-suffix.md`
+**Change Class**: `hotfix`
+**Version**: `0.31.0 -> 0.31.1`
+**Tag**: `v0.31.1` (created at Step 9.5.5 post-commit; LOCAL ONLY pending PR merge per Phase 40 doctrine)
+
+**Content Hash (session seal)**: `68ee2a9eb638e8b4a0d058b87873c93977b857d92d947eb95d3727f8d034733a`
+**Previous Hash**: `7201d838ff930177d4d9972ba5bd4c9257c6c9ce1d3395266e9b16370ce6ec62`
+**Chain Hash (Merkle seal)**: `1e663a6c5cb1787afe12558fb57549649c7fe6c86b99962464689dee868244e8`
+
+**Scope**: Closes Phase 41 regression. Hash field labels now optionally accept a parenthetical suffix inside the bold markers (e.g., `**Chain Hash (Merkle seal)**:`). Restores chain-verification coverage for 7 ledger entries silently skipped since Phase 41. Anti-vacuous-green guard installed against the real ledger.
+
+**Reliability sweep**: intent-lock VERIFIED (post-implement-commit; ancestry fix from Phase 43 working as designed across third consecutive phase), skill-admission ADMITTED, gate-skill-matrix clean (29 skills, 112 handoffs, 0 broken).
+
+**Razor**: `verify()` 40 lines (unchanged); `qor/scripts/ledger_hash.py` 199 lines; nesting depth 3; no nested ternaries.
+
+**Verifier metric**: pre-fix 104 OK / 39 skipped; post-fix 112 OK / 32 skipped. Net +8 entries restored to verification.
+
+**SG-AdjacentState-A formalization**: this is the fourth instance of the family pattern (Phase 41 V1 coverage-gap, Phase 42 V1 coverage-gap, Phase 43 V1 specification-drift, Phase 44 root cause itself). The anti-vacuous-green real-ledger guard introduced in this phase provides the structural countermeasure that prevents recurrence beyond this fix's specific case. Provisional family ID promoted to formal: **SG-AdjacentState-A**.
+
+**Phase 33 release-doc currency**: hotfix exempt; CHANGELOG.md ## [0.31.1] entry voluntarily added for clarity (anti-vacuous-green test will surface any tag without CHANGELOG section anyway).
+
+**Decision**: Phase 44 hotfix sealed at v0.31.1. Tag LOCAL ONLY until PR merge per Phase 40 doctrine.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 44 hotfix substantiated)
+*Merkle seal: 1e663a6c...* (Phase 44 seal on top of Phase 41's c8cbb19e; Entries #144-#146 chained)
+
 
 
 
