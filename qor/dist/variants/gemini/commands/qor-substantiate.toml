@@ -116,6 +116,8 @@ Read: Test files
 
 Template: `references/qor-substantiate-templates.md`.
 
+**Presence-only seal gate**: substantiation refuses to seal if any test added in the current phase is presence-only for the unit it claims to verify. Operator runs the acceptance question — "If the unit's behavior were silently broken but the artifact still existed, would this test fail?" — against each new test in the phase. Any "no" answer ABORTs seal. The operator amends the test to invoke the unit and assert against its output, then re-runs `/qor-substantiate`. Per `qor/references/doctrine-test-functionality.md` and SG-035 ("doctrine-content test unanchored").
+
 #### Visual Silence Verification (if frontend)
 ```
 Grep: "color:" in src/**/*.{css,tsx}

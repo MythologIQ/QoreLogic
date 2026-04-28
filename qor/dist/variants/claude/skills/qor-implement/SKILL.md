@@ -143,6 +143,8 @@ Template: `references/qor-implement-patterns.md`.
 
 **Constraint**: Define exactly ONE success condition that proves Reality matches Promise.
 
+**Test functionality, not presence**: the failing test MUST invoke the unit under test (function call, CLI subprocess, helper render, parser pass) and assert against its output. Tests that only check artifact existence (`assert path.exists()`, `assert <substring> in <file_text>`, `assert hasattr(...)`) do not satisfy TDD-Light. Acceptance question: "If the unit's behavior were silently broken but the artifact still existed, would this test fail?" If no, the test is presence-only and must be rewritten before implementation begins. Per `qor/references/doctrine-test-functionality.md`.
+
 ### Step 5.5: Intent Lock Capture (Phase 17 wiring)
 
 Capture a fingerprint of the implementer's intent (plan + PASS audit + HEAD commit) before writing any implementation code. Interdicts drift during implementation.
@@ -188,6 +190,7 @@ For each file modified/created:
   - Count nesting levels
   - Check for nested ternaries
   - Verify naming conventions
+  - For every newly-added test in this file, confirm the test body invokes the unit under test (function/method/CLI) and the assertion compares against the call's return value or observable side-effect. Bare `assert <substring> in <file_text>` for the unit's behavior is a presence-only test; flag and rewrite as a functionality test before declaring completion. Per `qor/references/doctrine-test-functionality.md`.
 ```
 
 If ANY violation found:
