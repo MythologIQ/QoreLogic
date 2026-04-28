@@ -224,6 +224,7 @@ Create plan markdown file with specific requirements:
 - Backwards compatibility concerns
 - Feature gating or release plans
 - Concluding errata (future considerations, next steps)
+- Tests that only assert presence (file existence, `<substring> in <file_text>`, function-defined) without invoking the unit and verifying its output. Per `qor/references/doctrine-test-functionality.md`.
 
 **DO include:**
 
@@ -240,6 +241,7 @@ Before finalizing, ensure:
 - [ ] Open questions are clearly flagged
 - [ ] No backwards compatibility concerns
 - [ ] No concluding errata sections
+- [ ] Each unit test description names the behavior it confirms (the unit's output for a given input), not the artifact it expects to find. Per `qor/references/doctrine-test-functionality.md`.
 
 ## Success Criteria
 
