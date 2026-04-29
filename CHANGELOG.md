@@ -10,6 +10,16 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-04-29
+
+_Built via [Qor-logic SDLC](https://github.com/MythologIQ-Labs-LLC/qor-logic)._
+
+Phase 49: tiered attribution-trailer policy + README badge currency enforcement. Closes G-3 and G-4 from `docs/compliance-re-evaluation-2026-04-29.md`.
+
+### Added
+- **Tiered attribution policy** (Phase 49): `qor/references/doctrine-attribution.md` gains a `## Tiered usage` section defining required attribution form per surface — seal commits use full canonical (3 lines); plan/audit/implement commits use compact `Co-Authored-By:` only; PR descriptions use full PR-body footer; CHANGELOG and GitHub releases use the italic attribution line once per version. New `qor.scripts.attribution.commit_trailer_compact()` helper for the compact form. `ATTRIBUTION.md` gains a `## Tiered usage (quickref)` table. Locked by `tests/test_attribution_tiered_usage.py` (9 tests) with proximity-anchored assertions paired with strip-and-fail negative-paths per Phase 46 doctrine. Cutoff: versions ≥ 0.36.0; older commits/CHANGELOG sections grandfathered.
+- **README badge currency enforcement** (Phase 49): new `qor/scripts/badge_currency.py` (~140 lines, pure functions) parses README literal-count badges (Tests, Ledger, Skills, Agents, Doctrines) and asserts them against current truth. CLI: `python -m qor.scripts.badge_currency`. Wired into `/qor-substantiate` Step 6.5: ABORTs seal on mismatch when `change_class ∈ {feature, breaking}`. Hotfix exempt. Locked by `tests/test_readme_badge_currency.py` (8 tests) and `tests/test_substantiate_badge_currency_wiring.py` (6 defensive tests). `qor/references/doctrine-governance-enforcement.md` gains a `### Badge currency` subsection under §8 Install Currency. Closes the systemic violation surfaced post-Phase-48 where Phases 45/46/48 each shipped with stale README badges.
+
 ## [0.35.0] - 2026-04-29
 
 Phase 48: install-time UX/discoverability + canonical CLI rename + `/qor-help` conversational evolution.
