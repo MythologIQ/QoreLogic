@@ -1,37 +1,66 @@
 ---
 name: qor-help
 description: >-
-  Quick reference that summarizes the purpose and usage of all QorLogic commands. Use when: (1) Need to understand available commands, (2) Unsure which command to use, or (3) Looking for command overview.
+  Conversational catalog and SDLC navigator. Use when: (1) Need a command overview, (2) Stuck mid-workflow and want a recommendation based on current session state, or (3) Have a specific question about which skill applies.
 metadata:
   category: development
   author: MythologIQ
   source:
     repository: https://github.com/MythologIQ/QorLogic
+
     path: qor/skills/meta/qor-help
 phase: help
 tone_aware: false
 gate_reads: ""
 gate_writes: ""
 ---
-# /qor-help - Command Summary
+# /qor-help — Conversational catalog and SDLC navigator
 
 <skill>
   <trigger>/qor-help</trigger>
   <phase>ANY</phase>
-  <output>Concise summary of available QorLogic commands</output>
+  <output>Catalog + ASCII SDLC flow chart, or a state-aware recommendation, or a routed answer to a free-form question</output>
 </skill>
 
-## Execution Protocol
+## Intro — How to use /qor-help
 
-### Step 1: Display Command Summary
+Three modes:
 
-Present the command table and decision tree below. No file reads required.
+- **bare**: `/qor-help` — show the full command catalog, the ASCII SDLC flow chart, and these usage instructions.
+- **stuck mode**: `/qor-help --stuck` — diagnose where the current session is in the SDLC by reading `.qor/gates/<sid>/*.json`, then recommend the next skill with one-paragraph rationale.
+- **question mode**: `/qor-help -- "<your question>"` — answer a free-form question by routing against the catalog and (when relevant) the current session state. The LLM running this skill is the routing engine; the catalog is the source of truth.
 
-### Step 2: Route User
+All three modes are read-only. /qor-help never invokes another skill — it recommends; you invoke.
 
-If the user asks about a specific command, direct them to invoke it. If unsure, recommend `/qor-status` first.
+## SDLC Flow
 
-## SDLC Chain (research → plan → audit → implement → substantiate → validate)
+```
+                           [ /qor-status ]   <- diagnose at any time
+                                  |
+                  +---------------+---------------+
+                  |                               |
+                  v                               v
+             (new work)                      (--stuck?)
+                  |                               |
+                  v                               v
+       /qor-research              read .qor/gates/<sid>/*.json
+                  |                infer phase, recommend next skill
+                  v
+       /qor-plan ----> /qor-audit ----> /qor-implement ----> /qor-substantiate
+                          |  ^                   |
+                          |  | VETO              v
+                          v  |                /qor-debug   (regression)
+                        amend                    |
+                          |                      v
+                          +--> /qor-refactor   /qor-organize
+                          +--> /qor-remediate (3+ same-signature VETOs)
+
+Bundles: /qor-deep-audit, /qor-onboard-codebase, /qor-process-review-cycle
+```
+
+## Catalog
+
+### SDLC Chain (research -> plan -> audit -> implement -> substantiate -> validate)
 
 | Command | Purpose | Typical When |
 |---|---|---|
@@ -42,10 +71,10 @@ If the user asks about a specific command, direct them to invoke it. If unsure, 
 | `/qor-refactor` | File-internal logic shape (Section 4). | When audit/implement detects bloat. |
 | `/qor-debug` | Root-cause diagnosis (cross-cutting). | Regression / hallucination / degradation. |
 | `/qor-substantiate` | Seal session, record Merkle evidence. | End of completed work session. |
-| `/qor-validate` | Verify chain integrity + criteria. | Before delivery; on repeat failure → `/qor-remediate`. |
+| `/qor-validate` | Verify chain integrity + criteria. | Before delivery; on repeat failure -> `/qor-remediate`. |
 | `/qor-remediate` | Process-level fix (NOT code). Absorbed the retired qor-course-correct skill. | Process Shadow Genome severity-sum threshold breach; `repeated_veto_pattern` event fired by `qor/scripts/veto_pattern.py` (>=2 consecutive sealed phases each needing >1 audit pass); capability-shortfall cascade. |
 
-## Memory & Meta
+### Memory & Meta
 
 | Command | Purpose | Typical When |
 |---|---|---|
@@ -60,14 +89,14 @@ If the user asks about a specific command, direct them to invoke it. If unsure, 
 | `/qor-repo-scaffold` | Create new repo from template. | First-time repo creation. |
 | `/qor-ab-run` | Run persona-vs-stance A/B measurement via parallel Task subagents. | Before Phase 39b persona sweep; when empirical evidence is needed for Identity Activation rewrites on stance-critical skills. |
 
-## Governance
+### Governance
 
 | Command | Purpose | Typical When |
 |---|---|---|
 | `/qor-shadow-process` | Append a process-failure event to PROCESS_SHADOW_GENOME. | Auto-invoked by override paths; rarely called manually. |
 | `/qor-governance-compliance` | Verify workspace governance compliance (root hygiene, sensitive file checks, structure integrity). | Periodic governance audit; before release. |
 
-## Migrated qore-* skills
+### Migrated qore-* skills
 
 These skills migrated from the qore-* prefix during the SSoT consolidation; names retain the "qor-" prefix per Phase 7 rename.
 
@@ -77,48 +106,72 @@ These skills migrated from the qore-* prefix during the SSoT consolidation; name
 | `/qor-meta-log-decision` | Append a structured decision record. | Major decision points; ADR-style logging. |
 | `/qor-meta-track-shadow` | Track shadow-genome-style failure patterns at the meta level. | When patterns of failure emerge across cycles. |
 
-## Workflow Bundles (multi-skill orchestration)
+### Workflow Bundles (multi-skill orchestration)
 
 | Bundle | Composition | Typical When |
 |---|---|---|
 | `/qor-deep-audit` | recon (3 phases) + remediate (3 phases) — large, decomposed | Pre-release readiness, absorbing a codebase, comprehensive tech-debt inventory. |
-| `/qor-deep-audit-recon` | research subagents → synthesize RESEARCH_BRIEF → 3× verification | Investigation only; ends at brief. |
-| `/qor-deep-audit-remediate` | plan → implement → validate (consumes RESEARCH_BRIEF) | Action half; after recon brief is approved. |
-| `/qor-onboard-codebase` | research → organize → audit → plan (4 phases, 3 checkpoints) | Inheriting / merging an external codebase. |
-| `/qor-process-review-cycle` | shadow-sweep → remediate → audit (3 phases, 2 checkpoints) | Periodic process health check (weekly/monthly/post-incident). |
+| `/qor-deep-audit-recon` | research subagents -> synthesize RESEARCH_BRIEF -> 3x verification | Investigation only; ends at brief. |
+| `/qor-deep-audit-remediate` | plan -> implement -> validate (consumes RESEARCH_BRIEF) | Action half; after recon brief is approved. |
+| `/qor-onboard-codebase` | research -> organize -> audit -> plan (4 phases, 3 checkpoints) | Inheriting / merging an external codebase. |
+| `/qor-process-review-cycle` | shadow-sweep -> remediate -> audit (3 phases, 2 checkpoints) | Periodic process health check (weekly/monthly/post-incident). |
 
 Bundles honor `qor/gates/workflow-bundles.md` (checkpoints, budgets, decomposition) and `qor/references/doctrine-token-efficiency.md`.
 
-## Quick Decision Tree
+## Mode: --stuck
 
-```
-New workspace?              → /qor-bootstrap
-New feature?                → /qor-research → /qor-plan → /qor-audit → /qor-implement
-Check state?                → /qor-status
-Output too technical/plain? → /qor-tone technical|standard|plain (session-sticky)
-Refactor needed?            → /qor-refactor (file-internal) or /qor-organize (project-level)
-Bug / regression?           → /qor-debug
-Done with session?          → /qor-substantiate
-Process drift?              → /qor-process-review-cycle
-Onboarding a codebase?      → /qor-onboard-codebase
-Pre-release deep audit?     → /qor-deep-audit (or recon-only first)
-Repeat process failures?    → /qor-remediate
-```
+State-aware recommendation. Read-only.
+
+Protocol:
+
+1. Resolve session_id from `.qor/session/current` (read the file). If absent, recommend `/qor-status` and stop.
+2. Glob `.qor/gates/<session_id>/*.json` and read each artifact.
+3. Determine the highest-rank artifact present. Rank order: `research` < `plan` < `audit` < `implement` < `substantiate`.
+4. If `audit.json` present, read its `verdict` field (PASS or VETO) and `findings_categories`.
+5. Map state to recommendation:
+   - No artifacts -> `/qor-research` (or `/qor-plan` if research was done out-of-gate; ask the operator).
+   - `plan.json` only -> `/qor-audit`.
+   - `audit.json` verdict=PASS -> `/qor-implement`.
+   - `audit.json` verdict=VETO -> Governor amends the plan per `findings_categories`. Cite the required next action from `qor/references/doctrine-audit-report-language.md` per category.
+   - `implement.json` present -> `/qor-substantiate`.
+   - `substantiate.json` present -> session sealed; recommend a fresh `/qor-plan` or `/qor-research` for the next phase.
+6. Emit a one-paragraph recommendation: state observed, recommended skill, rationale, the exact slash-command to invoke.
+
+No file writes. Routing is read-only inference.
+
+## Mode: -- "question"
+
+Free-form routing. Read-only.
+
+Protocol:
+
+1. Capture the operator's question text (everything after `-- `).
+2. Optionally perform the --stuck state-read for context.
+3. Use the catalog above plus current state to identify the 1-3 most relevant skills.
+4. Answer with: which skill(s) apply, why, the exact slash-command to invoke, what the operator should expect to see.
+5. If the question maps to no skill (e.g., asking about external tooling), say so plainly and suggest the closest fit.
+
+The LLM running this skill is the routing engine. The catalog is the source of truth — never invent skills. When the question is ambiguous, ask one clarifying question before recommending.
 
 ## Constraints
 
-- **NEVER** execute other skills from within qor-help (display only)
-- **ALWAYS** recommend /qor-status when user is uncertain
+- **NEVER** execute other skills from within qor-help (recommend, never invoke)
+- **NEVER** write files
+- **ALWAYS** recommend `/qor-status` when the operator's state is unclear and --stuck cannot resolve it (e.g., no `.qor/` directory)
+- **ALWAYS** cite the catalog as the source of truth for question-mode answers; do not invent skills
 
 ## Success Criteria
 
-- [ ] Command summary displayed
-- [ ] User directed to appropriate next skill
+- [ ] Bare invocation displays intro + ASCII SDLC flow chart + catalog
+- [ ] --stuck mode reads gate artifacts and emits a recommendation
+- [ ] question mode routes the question to 1-3 catalog skills with rationale
+- [ ] No skill execution from within /qor-help
 
 ## Integration with S.H.I.E.L.D.
 
 This skill implements:
 
-- **Lifecycle Navigation**: Entry point for discovering available commands
-- **Zero-Read Design**: No file reads required, pure reference output
-- **Governor Persona**: Routing guidance without execution
+- **Lifecycle Navigation**: Entry point for discovering available commands and routing intent.
+- **State-aware Recommendation**: --stuck mode reads `.qor/gates/<sid>/*.json` to infer SDLC position.
+- **Question Routing**: question mode answers free-form operator questions against the catalog.
+- **Read-only Governor Persona**: routing guidance without execution.

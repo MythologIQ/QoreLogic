@@ -72,7 +72,7 @@ Read: .failsafe/governance/AUDIT_REPORT.md
 
 **INTERDICTION**: If no PASS verdict exists:
 
-<!-- qor:fail-fast-only reason="PASS verdict is produced by /qor-audit, not by qorlogic seed; cannot auto-heal" -->
+<!-- qor:fail-fast-only reason="PASS verdict is produced by /qor-audit, not by qor-logic seed; cannot auto-heal" -->
 Abort with "Cannot substantiate without PASS verdict. Run /qor-audit first."
 
 **INTERDICTION**: If no implementation exists:

@@ -1,11 +1,10 @@
 # AUDIT REPORT
 
-**Tribunal Date**: 2026-04-28T22:45:00Z
-**Target**: `docs/plan-qor-phase47-seal-entry-check.md` (Pass 3)
+**Tribunal Date**: 2026-04-29T00:00:00Z
+**Target**: `docs/plan-qor-phase48-script-discoverability-and-rename.md` (Pass 1)
 **Risk Grade**: L1
 **Auditor**: The QorLogic Judge
-**Mode**: solo (codex-plugin not available; capability_shortfall logged)
-**Session**: phase-47
+**Mode**: solo
 
 ---
 
@@ -15,19 +14,20 @@
 
 ### Executive Summary
 
-Pass 3 resolves the single Pass 2 V-1 ground (broken bash plan-path derivation) with a one-line fix. The new bash `PLAN_PATH=$(python -c "from qor.scripts.governance_helpers import current_phase_plan_path; print(current_phase_plan_path())")` calls the grounded helper at [qor/scripts/governance_helpers.py:57-67](qor/scripts/governance_helpers.py:57) — the function reads the git branch name via `git symbolic-ref`, extracts NN from `phase/NN-slug`, and globs `docs/plan-qor-phase{NN}*.md`. The Python source inside `python -c` is hardcoded (literal import + call); no shell variable is interpolated into the Python literal, so Pass 1 V-3's injection vector stays closed. The next line `--plan "$PLAN_PATH"` interpolates the captured path as a double-quoted argv element — safe under POSIX shell semantics for paths with spaces. Pass 3 amendment scope was bounded to a single bash block; Phase 1 helper, Phase 1 tests, Phase 2 step-numbering placement, and Phase 2 defensive countermeasure tests remain unchanged.
+Phase 48 ships three coupled UX/install/discovery improvements: (A) convert 3 path-form `python qor/scripts/<name>.py` skill invocations to `python -m qor.scripts.<name>` and lock the rule for both `qor/scripts/` and `qor/reliability/`; (B) introduce `qor-logic` as the canonical CLI entry point alongside `qorlogic` (alias retained) and update every operator-facing surface; (C) evolve `/qor-help` from static catalog into a three-mode skill (bare / `--stuck` / `-- "<question>"`) with an ASCII SDLC flow chart. All eight audit passes clear.
 
 ### Audit Results
 
 #### Security Pass
 **Result**: PASS
-No auth surface. The helper reads files (META_LEDGER, plan path) and computes hashes. No credentials.
+No auth, secrets, or credential surfaces touched. CLI rename is naming only; alias keeps prior behavior. `/qor-help --stuck` reads existing gate artifacts (already on disk under `.qor/gates/<sid>/`) read-only. No new subprocess shell-form invocations.
 
 #### OWASP Top 10 Pass
 **Result**: PASS
-- A03 Injection: hardcoded `python -c` source (no `$variable` interpolation into Python literal); `--plan "$PLAN_PATH"` is argv-form with proper double-quoting; argparse parses argv safely. **All three Pass-1/2 injection vectors closed.**
-- A04 Insecure Design: helper aborts substantiate on non-zero exit (no fail-open).
-- A05/A08: N/A.
+- A03 Injection: `/qor-help -- "<question>"` does not eval the question string; the LLM running the skill consumes it as routing input. No subprocess interpolation.
+- A04 Insecure Design: alias does not fail-open; both entry points dispatch to the same `qor.cli:main`.
+- A05 Security Misconfiguration: no secrets, no temp files.
+- A08 Software/Data Integrity: no deserialization changes.
 
 #### Ghost UI Pass
 **Result**: PASS
@@ -36,99 +36,101 @@ N/A.
 #### Section 4 Razor Pass
 **Result**: PASS
 
-| Check              | Limit | Plan Proposes                                  | Status |
-| ------------------ | ----- | ---------------------------------------------- | ------ |
-| Max function lines | 40    | `check()` projected ~22                        | OK     |
-| Max file lines     | 250   | `seal_entry_check.py` projected ~110           | OK     |
-| Max nesting depth  | 3     | Composition of two internal helpers; depth ≤2 | OK     |
-| Nested ternaries   | 0     | Zero                                           | OK     |
+| Check              | Limit | Plan Proposes                                                       | Status |
+| ------------------ | ----- | ------------------------------------------------------------------- | ------ |
+| Max function lines | 40    | n/a (markdown + small CLI prose edits)                              | OK     |
+| Max file lines     | 250   | `/qor-help` SKILL.md grows from ~125 to ~210 (under limit)          | OK     |
+| Max nesting depth  | 3     | n/a                                                                 | OK     |
+| Nested ternaries   | 0     | n/a                                                                 | OK     |
 
-#### Test Functionality Pass (Phase 46's pass, self-applied)
-**Result**: PASS
+Specific check on `/qor-help` rewrite size: existing skill is 125 lines; adding Intro (~10 lines), SDLC Flow ASCII chart fence (~25 lines), Mode: --stuck protocol (~25 lines), Mode: -- "question" protocol (~15 lines), removing Quick Decision Tree (~13 lines saved) → projected ~187 lines. Under the 250-line cap.
 
-Phase 1 tests (unchanged from Pass 2) — every test invokes the unit and asserts on returned `SealEntryResult`:
+#### Test Functionality Pass (Phase 46 doctrine)
+
+For every described test in Phase 48's plan:
 
 | Test description | Invokes unit? | Asserts on output? | Verdict |
 | ---------------- | ------------- | ------------------ | ------- |
-| `test_check_passes_when_latest_entry_is_seal_for_current_phase` | Yes | Yes | PASS |
-| `test_check_fails_when_latest_entry_is_not_a_seal` | Yes | Yes | PASS |
-| `test_check_fails_when_seal_phase_number_mismatches` | Yes | Yes | PASS |
-| `test_check_fails_when_chain_hash_internally_inconsistent` | Yes | Yes | PASS |
-| `test_check_fails_when_full_chain_verification_fails` | Yes | Yes | PASS |
-| `test_check_replays_phase_46_original_gap` (meta-test) | Yes | Yes | PASS |
-| `test_cli_resolves_phase_from_plan_path_argv` | Yes — subprocess | Yes — exit + stdout | PASS |
-| `test_cli_exits_zero_on_pass_and_one_on_fail` | Yes — subprocess | Yes | PASS |
-| `test_cli_rejects_path_with_shell_metacharacters_safely` | Yes — adversarial paths | Yes — no injection | PASS |
+| `test_no_path_form_qor_scripts_invocations` | Yes — applies regex over skill bodies | Yes — counts/reports offenders | PASS |
+| `test_no_path_form_qor_reliability_invocations` | Yes — same shape | Yes | PASS |
+| `test_pyproject_declares_both_qor_logic_and_qorlogic_entry_points` | Yes — `tomllib.load`, dict membership check | Yes | PASS |
+| `test_cli_main_version_string_uses_qor_logic` | Yes — `qor.cli.main(["--version"])` invocation, capsys capture | Yes — regex on stdout | PASS |
+| `test_cli_help_text_uses_qor_logic_program_name` | Yes — `qor.cli.main(["--help"])` invocation, capsys capture | Yes — substring on captured help | PASS |
+| `test_doctrine_governance_section_138_covers_both_scripts_and_reliability` | Yes — proximity-anchor regex on §138 | Yes — strip-and-fail negative-path paired | PASS |
+| `test_install_drift_check_emits_qor_logic_fix_string` | Yes — invokes `install_drift_check.main()`, capsys | Yes — substring on captured fix line | PASS |
+| `test_skill_prose_uses_qor_logic_for_cli_invocations` | Yes — regex with negative lookbehind on skill bodies | Yes — counts/reports offenders | PASS |
+| `test_qor_help_has_intro_section` | Yes — proximity-anchor; strip-and-fail | Yes | PASS |
+| `test_qor_help_has_ascii_sdlc_flow_chart` | Yes — fenced-block extraction + `body.encode('ascii')` round-trip + positional substring order | Yes — strip-and-fail | PASS |
+| `test_qor_help_has_stuck_mode_protocol` | Yes — proximity-anchor; strip-and-fail | Yes | PASS |
+| `test_qor_help_has_question_mode_protocol` | Yes — proximity-anchor; strip-and-fail | Yes | PASS |
+| `test_qor_help_constraint_no_execute_preserved` | Yes — proximity-anchor on Constraints; strip-and-fail | Yes | PASS |
 
-Phase 2 defensive tests (unchanged from Pass 2): proximity-anchor + strip-and-fail pairs lock the V-1/V-2/V-3 resolutions in place against future drift.
+Self-application of Phase 46's Test Functionality Pass clears. Every test invokes the unit (the regex helper, the parsed config, the imported CLI's `main()`, the file-content extraction) and compares the result against an expected value. No presence-only tests in the plan.
 
 #### Dependency Pass
 **Result**: PASS
-No new external dependencies. Helper imports `qor.scripts.ledger_hash`, `qor.scripts.governance_helpers`, and stdlib.
+No new dependencies. `tomllib` is stdlib (Python 3.11+, already required).
 
 #### Macro-Level Architecture Pass
 **Result**: PASS
-- Pure-function helper under existing `qor/reliability/` topology.
-- Single source of truth for plan-path derivation: `governance_helpers.current_phase_plan_path()` (already used by Phase 13 wiring elsewhere).
-- No cyclic deps, no layering inversions.
+- Alias entry point is one line in `[project.scripts]`; no module restructure.
+- `/qor-help` rewrite stays inside one SKILL.md; no new module boundaries.
+- Path-form fixes are single-line edits in three skills.
 
 #### Infrastructure Alignment Pass
-**Result**: PASS
 
-| Cited claim | Verification |
+| Cited path / symbol | Verification |
 |---|---|
-| `qor/scripts/governance_helpers.py` defines `current_phase_plan_path()` at lines 57-67 | confirmed |
-| Function reads git branch name via `git symbolic-ref` and globs `docs/plan-qor-phase{NN}*.md` | confirmed by reading source |
-| `qor.scripts.governance_helpers` importable as a module (no `sys.path.insert` needed) | confirmed (other gates use `python -m qor.reliability.X` which depends on the same package layout) |
-| Pass 3 bash one-liner produces a valid plan path on the current phase branch | logically grounded — `phase/47-seal-entry-check` matches the regex; glob matches `docs/plan-qor-phase47-seal-entry-check.md` |
-| `--plan "$PLAN_PATH"` is argv-form, double-quoted | confirmed in plan code block |
-| `python -c "..."` source contains no shell variables | confirmed (literal import statement only) |
-| Step 7.7 sits between Step 7.6 (line 290) and Step 8 (line 307) of `qor-substantiate/SKILL.md` | confirmed |
+| `pyproject.toml` `[project.scripts] qorlogic = "qor.cli:main"` | exists (line ~32) |
+| `qor/cli.py` `prog="qorlogic"` | exists (line 165) |
+| `qor/cli.py` `--version` action with `f"qorlogic {__version__}"` | exists (line 168) |
+| `qor/install.py` `qorlogic compile` / `qorlogic install` print strings | exists (lines 86, 147) |
+| `qor/skills/meta/qor-help/SKILL.md` | exists; current 125 lines, contains tables + Quick Decision Tree |
+| `qor/skills/governance/qor-shadow-process/SKILL.md:89,101` | exist; path-form invocations present |
+| `qor/skills/governance/qor-process-review-cycle/SKILL.md:57` | exists; path-form invocation present |
+| `qor/references/doctrine-governance-enforcement.md:138` | exists; rule currently mentions only `qor/reliability/` |
+| `qor/references/doctrine-governance-enforcement.md:92` | exists; prose example uses path-form `python qor/scripts/session.py new` |
+| `tests/test_installed_import_paths.py` | exists; `test_no_hyphen_named_reliability_invocations` and `test_qor_scripts_modules_importable` already present |
+| `qor/scripts/check_shadow_threshold.py`, `create_shadow_issue.py` | exist; both have `if __name__ == "__main__"` guards (verified via grep earlier) |
+| `qor/scripts/install_drift_check.py:72` | exists; print contains `qorlogic install` |
+| `.qor/gates/<sid>/*.json` artifacts referenced by `--stuck` mode | shipped per Phase 11D wiring; `gate_chain.write_gate_artifact` is canonical writer |
+| `qor.cli:main` callable | exists; argparse-based dispatcher |
+| `tomllib` stdlib import | available in Python 3.11+ (project requires-python = ">=3.11") |
 
-All claims verified.
+PASS.
 
 #### Orphan Detection
 **Result**: PASS
-- New module `qor.reliability.seal_entry_check` imported by Phase 1 tests and Phase 2 wiring.
-- New tests auto-discovered by pytest.
+- New tests live under `tests/`; auto-collected by pytest.
+- Doctrine edits modify existing referenced files.
+- `/qor-help` rewrite stays in place; no new file.
 
-### Anti-vacuous-green guard
+### Backwards-Compat Risk
 
-Pass 3's defensive tests (carried forward from Pass 2) include:
-- `test_step_7_7_runs_after_step_7_seal_write` — positional regression guard against re-locating the gate to a pre-Step-7 step
-- `test_step_7_7_does_not_use_python_c_shell_interpolation` — regex regression guard against re-introducing the V-3 injection vector
-- `test_step_7_7_does_not_reference_undefined_merkle_seal_variable` — regression guard against re-adding `$MERKLE_SEAL` or `--merkle`
+The `qorlogic` alias is retained. Operators with shell history, scripts, CI configs, or muscle memory referencing `qorlogic` continue to work. Filesystem state paths `.qorlogic/config.json` and `.qorlogic-installed.json` unchanged — no on-disk migration required. Risk: minimal.
 
-These tests would have caught Pass 1's V-1, V-2, V-3 if they had existed. They now lock the Pass 2/3 resolutions in place.
+### `/qor-help` mode-routing reliability
+
+The plan correctly notes that mode routing is prose-only (LLM follows the protocol; no Python parser). Boundary clause acknowledges a future phase may promote routing to a helper if prose-only proves unreliable. The locked tests cover what the skill body MUST contain (intro, ASCII chart with positional substring order check, stuck-mode protocol, question-mode protocol, no-execute constraint preserved). They do not assert against runtime routing accuracy — that's an evaluation concern outside the gate's scope.
 
 ### Sequencing
 
-Branch `phase/47-seal-entry-check` cut from `phase/46-test-functionality-doctrine`. Highest tag is `v0.33.0` (Phase 46 seal). `bump_version('feature')` will compute `v0.34.0` cleanly; downgrade guard clears.
+Branch `phase/48-script-discoverability-and-rename` cut from `origin/main` at v0.34.0 (post Phase 46 + 47 merges). `bump_version('feature')` → v0.35.0; downgrade guard clears.
 
 ### Violations Found
 
 None.
 
-### Process Pattern Advisory
+## Process Pattern Advisory
 
 <!-- qor:veto-pattern-advisory -->
 
-Phase 47 took three audit passes to reach PASS — Pass 1 VETO (3 wiring grounds: V-1 step placement, V-2 undefined `$MERKLE_SEAL`, V-3 shell injection); Pass 2 VETO (1 wiring ground: bash plan-path derivation broken). The plan's pure-function helper design (Phase 1) was sound on first attempt; the wiring slice (Phase 2 bash glue between helper and skill step) was the recurring failure point. SG-AdjacentState-A family eighth instance (Pass 2 VETO) was recursive — Phase 47 was *designed* to fix this exact family pattern and exhibited it in its own bash. Pass 3 closes both the technical defect and the meta-irony: the structural countermeasure now has working wiring grounded in the existing `current_phase_plan_path()` helper. Implementation should proceed cleanly. Note: the Pass 1 audit's directive ("argv-form `--plan <path>` and resolve phase metadata internally") was specific about API shape but underspecified about *how the bash populates argv*. Pass 2's improvised `xargs` glob and Pass 3's `python -c` one-liner are both attempts at the same wiring slice. The SG-pattern signal here: audit directives that specify "use X" without specifying "how to obtain X" leave a wiring slip surface. Future audits should anticipate this and direct toward the grounded helper.
+No repeated-VETO pattern detected.
 
-### Documentation Drift
+## Documentation Drift
 
 <!-- qor:drift-section -->
-(clean — no doctrine contradicted by the plan's intent or wiring.)
-
-### Verdict Hash
-
-SHA256(plan under audit) = `e6097e04e484f6b020314ea2d50f91b05ddea90401aec0350317bed2cef9d15a`
-
-### Mandated Next Action
-
-Per `qor/gates/chain.md`:
-
-- Plan PASSED audit. Gate OPEN for `/qor-implement`.
+(clean — `terms_introduced` for canonical CLI, stuck mode, question mode each map to a home file. Boundaries enumerate filesystem-state preservation, prose-only mode routing, and the Gemini variant exclusion.)
 
 ---
 _This verdict is binding._

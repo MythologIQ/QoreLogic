@@ -11,7 +11,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 STALE_PATH = ".claude/commands/scripts/validate-ledger.py"
-CANONICAL_MARKERS = ("qor/scripts/ledger_hash.py", "qor.scripts.ledger_hash", "qorlogic verify-ledger")
+CANONICAL_MARKERS = ("qor/scripts/ledger_hash.py", "qor.scripts.ledger_hash", "qor-logic verify-ledger")
 
 SOURCE_SKILL = REPO_ROOT / "qor" / "skills" / "governance" / "qor-validate" / "SKILL.md"
 VARIANT_DIST_SKILLS = list(

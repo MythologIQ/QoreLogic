@@ -98,10 +98,10 @@ Read: docs/CONCEPT.md
 **INTERDICTION**: If `docs/ARCHITECTURE_PLAN.md` does not exist:
 
 <!-- qor:recovery-prompt -->
-Ask the user: "docs/ARCHITECTURE_PLAN.md not found. Should I correct it by running 'qorlogic seed' or pause? [Y/n]"
+Ask the user: "docs/ARCHITECTURE_PLAN.md not found. Should I correct it by running 'qor-logic seed' or pause? [Y/n]"
 
-- On Y or empty: run `qorlogic seed` (idempotent), then continue.
-- On N: abort with "No blueprint found. Governor must complete ENCODE phase first. Run `qorlogic seed` to scaffold ARCHITECTURE_PLAN.md."
+- On Y or empty: run `qor-logic seed` (idempotent), then continue.
+- On N: abort with "No blueprint found. Governor must complete ENCODE phase first. Run `qor-logic seed` to scaffold ARCHITECTURE_PLAN.md."
 
 ### Step 3: Adversarial Audit
 

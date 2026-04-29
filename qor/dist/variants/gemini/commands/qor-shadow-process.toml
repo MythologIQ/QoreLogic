@@ -75,7 +75,7 @@ Validates against `qor/gates/schema/shadow_event.schema.json`, computes `id` = S
 ### Threshold check (periodic or post-skill-run)
 
 ```bash
-python qor/scripts/check_shadow_threshold.py
+python -m qor.scripts.check_shadow_threshold
 ```
 
 - Applies stale expiry: severities 1–2 unaddressed > 90 days → `addressed=true`, `addressed_reason="stale"`
@@ -87,7 +87,7 @@ Exit 10 is the `/qor-remediate` trigger signal. Skills consuming this script sho
 ### Issue creation (manual or via /qor-remediate)
 
 ```bash
-python qor/scripts/create_shadow_issue.py
+python -m qor.scripts.create_shadow_issue
 ```
 
 - Validates `gh auth status`

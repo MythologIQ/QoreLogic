@@ -46,7 +46,7 @@ to add the missing section, then re-check.`
 1. **Session override** -- a `/qor-tone <tier>` directive in the current
    agent-session window sets the tier for the remainder of the session.
 2. **Workspace config** -- `.qorlogic/config.json`'s `tone` field. Written
-   by `qorlogic init --tone <tier>`.
+   by `qor-logic init --tone <tier>`.
 3. **Default** -- `"technical"`.
 
 ## How skills read the tone value
@@ -78,7 +78,7 @@ artifacts MUST declare `tone_aware: false` in frontmatter. Enforced by
 
 - `tests/test_tone_resolution.py` -- resolution order + doctrine presence
   check.
-- `tests/test_tone_config_persistence.py` -- `qorlogic init --tone` writes
+- `tests/test_tone_config_persistence.py` -- `qor-logic init --tone` writes
   the config field.
 - `tests/test_tone_skill_frontmatter.py` -- every skill declares
   `tone_aware`; tone-aware skills have rendering sections; evidentiary

@@ -69,7 +69,7 @@ def main() -> int:
     for d in drift:
         print(f"  - {d}")
     print("")
-    print(f"Fix: qorlogic install --host {args.host} --scope {args.scope}")
+    print(f"Fix: qor-logic install --host {args.host} --scope {args.scope}")
     return 1
 
 

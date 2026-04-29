@@ -1,6 +1,6 @@
 # Qor-logic Policies
 
-The policy layer expresses invariants as Cedar-flavored declarative policies and standards-framework mappings. Policies are evaluated by the CLI (`qorlogic policy check <request.json>`) and cited by doctrines at audit time.
+The policy layer expresses invariants as Cedar-flavored declarative policies and standards-framework mappings. Policies are evaluated by the CLI (`qor-logic policy check <request.json>`) and cited by doctrines at audit time.
 
 ## Policy files
 
@@ -33,7 +33,7 @@ See [doctrine-owasp-governance](../qor/references/doctrine-owasp-governance.md) 
 
 ### NIST SP 800-218A (SSDF)
 
-See [doctrine-nist-ssdf-alignment](../qor/references/doctrine-nist-ssdf-alignment.md) for the full practice-tag mapping. Meta Ledger entries carry practice tags; `qorlogic compliance report` emits a coverage report against the SSDF practices.
+See [doctrine-nist-ssdf-alignment](../qor/references/doctrine-nist-ssdf-alignment.md) for the full practice-tag mapping. Meta Ledger entries carry practice tags; `qor-logic compliance report` emits a coverage report against the SSDF practices.
 
 ## Change class contract
 
@@ -75,6 +75,6 @@ See [change_class](../qor/references/glossary.md) for the version impact a polic
 
 - [architecture.md](architecture.md) -- where policies sit in the layer stack
 - [lifecycle.md](lifecycle.md) -- when policies are evaluated
-- [operations.md](operations.md) -- `qorlogic policy check` usage
+- [operations.md](operations.md) -- `qor-logic policy check` usage
 - [../qor/references/doctrine-owasp-governance.md](../qor/references/doctrine-owasp-governance.md)
 - [../qor/references/doctrine-nist-ssdf-alignment.md](../qor/references/doctrine-nist-ssdf-alignment.md)

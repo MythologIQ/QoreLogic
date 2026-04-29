@@ -5,7 +5,7 @@ files already present are never overwritten. Missing parent directories are
 created. `.gitignore` gets a single bounded section appended (never duplicated
 on re-seed).
 
-Callable from the ``qorlogic seed`` CLI subcommand and from any Python caller
+Callable from the ``qor-logic seed`` CLI subcommand and from any Python caller
 that needs the same scaffold.
 """
 from __future__ import annotations

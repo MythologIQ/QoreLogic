@@ -47,7 +47,7 @@ The selected tier is sticky for the remainder of the current agent-session windo
 
 ### Step 3: Persist (optional)
 
-If the operator wants the preference to outlive the session, they run `qorlogic init --tone <tier>` to persist into `.qorlogic/config.json`. The CLI flag writes the config; it does not set the current session tier.
+If the operator wants the preference to outlive the session, they run `qor-logic init --tone <tier>` to persist into `.qorlogic/config.json`. The CLI flag writes the config; it does not set the current session tier.
 
 ### Step 4: Report
 
@@ -67,11 +67,11 @@ These artifacts have evidentiary weight and stay technical-only for integrity.
 ## Constraints
 
 - **NEVER** apply the tier to evidentiary or hash-chained content.
-- **NEVER** persist the tier to `.qorlogic/config.json` from this skill; that requires explicit `qorlogic init --tone <tier>` invocation.
+- **NEVER** persist the tier to `.qorlogic/config.json` from this skill; that requires explicit `qor-logic init --tone <tier>` invocation.
 - **ALWAYS** treat invalid tier arguments as user errors that leave the current tier unchanged.
 
 ## Integration with QorLogic
 
-- Session-level tier selector complementary to the CLI-level `qorlogic init --tone` persistence.
+- Session-level tier selector complementary to the CLI-level `qor-logic init --tone` persistence.
 - Tone-aware skills read the active tier via `qor.tone.resolve_tone()` in Python, or by checking session state in their own rendering preambles.
 - Tier selection is orthogonal to the `autonomy` classification: an autonomous skill's emergency surface can still render in the selected tier.

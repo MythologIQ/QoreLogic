@@ -92,10 +92,10 @@ Detect whether the operator's locally installed skills differ from the repo sour
 
 ```bash
 python -m qor.scripts.install_drift_check --host claude --scope repo || \
-  echo "WARNING: Local skill install differs from repo source. Consider: qorlogic install --host claude --scope repo"
+  echo "WARNING: Local skill install differs from repo source. Consider: qor-logic install --host claude --scope repo"
 ```
 
-Fix on drift: `qorlogic install --host <host> --scope <scope>` regenerates the installed copy from source. See `qor/references/doctrine-governance-enforcement.md` §8 Install Currency for the full contract.
+Fix on drift: `qor-logic install --host <host> --scope <scope>` regenerates the installed copy from source. See `qor/references/doctrine-governance-enforcement.md` §8 Install Currency for the full contract.
 
 ### Step 0.5: Phase branch creation (Phase 13 wiring)
 

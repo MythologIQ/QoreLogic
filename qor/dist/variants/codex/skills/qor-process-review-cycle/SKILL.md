@@ -54,7 +54,7 @@ Run the threshold checker. This applies stale expiry (sev 1-2 only after 90 days
 If the threshold is breached, `.qor/remediate-pending` exists with aggregated event ids. If not, the sweep summary still shows recent activity.
 
 ```bash
-python qor/scripts/check_shadow_threshold.py
+python -m qor.scripts.check_shadow_threshold
 ```
 
 **CHECKPOINT — after-shadow-sweep**: Surface (a) total unaddressed severity, (b) breached/under threshold, (c) event-type distribution, (d) whether `.qor/remediate-pending` exists. Prompt: continue to remediate / scope-down (focus on subset) / stop with summary.

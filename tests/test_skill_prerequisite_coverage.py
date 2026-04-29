@@ -104,7 +104,7 @@ def test_skill_recovery_pattern_reference_exists_with_both_markers():
     text = ref.read_text(encoding="utf-8")
     assert "qor:recovery-prompt" in text
     assert "qor:auto-heal" in text
-    assert "qorlogic seed" in text
+    assert "qor-logic seed" in text
 
 
 def test_every_skill_file_declares_autonomy_or_defaults_interactive():
