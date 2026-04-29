@@ -13,7 +13,7 @@ Read `docs/META_LEDGER.md`.
 **INTERDICTION**: If `docs/META_LEDGER.md` does not exist:
 
 <!-- qor:recovery-prompt -->
-Ask the user: "docs/META_LEDGER.md not found. Should I correct it by running 'qorlogic seed' or pause? [Y/n]"
+Ask the user: "docs/META_LEDGER.md not found. Should I correct it by running 'qor-logic seed' or pause? [Y/n]"
 
-- On Y or empty: run `qorlogic seed`, then continue.
-- On N: abort with "Run `qorlogic seed` to create the governance scaffold, then re-run this skill."
+- On Y or empty: run `qor-logic seed`, then continue.
+- On N: abort with "Run `qor-logic seed` to create the governance scaffold, then re-run this skill."

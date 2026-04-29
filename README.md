@@ -66,16 +66,16 @@ By default QorLogic installs into the **current workspace** (`./.<host>/`). Use 
 
 ```bash
 # Initialize with host + scope (scope defaults to repo)
-qorlogic init --host claude --profile sdlc                 # repo scope
-qorlogic init --host gemini --profile sdlc --scope global  # global scope
+qor-logic init --host claude --profile sdlc                 # repo scope
+qor-logic init --host gemini --profile sdlc --scope global  # global scope
 
 # Install governance skills and agent personas
-qorlogic install --host claude                # -> ./.claude/
-qorlogic install --host gemini                # -> ./.gemini/commands/
-qorlogic install --host codex --scope global  # -> ~/.codex/
+qor-logic install --host claude                # -> ./.claude/
+qor-logic install --host gemini                # -> ./.gemini/commands/
+qor-logic install --host codex --scope global  # -> ~/.codex/
 
 # Verify the installation
-qorlogic list --available
+qor-logic list --available
 ```
 
 Supported host layouts:
@@ -93,7 +93,7 @@ Set `QORLOGIC_PROJECT_DIR` to override the repo root.
 
 ```bash
 # Non-standard host, filesystem governance, or data pipeline projects
-qorlogic install --host claude --target /path/to/custom/dir/
+qor-logic install --host claude --target /path/to/custom/dir/
 ```
 
 ### Use in your AI coding session
@@ -154,7 +154,7 @@ forbid (
 Evaluate policies from the CLI:
 
 ```bash
-qorlogic policy check request.json
+qor-logic policy check request.json
 ```
 
 The evaluator supports `permit`/`forbid` effects, `==` and `in` constraints, `when` conditions, and default-deny semantics (forbid overrides permit). Designed for compatibility with the [Cedar](https://www.cedarpolicy.com/) language; swap in a native Cedar SDK when Python bindings ship.
@@ -226,7 +226,7 @@ The codebase has been [audited against OWASP Top 10 (2021)](docs/security-audit-
 
 ## Governance Model
 
-1. **Every decision is logged.** Plans, audits, and substantiations land in `docs/META_LEDGER.md` as SHA256-chained entries. Verify the full chain: `qorlogic verify-ledger`.
+1. **Every decision is logged.** Plans, audits, and substantiations land in `docs/META_LEDGER.md` as SHA256-chained entries. Verify the full chain: `qor-logic verify-ledger`.
 
 2. **Gates are advisory with teeth.** Skills check for prior-phase artifacts. Override is permitted but logged as a severity-1 `gate_override` event in the Shadow Genome.
 
@@ -254,7 +254,7 @@ qor-logic/
     resources.py      importlib.resources wrapper for packaged assets
     workdir.py        $QOR_ROOT / CWD anchor for consumer-state paths
     hosts.py          Host-to-install-path resolver (claude, kilo, codex, gemini)
-    cli.py            qorlogic CLI entry point
+    cli.py            qor-logic CLI entry point
     dist/variants/    Pre-compiled per-host outputs (claude, kilo-code, codex, gemini)
   docs/
     architecture.md   System-tier doc: layer stack + responsibilities
@@ -272,15 +272,15 @@ qor-logic/
 ## CLI Reference
 
 ```
-qorlogic install --host <claude|kilo-code|codex|gemini> [--scope <repo|global>] [--target <path>] [--dry-run]
-qorlogic uninstall --host <host> [--scope <repo|global>]
-qorlogic init --host <host> [--scope <repo|global>] --profile <sdlc|filesystem|data|research>
-qorlogic list [--available] [--installed] [--host <host>] [--scope <repo|global>]
-qorlogic info <skill-name>
-qorlogic compile [--dry-run]
-qorlogic verify-ledger [<path>]
-qorlogic policy check <request.json>
-qorlogic --version
+qor-logic install --host <claude|kilo-code|codex|gemini> [--scope <repo|global>] [--target <path>] [--dry-run]
+qor-logic uninstall --host <host> [--scope <repo|global>]
+qor-logic init --host <host> [--scope <repo|global>] --profile <sdlc|filesystem|data|research>
+qor-logic list [--available] [--installed] [--host <host>] [--scope <repo|global>]
+qor-logic info <skill-name>
+qor-logic compile [--dry-run]
+qor-logic verify-ledger [<path>]
+qor-logic policy check <request.json>
+qor-logic --version
 ```
 
 ## Development
@@ -289,7 +289,7 @@ qorlogic --version
 pip install -e ".[dev]"
 python -m pytest tests/                                    # 602 tests
 python -m pytest tests/ -m integration                     # +4 install-smoke tests
-qorlogic verify-ledger                                     # Merkle chain integrity
+qor-logic verify-ledger                                     # Merkle chain integrity
 BUILD_REGEN=1 python qor/scripts/dist_compile.py           # regenerate variants
 python qor/scripts/check_variant_drift.py                  # SSoT vs dist consistency
 ```

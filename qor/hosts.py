@@ -1,4 +1,4 @@
-"""Host-to-install-path resolver for qorlogic CLI.
+"""Host-to-install-path resolver for qor-logic CLI.
 
 Maps AI coding host names to filesystem targets for skill/agent installation.
 Extensible via ``register_host()`` for third-party hosts (Cursor, Continue,

@@ -129,7 +129,7 @@ def _register_install_family(sub) -> None:
     sp_list.add_argument("--host", default="claude")
     sp_list.add_argument("--scope", default="repo", choices=_SCOPES_CHOICES)
 
-    sp_init = sub.add_parser("init", help="initialize .qorlogic/config.json")
+    sp_init = sub.add_parser("init", help="initialize the qor-logic config (.qorlogic/config.json)")
     sp_init.add_argument("--host", default="claude", choices=_HOSTS_CHOICES)
     sp_init.add_argument("--scope", default="repo", choices=_SCOPES_CHOICES)
     sp_init.add_argument("--profile", default="sdlc", choices=_PROFILE_CHOICES)
@@ -162,10 +162,10 @@ def _register_compliance_policy(sub) -> tuple[argparse.ArgumentParser, argparse.
 
 def _build_parser() -> tuple[argparse.ArgumentParser, dict[str, argparse.ArgumentParser]]:
     parser = argparse.ArgumentParser(
-        prog="qorlogic",
+        prog="qor-logic",
         description="S.H.I.E.L.D. governance skills for AI coding hosts.",
     )
-    parser.add_argument("--version", action="version", version=f"qorlogic {__version__}")
+    parser.add_argument("--version", action="version", version=f"qor-logic {__version__}")
     sub = parser.add_subparsers(dest="command", metavar="<command>")
     _register_install_family(sub)
     _register_misc(sub)

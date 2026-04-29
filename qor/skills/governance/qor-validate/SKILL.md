@@ -69,20 +69,20 @@ Read: docs/META_LEDGER.md
 **INTERDICTION**: If ledger does not exist:
 
 <!-- qor:recovery-prompt -->
-Ask the user: "docs/META_LEDGER.md not found. Should I correct it by running 'qorlogic seed' or pause? [Y/n]"
+Ask the user: "docs/META_LEDGER.md not found. Should I correct it by running 'qor-logic seed' or pause? [Y/n]"
 
-- On Y or empty: run `qorlogic seed` (idempotent), then continue.
-- On N: abort with "Run `qorlogic seed` to create the governance scaffold, then re-run this skill."
+- On Y or empty: run `qor-logic seed` (idempotent), then continue.
+- On N: abort with "Run `qor-logic seed` to create the governance scaffold, then re-run this skill."
 
 ### Step 3: Parse Entries
 
 Extract all ledger entries:
 
-Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qorlogic verify-ledger docs/META_LEDGER.md`.
+Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qor-logic verify-ledger docs/META_LEDGER.md`.
 
 ### Step 4: Verify Chain
 
-Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qorlogic verify-ledger docs/META_LEDGER.md`.
+Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qor-logic verify-ledger docs/META_LEDGER.md`.
 
 ### Step 5: Generate Report
 
@@ -110,7 +110,7 @@ Template: `references/qor-validate-reports.md`.
 
 For thorough validation, recalculate content hashes:
 
-Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qorlogic verify-ledger docs/META_LEDGER.md`.
+Reference implementation: `qor/scripts/ledger_hash.py` — exposes `ENTRY_RE`, `CONTENT_HASH_RE`, `PREV_HASH_RE`, `CHAIN_HASH_RE` and the `verify()` entrypoint. CLI: `qor-logic verify-ledger docs/META_LEDGER.md`.
 
 Template: `references/qor-validate-reports.md`.
 

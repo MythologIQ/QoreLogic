@@ -1,4 +1,4 @@
-"""Install/uninstall/list helpers for the qorlogic CLI.
+"""Install/uninstall/list helpers for the qor-logic CLI.
 
 Phase 24 update: install source root is per-host (``variants/<host>/``), and
 the install dispatcher uses each host's install_map (keyed by source-path
@@ -83,7 +83,7 @@ def _do_install(
     if manifest is None:
         print(
             f"No manifest.json for host {host!r} at {source_root}. "
-            f"Run 'qorlogic compile' first.",
+            f"Run 'qor-logic compile' first.",
             file=sys.stderr,
         )
         return 1
@@ -144,7 +144,7 @@ def _list_available() -> int:
     dist_root = _default_dist_root()
     manifest = _load_manifest(dist_root / "manifest.json")
     if manifest is None:
-        print("No manifest. Run 'qorlogic compile' first.", file=sys.stderr)
+        print("No manifest. Run 'qor-logic compile' first.", file=sys.stderr)
         return 1
     seen: set[str] = set()
     for entry in manifest["files"]:

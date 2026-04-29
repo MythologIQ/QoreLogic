@@ -233,7 +233,7 @@ introduced_in_plan: phase30-system-tier-hardening
 
 ```yaml
 term: Install Drift
-definition: Divergence between qor/skills/**/SKILL.md source and the operator's installed copies (e.g., under .claude/skills/). Detected by SHA256 byte-match in qor/scripts/install_drift_check.py. Non-blocking WARN semantics; fix via `qorlogic install --host <host>`.
+definition: Divergence between qor/skills/**/SKILL.md source and the operator's installed copies (e.g., under .claude/skills/). Detected by SHA256 byte-match in qor/scripts/install_drift_check.py. Non-blocking WARN semantics; fix via `qor-logic install --host <host>`.
 home: qor/references/doctrine-governance-enforcement.md
 referenced_by:
   - qor/scripts/install_drift_check.py

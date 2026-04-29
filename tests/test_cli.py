@@ -21,8 +21,8 @@ def test_qor_cli_version_prints_version(capsys):
     with pytest.raises(SystemExit):
         main(["--version"])
     captured = capsys.readouterr()
-    assert "qorlogic" in captured.out
-    assert "qorlogic" in captured.out
+    assert "qor-logic" in captured.out
+    assert "qor-logic" in captured.out
 
 
 def test_qor_cli_compile_callable():

@@ -24,7 +24,7 @@ SKILL.md frontmatter. Missing or unset defaults to `interactive`.
   recovery prompt when a prerequisite is missing.
 - **autonomous** -- runs start-to-finish without user interaction except for
   break-the-glass emergencies. Missing prerequisites auto-heal via
-  `qorlogic seed`. Zero Y/N prompts.
+  `qor-logic seed`. Zero Y/N prompts.
 
 The classification is terminal. A skill that needs occasional user input is
 `interactive` by definition.
@@ -62,7 +62,7 @@ The lint recognizes four markers. Their canonical templates live in
 - `<!-- qor:fail-fast-only reason="..." -->` -- interactive skill, missing
   prerequisite, justified pure abort (rare).
 - `<!-- qor:auto-heal -->` -- autonomous skill, missing prerequisite, silent
-  `qorlogic seed` invocation.
+  `qor-logic seed` invocation.
 - `<!-- qor:break-the-glass reason="..." -->` -- autonomous skill, emergency
   surface when auto-heal itself fails; emits `EMERGENCY:` message and aborts.
 

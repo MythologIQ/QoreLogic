@@ -56,13 +56,13 @@ Starting with Phase 23, ledger entries include `**SSDF Practices**: PW.1.1, PS.1
 ### How it works
 
 1. Each `/qor-substantiate` seal adds SSDF practice tags to the ledger entry body.
-2. `qorlogic compliance report` reads META_LEDGER.md, extracts practice tags, and reports coverage.
+2. `qor-logic compliance report` reads META_LEDGER.md, extracts practice tags, and reports coverage.
 3. Coverage gaps (practices with zero entries) indicate areas where governance evidence is missing.
 
 ### Running the report
 
 ```
-$ qorlogic compliance report
+$ qor-logic compliance report
 SSDF Practice Coverage:
   PO.1.1: 3 entries (Entry #14, Entry #31, Entry #45)
   PS.1.1: 5 entries (Entry #33, Entry #35, ...)

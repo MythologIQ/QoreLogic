@@ -2,9 +2,9 @@
 
 Operator runbook. Covers CLI usage, seal ceremony, failure recovery, CI considerations, and dist-variant management.
 
-## CLI (`qorlogic`)
+## CLI (`qor-logic`)
 
-The `qorlogic` CLI is the primary install/operation surface. Subcommands:
+The `qor-logic` CLI is the primary install/operation surface. Subcommands:
 
 | Subcommand | Purpose |
 |---|---|
@@ -18,12 +18,12 @@ The `qorlogic` CLI is the primary install/operation surface. Subcommands:
 | `policy check <request.json>` | Evaluate a request against `qor/policies/*.cedar` |
 | `compliance report` | Emit a NIST SP 800-218A practice-tag report |
 
-### Ad-hoc tooling (invoked directly, not through `qorlogic`)
+### Ad-hoc tooling (invoked directly, not through `qor-logic`)
 
 | Command | Purpose |
 |---|---|
 | `python -m qor.scripts.doc_integrity_drift_report` | Phase 31 wiring. Runs Check Surface D + E in lenient mode against the live repo; writes a Markdown drift report to stdout grouped by term. Operator triage tool; not wired into the seal flow. |
-| `python -m qor.scripts.install_drift_check --host claude --scope repo` | Phase 32 wiring. SHA256-compares source `qor/skills/**/SKILL.md` against the installed copies at `.claude/skills/**/SKILL.md`. Exit 0 = clean; exit 1 = drift detected (stdout names mismatches + `qorlogic install` hint). Invoked by `/qor-plan` Step 0.2 as a pre-phase nudge. |
+| `python -m qor.scripts.install_drift_check --host claude --scope repo` | Phase 32 wiring. SHA256-compares source `qor/skills/**/SKILL.md` against the installed copies at `.claude/skills/**/SKILL.md`. Exit 0 = clean; exit 1 = drift detected (stdout names mismatches + `qor-logic install` hint). Invoked by `/qor-plan` Step 0.2 as a pre-phase nudge. |
 
 All subcommands accept `--scope {repo,global}` (default `repo`); this determines whether the install/uninstall/init writes to the project directory or to the user's home directory.
 
