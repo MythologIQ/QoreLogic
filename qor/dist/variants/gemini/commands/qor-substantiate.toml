@@ -250,6 +250,19 @@ if warnings:
 
 Phase 33 addition: when `plan_artifact.change_class` is `feature` or `breaking`, the check also requires README.md and CHANGELOG.md in `files_touched`. Hotfix is exempt. Operator judgment applies: if warnings are spurious (e.g., touched file genuinely doesn't affect doc-worthy concepts), continue seal. If legitimate (e.g., new doctrine added without updating lifecycle.md, or feature shipped without release-doc authoring), PAUSE, amend, re-run seal.
 
+**Phase 49 addition: README badge currency (release-class only, ABORT semantics)**. When `plan_artifact.change_class` is `feature` or `breaking`, run `qor.scripts.badge_currency` and ABORT seal on mismatch. Hotfix is exempt (matches the existing `_RELEASE_CLASSES` semantics). The check parses README literal-count badges (Tests, Ledger, Skills, Agents, Doctrines) and asserts them against current truth.
+
+```bash
+if [[ "${CHANGE_CLASS}" == "feature" || "${CHANGE_CLASS}" == "breaking" ]]; then
+  python -m qor.scripts.badge_currency \\
+    --repo-root . \\
+    --ledger docs/META_LEDGER.md \\
+    || { echo "ABORT: README badge currency mismatch — update Tests/Ledger/Skills/Agents/Doctrines counts to match truth before re-running /qor-substantiate"; exit 1; }
+fi
+```
+
+The exit-1 ABORT is what distinguishes Phase 49's enforcement from Phase 31's WARN-only currency check above. Operator must update the README badges in the implement pass (or here, before re-running substantiate). Locked by `tests/test_readme_badge_currency.py` and `tests/test_substantiate_badge_currency_wiring.py` per `qor/references/doctrine-governance-enforcement.md` §"Badge currency".
+
 ### Step 7: Final Merkle Seal
 
 Calculate session seal:

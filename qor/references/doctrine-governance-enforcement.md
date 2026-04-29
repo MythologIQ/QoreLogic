@@ -129,6 +129,16 @@ patterns, ql-templates, and the glossary are not verified because they
 are not currently installed by `qor-logic install` into the host's
 runtime surface.
 
+### Badge currency (Phase 49 wiring)
+
+Feature and breaking phases MUST update README literal-count badges (Tests, Ledger, Skills, Agents, Doctrines) to match current truth. Verified by `qor/scripts/badge_currency.py` invoked at `/qor-substantiate` Step 6.5; ABORTs seal on mismatch. Hotfix is exempt (matches `_RELEASE_CLASSES` semantics).
+
+Locked at the test layer by `tests/test_readme_badge_currency.py` (5 tests verifying each badge against truth) and `tests/test_substantiate_badge_currency_wiring.py` (3 defensive tests with proximity-anchor + strip-and-fail per Phase 46 doctrine).
+
+Dynamic badges (PyPI, Python version, License, NIST, OWASP, Doc Tier) are NOT parsed — they auto-refresh from shields.io live queries or are framework-named and don't drift with project state.
+
+This addition closes G-4 from `docs/compliance-re-evaluation-2026-04-29.md`. Pre-Phase-49 the check was WARN-only; Phase 49 promotes it to ABORT for release-class phases. Three phases (45/46/48) had silently shipped with stale badges; Phase 49 prevents recurrence.
+
 ## 9. Installed-Mode Invariants (Phase 35 wiring)
 
 Qor-logic is `pip install`-able. Every governance skill must run successfully from any CWD, not only from the Qor-logic repo root. Three binding rules:
