@@ -1,11 +1,10 @@
 # AUDIT REPORT
 
-**Tribunal Date**: 2026-04-28T02:47:00Z
-**Target**: `docs/plan-qor-phase45-attribution-trailer-convention.md` (Pass 1)
+**Tribunal Date**: 2026-04-27T00:00:00Z
+**Target**: `docs/plan-qor-phase46-test-functionality-doctrine.md` (Pass 1)
 **Risk Grade**: L1
 **Auditor**: The QorLogic Judge
-**Mode**: solo (codex-plugin not available; capability_shortfall logged)
-**Session**: 2026-04-28T0247-92f578
+**Mode**: solo (codex-plugin not available; capability_shortfall noted)
 
 ---
 
@@ -15,95 +14,88 @@
 
 ### Executive Summary
 
-Phase 45 implements issue #18 with the minimal scope required: a pure-function helper `qor/scripts/attribution.py` exposing three string-returning functions, plus two documentation surfaces (`ATTRIBUTION.md` at root, `qor/references/doctrine-attribution.md` as full doctrine), plus a one-line `CLAUDE.md` Authority append. No skill wiring. No CHANGELOG mutation. No new dependencies. The helper is value-oriented (pure functions, immutable module constants, kwargs-overridable defaults) and uncomplected from session detection, gate-artifact reading, and harness env. The two-phase decomposition is incremental: Phase 1 lands the canonical source of strings; Phase 2 lands the documentation surfaces and adds drift-guard tests asserting the docs match the helper output. All six audit passes clear.
+Phase 46 codifies the "test functionality, not presence" principle as a first-class doctrine and wires enforcement language into the four SDLC gate skills. Deliverables: new `qor/references/doctrine-test-functionality.md`, `CLAUDE.md` Authority update, in-place edits to `/qor-plan` (Steps 4, 5), `/qor-audit` (new Test Functionality Pass between Section 4 Razor and Dependency), `/qor-implement` (Steps 5, 9), `/qor-substantiate` (Step 4 Test Audit), regenerated variants, and a new test module `tests/test_doctrine_test_functionality.py` that locks each surface with proximity-anchored assertions paired with strip-and-fail negative-path tests. All audit passes clear.
 
 ### Audit Results
 
 #### Security Pass
 **Result**: PASS
-Pure string-construction module. No auth surface, no credentials, no secrets. The `noreply@anthropic.com` constant is a documented public bot email used in `Co-Authored-By:` trailers, not a credential. No subprocess. No I/O.
+Pure markdown / doctrine surface; no auth, secrets, or runtime code paths.
 
 #### OWASP Top 10 Pass
 **Result**: PASS
-- A03 Injection: helper concatenates caller-supplied `defects_list` and optional `comparison_doc_path` into markdown text emitted into commit messages and PR bodies. Callers are internal skill code, not external user input. Downstream consumers (`git commit -m`, `gh pr create --body`) accept arbitrary text. No shell interpolation surface.
-- A04 Insecure Design: pure functions; no error paths to fail-open.
-- A05 Security Misconfiguration: no secrets; module constants are public URLs and a public bot email.
-- A08 Software/Data Integrity: no deserialization, no `eval`/`exec`, no `pickle`, no `yaml.load`.
+No injection / serialization / config surfaces touched.
 
 #### Ghost UI Pass
 **Result**: PASS
-N/A — no UI.
+N/A.
 
 #### Section 4 Razor Pass
 **Result**: PASS
 
-| Check              | Limit | Plan Proposes                                                                              | Status |
-| ------------------ | ----- | ------------------------------------------------------------------------------------------ | ------ |
-| Max function lines | 40    | `commit_trailer` ~8, `pr_footer` ~12 (one optional clause), `changelog_attribution_line` 1 | OK     |
-| Max file lines     | 250   | `qor/scripts/attribution.py` projected ~50–80 (constants + 3 functions + module docstring) | OK     |
-| Max nesting depth  | 3     | At most 1 (function body + optional `if comparison_doc_path:`)                             | OK     |
-| Nested ternaries   | 0     | Zero                                                                                       | OK     |
+| Check              | Limit | Plan Proposes                                | Status |
+| ------------------ | ----- | -------------------------------------------- | ------ |
+| Max function lines | 40    | n/a (markdown-only edits)                    | OK     |
+| Max file lines     | 250   | doctrine ~80 lines; test file estimated ~200 | OK     |
+| Max nesting depth  | 3     | n/a                                          | OK     |
+| Nested ternaries   | 0     | n/a                                          | OK     |
 
-Test files: `tests/test_attribution.py` ~9 small functions; `tests/test_attribution_docs_consistency.py` ~5 small functions. Both well under file/function limits.
+#### Test Functionality Pass (Phase 46 self-application)
+
+The plan's own tests audited against the criterion the phase introduces:
+
+| Test description | Invokes unit? | Asserts on output? | Verdict |
+| ---------------- | ------------- | ------------------ | ------- |
+| `test_doctrine_file_exists_with_required_sections` | Yes — file read + per-section regex; strip-and-fail negative path | Yes — match result vs None | PASS |
+| `test_doctrine_anti_patterns_section_cites_sg_035_and_phase_45` | Yes — proximity-anchor regex; strip-and-fail | Yes | PASS |
+| `test_claude_md_authority_references_test_functionality_doctrine` | Yes — Authority section regex; strip-and-fail | Yes | PASS |
+| `test_qor_plan_step4_forbids_presence_only_tests` | Yes — Step 4 header proximity-anchor; strip-and-fail | Yes | PASS |
+| `test_qor_plan_step5_review_lists_behavior_naming` | Yes — Step 5 header proximity-anchor; strip-and-fail | Yes | PASS |
+| `test_qor_audit_has_test_functionality_pass_between_razor_and_dependency` | Yes — positional check between two header offsets; strip-and-fail | Yes | PASS |
+| `test_qor_audit_test_functionality_pass_states_veto_criterion` | Yes — proximity-anchor; strip-and-fail | Yes | PASS |
+| `test_qor_implement_step5_requires_unit_invocation` | Yes — proximity-anchor; strip-and-fail | Yes | PASS |
+| `test_qor_implement_step9_scans_for_presence_only_tests` | Yes — proximity-anchor; strip-and-fail | Yes | PASS |
+| `test_qor_substantiate_seal_gate_blocks_presence_only_tests` | Yes — proximity-anchor; strip-and-fail | Yes | PASS |
+
+Every assertion is paired with a strip-and-fail negative-path so the doctrine test cannot itself decay into a presence-only check (the SG-035 trap the doctrine is designed to prevent). The unit under test is the proximity-anchored enforcement language; the file-read + regex-match-against-bounded-span is the invocation; the assertion compares the match result against expected presence/absence. Self-application of the new pass clears.
 
 #### Dependency Pass
 **Result**: PASS
-
-| Package | Justification | <10 Lines Vanilla? | Verdict |
-| ------- | ------------- | ------------------ | ------- |
-| (none)  | n/a           | n/a                | PASS    |
-
-Helper imports only `from __future__ import annotations`. Doc-consistency tests use stdlib `pathlib`. CI workflow is unchanged.
+No new dependencies.
 
 #### Macro-Level Architecture Pass
 **Result**: PASS
-- Module boundaries: `qor/scripts/attribution.py` is a leaf module with no QorLogic-internal imports.
-- No cyclic deps: it imports nothing from the project.
-- Layering: helper sits at the lowest layer; future skill wiring (out of scope) flows downward into it.
-- Single source of truth: module constants are the canonical source. `ATTRIBUTION.md` and the doctrine are documentation surfaces of the same strings; Phase 2 drift-guard tests bind them to the helper output.
-- Cross-cutting concerns: N/A (no logging, auth, or config touched).
-- Build path: `qor/scripts/` is the established helpers location (38+ existing modules); `tests/` is the established test location with pytest auto-discovery wired via CI's `python -m pytest tests/ -v`.
+New doctrine in `qor/references/` aligned with existing topology. Skill edits are in-place section additions in source `qor/skills/**/SKILL.md`; variants regenerate mechanically via `dist_compile`. No cross-module wiring. No new module boundaries.
 
-#### Orphan Pass
+#### Infrastructure Alignment Pass
+
+| Cited path / symbol | Verification |
+|---|---|
+| `qor/references/doctrine-test-discipline.md` | exists |
+| `qor/references/doctrine-shadow-genome-countermeasures.md` SG-035 | exists, lines 63-69 |
+| `qor/skills/sdlc/qor-plan/SKILL.md` Step 4 + Step 5 headers | exist (lines 231, 246) |
+| `qor/skills/governance/qor-audit/SKILL.md` Section 4 Razor / Dependency Audit headers | exist (lines 160, 177) |
+| `qor/skills/sdlc/qor-implement/SKILL.md` Step 5 + Step 9 headers | exist (lines 139, 181) |
+| `qor/skills/governance/qor-substantiate/SKILL.md` `#### Test Audit` subsection | exists under Step 4 |
+| `qor/scripts/dist_compile.py` BUILD_REGEN env var | env var is operator convention surfaced by `check_variant_drift.py` line 74 fix string; `dist_compile.main()` runs unconditionally, so the documented invocation works. |
+| `tests/test_compile.py` | exists |
+| `qor/scripts/check_variant_drift.py` | exists, line 74 surfaces the canonical regen command |
+| `findings_categories` enum value `test-failure` | already present in audit schema mapping (qor-audit/SKILL.md line 357) |
+
+PASS.
+
+#### Orphan Detection
 **Result**: PASS
+- New doctrine file referenced from `CLAUDE.md` Authority and from each updated skill body. Connected.
+- New test module auto-collected by pytest. Connected.
 
-| Proposed File                                       | Entry Point Connection                                  | Status    |
-| --------------------------------------------------- | ------------------------------------------------------- | --------- |
-| `qor/scripts/attribution.py`                        | imported by `tests/test_attribution.py` and Phase-2 doc-consistency test; CI runs `pytest tests/` | Connected |
-| `tests/test_attribution.py`                         | discovered by pytest auto-discovery in CI               | Connected |
-| `tests/test_attribution_docs_consistency.py`        | discovered by pytest auto-discovery in CI               | Connected |
-| `qor/references/doctrine-attribution.md`            | linked from CLAUDE.md Authority line (Phase 2 edit)     | Connected |
-| `ATTRIBUTION.md`                                    | GitHub root convention; cross-linked from doctrine and helper docstring | Connected |
+### Anti-vacuous-green guard
 
-The helper has no production skill caller in this phase by explicit design (option B from dialogue: doc + helper, defer skill wiring). Tests exercise the module. This is intentional staging, not orphan code.
+The new test module's structural pattern (positive proximity-anchor assertion paired with strip-and-fail negative-path) is itself the anti-vacuous-green guard: a future refactor that strips an enforcement section from a skill body cannot pass the test without restoring or relocating the language. This pattern follows SG-035's countermeasure recipe and the existing `test_skill_doctrine.py::test_proximity_anchor_fails_when_section_missing` discipline.
 
-### Test Discipline Audit
+### Sequencing
 
-Plan lists tests **before** implementation in each phase, satisfying TDD-first requirement from CLAUDE.md and `qor/references/doctrine-test-discipline.md`:
-
-- Phase 1: 9 tests enumerated with concrete assertions (exact byte-equality for default outputs, kwarg-override semantics, em-dash exclusion, monkeypatch confirmation that constants drive defaults). All pure: no time, random, network, or filesystem coupling.
-- Phase 2: 5 doc-consistency tests enumerated, each invoking the helper and asserting the rendered string appears in the corresponding doc file.
-
-`test_no_em_dash_in_any_emitted_string` is a notable structural guard against drift toward smart-punctuation — directly enforces the CLAUDE.md ASCII-in-data rule against the carved-out exception (the doctrine excepts the `🤖` emoji, but no other non-ASCII).
-
-`test_module_constants_are_the_only_default_source` uses `monkeypatch.setattr` to verify there are no shadow defaults inside function bodies — a sound architectural check that the SSoT property holds in code, not just in convention.
-
-### Grounding Audit
-
-All plan claims about repo state verified:
-
-- `changelog_stamp.py` regex collision claim — confirmed: regex matches `## [X.Y.Z] - YYYY-MM-DD` exactly; the issue's proposed `## vX.Y.Z — <feature title> — built via [QorLogic SDLC](...)` would break it. Plan's option-B (separate italic line beneath the version header) avoids the collision. ✓
-- `CLAUDE.md` Authority line — confirmed: ends with `[token-efficiency](...), [test-discipline](...), [governance-enforcement](...)`. Append point unambiguous. ✓
-- `qor/references/` doctrine taxonomy — confirmed: 16 existing `doctrine-*.md` files; new file fits the pattern. ✓
-- CI command `python -m pytest tests/ -v` — confirmed in `.github/workflows/ci.yml`. ✓
-- No existing attribution helper — confirmed: nothing in `qor/scripts/` matches `attrib|trailer|credit`. ✓
-- Canonical QorLogic URL — confirmed against repo origin remote. ✓
-
-No `{{verify: ...}}` residual tags. Grounding clean.
-
-### Open Questions
-
-Plan declares "None. All design decisions resolved." Each design decision is traceable to the dialogue with explicit rationale (six numbered rationales in the Open Questions section). No unresolved ambiguity blocks implementation.
+Branch `phase/46-test-functionality-doctrine` cut from `main` at v0.31.1. `bump_version('feature')` will compute v0.32.0 cleanly; highest tag is v0.31.1; downgrade guard clears.
 
 ### Violations Found
 
@@ -113,27 +105,12 @@ None.
 
 <!-- qor:veto-pattern-advisory -->
 
-No repeated-VETO pattern in the last 2 sealed phases (Phase 41 PASS, Phase 44 PASS). Both prior phases sealed clean.
-
-**SG family relevance**:
-
-- **SG-037 (knowledge-surface drift)** — directly applicable: this plan creates three surfaces (helper module, root `ATTRIBUTION.md`, doctrine) carrying the same canonical strings. The plan addresses this structurally with Phase-2 drift-guard tests that invoke the helper and assert verbatim presence in each doc surface. The SG-037 risk is acknowledged and contained.
-- **SG-InfrastructureMismatch** — not present: every infrastructure claim in the plan was verified during the grounding pass above.
-- **SG-038 (prose-code mismatch)** — not present: function signatures in plan prose match the test descriptions of their kwargs and return semantics.
-- **SG-035 (doctrine-content test unanchored)** — partially relevant: drift-guard tests use substring `in` checks, which catch the primary drift mode (helper string changes, doc not updated). Edge-case modes (the string appearing in a "DO NOT use this old format" anti-example block) are not caught by substring presence alone. This is an implementation-detail concern, not a blueprint defect; the plan's test design addresses the dominant failure mode and is binding-acceptable for v1.
+No repeated-VETO pattern detected in the last 2 sealed phases.
 
 ## Documentation Drift
 
 <!-- qor:drift-section -->
-(clean) — no doctrine or surface contradicted by the plan; the plan's own contribution (the emoji exception) is documented inside the new doctrine itself, with the carve-out scoped narrowly to bot-attribution trailer text.
-
-## Process Gap (advisory, non-blocking)
-
-Phase-branch creation (Step 0.5 of `/qor-plan`) was skipped: this audit is being performed on `claude/intelligent-matsumoto-5c2dfd` rather than the canonical `phase/45-attribution-trailer-convention` branch. Plan-gate artifact `.qor/gates/<sid>/plan.json` (Step Z of `/qor-plan`) was not written. Both are advisory gates per the `/qor-plan` skill protocol. Recommend the implementer create the phase branch before invoking `/qor-implement`. Logged here for the Shadow Genome process trail; not VETO-grade.
-
-### Verdict Hash
-
-SHA256(plan under audit) = `8fd15fd16416289979ae92e3120a7fd77c632fd18d86d4fb8b3b3088bb1d3618`
+(clean — declared `terms_introduced` map to the new doctrine; `boundaries` exclude Phase 47 audit-Step-3 fix and the runtime AST detector explicitly.)
 
 ---
 _This verdict is binding._

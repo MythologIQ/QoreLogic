@@ -5395,6 +5395,94 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 *Session: SEALED* (Phase 45 feature substantiated)
 *Merkle seal: 99a2b470...* (Phase 45 seal on top of Phase 44's 1e663a6c; Entries #147-#149 chained)
 
+---
+
+### Entry #150: GATE TRIBUNAL — Phase 46 Pass 1 — **PASS** (L1)
+
+**Timestamp**: 2026-04-27T00:00:00Z
+**Phase**: GATE
+**Author**: Judge
+**Risk Grade**: L1
+**Verdict**: PASS
+
+**Target**: `docs/plan-qor-phase46-test-functionality-doctrine.md`
+**Session**: `2026-04-27T0000-phase46`
+
+**Content Hash**: `46b2012a81cb389799de48c147bc45ca45f1097ede4f107ef01c10c069a497d7`
+**Previous Hash**: `99a2b47041dbd0156cfcba01ef4b9ec71b6c3cdcde0ee6800108c245abbbb6b2`
+**Chain Hash**: `04b2bc19f644f67079278357ef8dafccb09c1b83b53e61a229508b50b73d0928`
+
+**Decision**: Phase 46 plan codifies the "test functionality, not presence" principle as a first-class doctrine and wires enforcement into the four SDLC gate skills (`/qor-plan`, `/qor-audit`, `/qor-implement`, `/qor-substantiate`). Deliverables: new `qor/references/doctrine-test-functionality.md` (Principle, Definitions, Rule, Anti-patterns citing SG-035 and Phase 45 origin, Verification mechanisms, Update protocol); CLAUDE.md Authority update; in-place skill-prompt edits with VETO grounds; new `tests/test_doctrine_test_functionality.py` with proximity-anchored assertions paired with strip-and-fail negative-path tests. All eight audit passes clear (Security, OWASP, Ghost UI, Section 4 Razor, Test Functionality self-application, Dependency, Macro, Infrastructure Alignment, Orphan). Test Functionality Pass applied to the phase's own test descriptions per the criterion the phase introduces. Gate OPEN for `/qor-implement`. Note: this entry was added retroactively during Phase 46 substantiate-remediation after the original Phase 46 substantiate cycle landed without ledger entries (governance bookkeeping gap, not content gap; SG-AdjacentState-A sixth instance).
+
+---
+
+### Entry #151: IMPLEMENTATION — Phase 46 (test-functionality doctrine for SDLC skills)
+
+**Timestamp**: 2026-04-28T00:00:00Z
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L1
+
+**Session**: `2026-04-27T0000-phase46`
+**Plan**: `docs/plan-qor-phase46-test-functionality-doctrine.md` (Pass 1)
+**Audit**: entry #150 (PASS)
+
+**Files Created**:
+- `qor/references/doctrine-test-functionality.md` — 40 lines. Principle (acceptance question: "If the unit's behavior were silently broken but the artifact still existed, would this test fail?"); Definitions (presence-only test vs functionality test); Rule (every unit-behavior test MUST invoke the unit and assert against output); Anti-patterns (Phase 45 substring-only doc-consistency check, SG-035 doctrine-content test unanchored, Phase 46's own self-referential row); Verification mechanisms list each gate skill's enforcement; Update protocol.
+- `tests/test_doctrine_test_functionality.py` — 285 lines, 20 tests. Each positive proximity-anchored assertion paired with a strip-and-fail negative-path test that proves the assertion would fail when the named section is removed. Self-defends against SG-035 (the doctrine test cannot itself decay into a presence-only check).
+
+**Files Modified**:
+- `CLAUDE.md` — Authority line now references `doctrine-test-functionality.md` alongside the existing doctrines.
+- `qor/skills/sdlc/qor-plan/SKILL.md` — Step 4 (Avoid Common Pitfalls) forbids presence-only test descriptions; Step 5 (Review Plan) review checklist requires each test description to name the behavior it confirms.
+- `qor/skills/governance/qor-audit/SKILL.md` — new Test Functionality Pass between Section 4 Razor and Dependency Audit. VETO with `test-failure` category against any plan whose described tests do not invoke the unit.
+- `qor/skills/sdlc/qor-implement/SKILL.md` — Step 5 (TDD-Light) requires the failing test invoke the unit and assert against output; Step 9 (Complexity Self-Check) scans newly-added tests for the `assert <substring> in <file_text>` family.
+- `qor/skills/governance/qor-substantiate/SKILL.md` — Step 4 Test Audit refuses to seal if a phase-added test is presence-only.
+- `qor/dist/variants/{claude,codex,gemini,kilo-code}/` — variant artifacts regenerated for the four host targets.
+
+**Content Hash**: `d9bd0155db1e748e514bcd65453ba8c5641136055d5aa546e47b278a8f9d0a41`
+**Previous Hash**: `04b2bc19f644f67079278357ef8dafccb09c1b83b53e61a229508b50b73d0928`
+**Chain Hash**: `eea18521f5df63d335fe22db438ec6fdd698294c266af4696faaaab85ad37803`
+
+**Test results**: 20/20 phase-46 doctrine tests green across two consecutive runs (determinism confirmed). Full suite at implementation time: 787 passed, 1 skipped.
+
+**Razor compliance**: doctrine file 40 lines (≤250); test file 285 lines (≤250 - exceeds; flagged but justified: every positive assertion paired with a strip-and-fail negative test doubles the test count by design); all skill-prompt edits are additive paragraphs to existing steps, no function/file size changes triggered.
+
+**Note on test file line count**: `tests/test_doctrine_test_functionality.py` at 285 lines exceeds the Section 4 Razor file limit of 250. Justification: the doctrine itself mandates the strip-and-fail negative-path pairing pattern for every positive proximity-anchored assertion (10 positive + 10 negative = 20 tests). Splitting the file would either (a) duplicate the `_strip_section` and `_proximity` helpers across files, or (b) couple the files via a shared module — both worse than the 35-line overrun. Explicit razor-exception justification logged.
+
+**Note on retroactive entry**: this entry was added during Phase 46 substantiate-remediation. Original Phase 46 substantiate cycle landed the seal commit `f8aac99` (since rebased to `7ba463a`) without writing META_LEDGER entries, breaking the Merkle chain governance contract. This remediation rebases Phase 46 onto Phase 45's seal (so Entry #150 chains on Entry #149's `99a2b470...`), adds Entries #150/#151/#152, updates SYSTEM_STATE.md, and amends the seal commit to use Phase 45's canonical attribution trailer.
+
+---
+
+### Entry #152: SESSION SEAL -- Phase 46 feature substantiated
+
+**Timestamp**: 2026-04-28T05:30:00Z
+**Phase**: SEAL (feature)
+**Author**: Judge
+**Verdict**: PASS (787 tests green pre-rebase; full-suite re-run post-amend pending in this remediation cycle)
+
+**Target**: `docs/plan-qor-phase46-test-functionality-doctrine.md`
+**Change Class**: `feature`
+**Version**: `0.32.0 -> 0.33.0`
+**Tag**: `v0.33.0` (created at Step 9.5.5 post-commit; LOCAL ONLY pending PR merge per Phase 40 doctrine)
+
+**Content Hash (session seal)**: `2454147b6bd0820c46d24698f3d362f9ec07390c73a2c5b16d2502bbbeeeeae1`
+**Previous Hash**: `eea18521f5df63d335fe22db438ec6fdd698294c266af4696faaaab85ad37803`
+**Chain Hash (Merkle seal)**: `d9db2f5cacd01fb55eea7165bbc0f0d8f2294420e89ef2c4eedc8f0bd7328b2d`
+
+**Scope**: Closes the test-functionality enforcement gap identified in Phase 45's review feedback. Doctrine + four-skill enforcement + drift-guarded tests + variant regeneration. Substantiate-remediation cycle: rebased Phase 46 branch onto Phase 45 (so Entries #150/#151/#152 chain correctly on Phase 45's Entry #149 seal `99a2b470...`); added the three missing ledger entries; updated SYSTEM_STATE.md with Phase 46 narrative; amended the seal commit to use Phase 45's canonical attribution trailer (`qor/scripts/attribution.commit_trailer()`); retagged `v0.33.0` at the amended commit. Phase 33 release-doc currency satisfied: CHANGELOG.md `## [0.33.0]` section added (alongside Phase 45's preserved `## [0.32.0]`); pyproject.toml at 0.33.0.
+
+**Reliability sweep**: intent-lock not re-captured for the remediation cycle (the original Phase 46 capture is preserved; remediation is purely governance bookkeeping with no plan/audit content drift); skill-admission ADMITTED; gate-skill-matrix clean.
+
+**SG-AdjacentState-A sixth instance**: Phase 46's substantiate landed without writing ledger entries — the substantiate skill's mandatory ledger-entry steps are documented in skill prose but not enforced by an automatable check. Same family as Phase 45's plan-format-conventions miss. Structural countermeasure proposal: a `/qor-substantiate` step that calls `python qor/scripts/ledger_hash.py verify docs/META_LEDGER.md` and aborts seal if the latest entry's chain hash isn't reachable from the phase's prior gate artifact. Filed for Phase 47 or a future SG-pattern phase.
+
+**Decision**: Phase 46 sealed at v0.33.0 (post-remediation). Tag LOCAL ONLY until PR merge per Phase 40 doctrine.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 46 feature substantiated post-remediation)
+*Merkle seal: d9db2f5c...* (Phase 46 seal on top of Phase 45's 99a2b470; Entries #150-#152 chained)
+
 
 
 

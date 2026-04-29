@@ -10,6 +10,11 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-04-28
+
+### Added
+- **Test functionality doctrine** (Phase 46): new `qor/references/doctrine-test-functionality.md` codifying the "test functionality, not presence" principle and wiring enforcement language into the four SDLC gate skills. `/qor-plan` Step 4 forbids presence-only test descriptions; Step 5 review checklist requires each test description to name the behavior it confirms. `/qor-audit` gains a Test Functionality Pass between Section 4 Razor and Dependency Audit (VETO any plan whose described tests do not invoke the unit). `/qor-implement` Step 5 (TDD-Light) requires the failing test invoke the unit and assert against its output; Step 9 scans newly-added tests for the `assert <substring> in <file_text>` family. `/qor-substantiate` Step 4 Test Audit refuses to seal if a phase-added test is presence-only. `CLAUDE.md` Authority line updated. Cross-references SG-035 ("doctrine-content test unanchored"). Locked by `tests/test_doctrine_test_functionality.py` with proximity-anchored regex assertions paired with strip-and-fail negative-path tests so the doctrine test cannot itself decay into a presence-only check. Variant artifacts regenerated under `qor/dist/variants/`.
+
 ## [0.32.0] - 2026-04-28
 
 Phase 45: attribution trailer convention. Implements GitHub issue #18.
@@ -20,6 +25,7 @@ Phase 45: attribution trailer convention. Implements GitHub issue #18.
 - **`ATTRIBUTION.md`** (root): one-screen quick-ref with copy-pasteable canonical strings; pointers to the doctrine for rationale and to the helper for the canonical source.
 - **CLAUDE.md Authority line**: now references `[attribution](qor/references/doctrine-attribution.md)` alongside the existing `token-efficiency`, `test-discipline`, and `governance-enforcement` doctrines.
 - **15 new tests** (`tests/test_attribution.py` + `tests/test_attribution_docs_consistency.py`): 9 unit tests pinning canonical output and override semantics, 1 functional test piping the rendered trailer through `git interpret-trailers --parse` to confirm `Co-Authored-By:` is recognized as a valid git trailer (catches spacing/bracket/separator drift that pure presence-tests would miss), and 5 drift-guard tests asserting the helper's output appears verbatim in `ATTRIBUTION.md` and the doctrine and that `CLAUDE.md` Authority line links the doctrine.
+
 
 ## [0.31.1] - 2026-04-24
 

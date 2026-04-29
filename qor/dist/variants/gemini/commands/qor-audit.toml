@@ -161,6 +161,24 @@ Verify KISS compliance in proposed design:
 
 **Any violation -> VETO**. **Required next action:** `/qor-refactor` (file-internal logic shape is its domain). Per `qor/gates/delegation-table.md`, never inline a refactor process inside an audit report — name the skill.
 
+#### Test Functionality Pass
+
+For every unit test described in the plan, verify the description names the behavior the test confirms by invoking the unit, not just an artifact it expects to find. Per `qor/references/doctrine-test-functionality.md` and SG-035 ("doctrine-content test unanchored").
+
+```markdown
+### Test Functionality Audit
+
+| Test description | Invokes unit? | Asserts on output? | Verdict     |
+| ---------------- | ------------- | ------------------ | ----------- |
+| [test name]      | [yes/no]      | [yes/no]           | [PASS/VETO] |
+```
+
+A test is **presence-only** when its assertion is solely about artifact existence or textual presence (`assert path.exists()`, `assert <substring> in <file_text>`, `assert hasattr(...)`) and the unit under test is not invoked. Acceptance question for every described test: "If the unit's behavior were silently broken but the artifact still existed, would this test fail?" If no, the test is presence-only.
+
+**Any planned test that asserts only file existence, substring presence, or structural placement without invoking the unit and validating its output -> VETO with `test-failure` category.**
+
+**Required next action:** Governor: amend plan to replace presence-only tests with functionality tests (invoke the unit, assert against output), re-run `/qor-audit`. Per `qor/references/doctrine-audit-report-language.md`, this is a **Plan-text** ground.
+
 #### Dependency Audit
 
 Check for hallucinated or unnecessary dependencies:
