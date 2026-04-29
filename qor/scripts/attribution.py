@@ -37,6 +37,22 @@ def commit_trailer(
     )
 
 
+def commit_trailer_compact(
+    model: str,
+    *,
+    model_email: str | None = None,
+) -> str:
+    """Return the single-line `Co-Authored-By:` form for low-signal commits.
+
+    Used on plan/audit/implement commits per the tiered usage policy in
+    qor/references/doctrine-attribution.md §"Tiered usage". Seal commits
+    use the full `commit_trailer()` instead; the bilineage of the seal is
+    sufficient to mark the chain of work as Qor-logic-SDLC-authored.
+    """
+    email = _MODEL_EMAIL if model_email is None else model_email
+    return f"Co-Authored-By: {model} <{email}>"
+
+
 def pr_footer(
     model: str,
     *,

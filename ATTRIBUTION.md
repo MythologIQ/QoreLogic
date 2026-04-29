@@ -33,3 +33,14 @@ The Qor-logic adversarial audit gate caught these defects before review:
 
 See `{comparison_doc_path}` for the side-by-side.
 ```
+
+## Tiered usage (quickref)
+
+| Surface | Form |
+|---|---|
+| Seal commit | Full canonical (3 lines) |
+| Plan/audit/implement | `Co-Authored-By:` only |
+| PR description | Full PR-body footer |
+| CHANGELOG version section | `_Built via [Qor-logic SDLC](url)._` |
+
+Full table and rationale: [doctrine-attribution.md §"Tiered usage"](qor/references/doctrine-attribution.md).

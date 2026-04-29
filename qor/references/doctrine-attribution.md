@@ -85,3 +85,18 @@ Scope of the exception:
 ## Worked example
 
 Issue [#18](https://github.com/MythologIQ-Labs-LLC/Qor-logic/issues/18) was filed during a live submission of a worked example: BicameralAI MCP [#59](https://github.com/BicameralAI/bicameral-mcp/issues/59) (CodeGenome Phase 1+2). Three defects were caught before code review by the Qor-logic audit gate that an ad-hoc Claude Code pass missed (architectural-pattern break, scope creep, Section 4 razor violation). The PR-body footer above is the shape that submission used to surface those defects to maintainers.
+
+## Tiered usage
+
+The canonical strings above define the *content* of attribution. This section defines *which form is required at which surface*, so the full canonical form is reserved for high-signal places (seal commits, PR descriptions) and low-signal commits get a compact form. Avoids 12-line boilerplate per phase across 4 commits while preserving attribution where reviewers actually read it.
+
+| Surface | Required form | Helper | Rationale |
+|---|---|---|---|
+| Seal commit (`seal: phase NN ...`) | Full canonical (emoji + Qor-logic SDLC line + `Co-Authored-By:`) | `commit_trailer()` | One per phase. Marks the substantiated artifact. |
+| Plan/audit/implement commits | `Co-Authored-By:` only | `commit_trailer_compact()` | Bilineage established by the seal commit they chain into. Low signal-per-commit. |
+| Merge commit | Untouched | n/a | GitHub auto-generates; outside operator authoring surface. |
+| PR description | Full canonical PR-body footer | `pr_footer()` | Reviewer-facing. Highest-context surface. |
+| CHANGELOG entry | `_Built via [Qor-logic SDLC](url)._` once per `## [X.Y.Z]` header | `changelog_attribution_line()` | Per-version, not per-entry. Reader scans CHANGELOG version-by-version. |
+| GitHub release notes | Once per release | `changelog_attribution_line()` | Same rationale as CHANGELOG. |
+
+Locked by `tests/test_attribution_tiered_usage.py`. Cutoff for CHANGELOG: versions ≥ 0.36.0; older sections grandfathered.

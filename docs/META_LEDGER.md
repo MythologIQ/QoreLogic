@@ -5709,6 +5709,95 @@ User direction on prior turn was implement. V10 blocks implement. Judge does not
 *Session: SEALED* (Phase 48 feature substantiated)
 *Merkle seal: 5fb66d73...* (Phase 48 seal on top of Phase 47's 1eb7bb31; Entries #158-#160 chained)
 
+---
+
+### Entry #161: GATE TRIBUNAL — Phase 49 Pass 1 — **PASS** (L1)
+
+**Timestamp**: 2026-04-29T22:00:00Z
+**Phase**: GATE
+**Author**: Judge
+**Risk Grade**: L1
+**Verdict**: PASS
+
+**Target**: `docs/plan-qor-phase49-attribution-tiering-and-badge-enforcement.md`
+**Session**: `2026-04-29T2200-phase49`
+
+**Content Hash**: `e05ee250855229772aacabc313c51ba6c238b269ad5f75b4d90b8035fcb376e8`
+**Previous Hash**: `5fb66d738fd0b4d0e80d1d6e753341b4af4ee3c65ac97b7a156046ff4b614a14`
+**Chain Hash**: `a71c586d166b1a9a8f4a5810e042f9f3a66c2f496553302c4b93ed459a4538c4`
+
+**Decision**: Phase 49 closes G-3 (attribution-trailer signal/noise drift) and G-4 (README badge currency systemic violation) from `docs/compliance-re-evaluation-2026-04-29.md`. New `qor/scripts/badge_currency.py` (140 lines, pure functions, CLI entrypoint via `python -m`) parses README literal-count badges (Tests, Ledger, Skills, Agents, Doctrines) and asserts them against current truth. New `qor.scripts.attribution.commit_trailer_compact()` helper for the single-line `Co-Authored-By:` form on plan/audit/implement commits. `qor/references/doctrine-attribution.md` extended with `## Tiered usage` section defining required attribution form per surface; `qor/references/doctrine-governance-enforcement.md` extended with `### Badge currency` subsection; `ATTRIBUTION.md` gains a quickref block. `/qor-substantiate` Step 6.5 promoted from WARN to ABORT on release-class phases (`feature`/`breaking`); hotfix exempt. All eight audit passes clear. Test Functionality Pass applied to all 23 described tests; each invokes the unit and asserts on output. Gate OPEN for `/qor-implement`.
+
+---
+
+### Entry #162: IMPLEMENTATION — Phase 49 (tiered attribution + README badge enforcement)
+
+**Timestamp**: 2026-04-29T23:00:00Z
+**Phase**: IMPLEMENT
+**Author**: Specialist
+**Risk Grade**: L1
+
+**Session**: `2026-04-29T2200-phase49`
+**Plan**: `docs/plan-qor-phase49-attribution-tiering-and-badge-enforcement.md` (Pass 1)
+**Audit**: entry #161 (PASS)
+
+**Files Created**:
+- `qor/scripts/badge_currency.py` — 140 lines. Pure functions: `count_tests` (subprocess pytest --collect-only with `sys.executable`, ~26 lines), `count_ledger_entries` (regex over META_LEDGER), `count_skills`/`count_agents`/`count_doctrines` (Path.rglob), `parse_readme_badges` (regex over README badge HTML), `check_currency` (combines all, returns mismatch list with ±5 tolerance for Tests, strict for others; ~25 lines), `main` CLI entrypoint. Section 4 Razor: longest function 26 lines, max nesting 2, zero ternaries.
+- `tests/test_attribution_tiered_usage.py` — 9 tests + helpers. Walks `git log` for commit-trailer compliance per phase cutoff (Phase 49+); parses CHANGELOG for per-version attribution line; verifies `commit_trailer()` and `commit_trailer_compact()` return canonical strings; doctrine + ATTRIBUTION.md content locked with proximity-anchor + strip-and-fail.
+- `tests/test_readme_badge_currency.py` — 8 tests. Locks each badge against truth (Ledger/Skills/Agents/Doctrines strict; Tests with tolerance); functional invocation of `check_currency` with synthetic shields.io-formatted README + ledger.
+- `tests/test_substantiate_badge_currency_wiring.py` — 6 tests (3 positive proximity-anchored + 3 strip-and-fail negative-paths). Locks Step 6.5 prose to require `badge_currency` invocation with feature/breaking scope, ABORT semantics, hotfix exemption.
+
+**Files Modified**:
+- `qor/scripts/attribution.py` — added `commit_trailer_compact(model, *, model_email=None)` 11-line helper returning the single-line `Co-Authored-By:` form.
+- `qor/references/doctrine-attribution.md` — appended `## Tiered usage` section with 6-row table mapping surface → required form → helper → rationale.
+- `qor/references/doctrine-governance-enforcement.md` — appended `### Badge currency (Phase 49 wiring)` subsection under §8 Install Currency.
+- `ATTRIBUTION.md` — appended `## Tiered usage (quickref)` block.
+- `qor/skills/governance/qor-substantiate/SKILL.md` — Step 6.5 extended with the Phase 49 ABORT clause for release-class badge currency mismatch.
+- `README.md` — Tests badge updated 838 → 862 (the 23 new tests this phase adds bring the count to 862; 866 total collected, 4 deselected).
+- `qor/dist/variants/{claude,codex,gemini,kilo-code}/` — variant artifacts regenerated via `python -m qor.scripts.dist_compile`. 236 files, no drift.
+
+**Content Hash**: `9a0d7b4b87194e7c37fdc533a0d7768e990365905b8dbaae8cf811d7e58be43a`
+**Previous Hash**: `a71c586d166b1a9a8f4a5810e042f9f3a66c2f496553302c4b93ed459a4538c4`
+**Chain Hash**: `d775fbc7b2fe812608b50f548f280b1320dd2896e602df8eb6e0ed3b9d1843c7`
+
+**Test results**: 23/23 phase-49 tests green twice in a row (determinism). Full suite at implementation time: 861 passed, 1 skipped (delta +23 from Phase 48's 838 baseline). Self-application of `python -m qor.scripts.badge_currency`: "OK: README badges current".
+
+**Razor compliance**: `badge_currency.py` 140 lines (≤250); longest function 26 lines (≤40); max nesting 2; zero ternaries. PASS.
+
+**Intent lock**: captured at Step 5.5 against Pass 1 plan + PASS audit + HEAD; verified immediately. Single-pass clean.
+
+**Decision**: Phase 49 reality matches Phase 49 promise. Both gaps closed (G-3 attribution tiering, G-4 badge currency enforcement). Ready for `/qor-substantiate`.
+
+---
+
+### Entry #163: SESSION SEAL -- Phase 49 feature substantiated
+
+**Timestamp**: 2026-04-29T23:30:00Z
+**Phase**: SEAL (feature)
+**Author**: Judge
+**Verdict**: PASS (861 tests green pre-seal; ledger entries chain integrity OK)
+
+**Target**: `docs/plan-qor-phase49-attribution-tiering-and-badge-enforcement.md`
+**Change Class**: `feature`
+**Version**: `0.35.0 -> 0.36.0`
+**Tag**: `v0.36.0` (created at Step 9.5.5 post-commit; LOCAL ONLY pending PR merge per Phase 40 doctrine)
+
+**Content Hash (session seal)**: `265fc80e4a6625fbe7401eb14adafee04cc7ffece84f46e8c985be1dfb61e7af`
+**Previous Hash**: `d775fbc7b2fe812608b50f548f280b1320dd2896e602df8eb6e0ed3b9d1843c7`
+**Chain Hash (Merkle seal)**: `2d7fc8e5249c20c22141e63ec01d615e670637c5f280aa585ad2e3916945910a`
+
+**Scope**: Three structural improvements in one phase. (1) **Tiered attribution** — per-surface attribution form policy locked by 9 tests; CHANGELOG `[0.36.0]` carries the canonical italic line `_Built via [Qor-logic SDLC](url)._`. (2) **Badge currency enforcement** — `badge_currency.py` helper + `/qor-substantiate` Step 6.5 ABORT promotion; hotfix exempt. (3) **README Tests badge** updated to 862 (truth at seal time). Phase 33 release-doc currency satisfied: CHANGELOG `## [0.36.0]` section added with attribution line + Added entries; pyproject.toml at 0.36.0; README badges current. Self-applies the new badge-currency check (passes).
+
+**Reliability sweep**: full suite 861 passed twice in a row (determinism); `python -m qor.scripts.check_variant_drift` clean (236 files); `python -m qor.scripts.badge_currency`: clean; `python -m qor.reliability.seal_entry_check` (Phase 47 wiring): chain integrity OK at Entry #163.
+
+**Decision**: Phase 49 sealed at v0.36.0. Tag LOCAL ONLY until PR merge per Phase 40 doctrine.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 49 feature substantiated)
+*Merkle seal: 2d7fc8e5...* (Phase 49 seal on top of Phase 48's 5fb66d73; Entries #161-#163 chained)
+
 
 
 
