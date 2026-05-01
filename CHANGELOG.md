@@ -10,6 +10,28 @@ file is the user-facing narrative.
 
 ## [Unreleased]
 
+## [0.42.0] - 2026-05-01
+
+_Built via [Qor-logic SDLC](https://github.com/MythologIQ-Labs-LLC/qor-logic)._
+
+Phase 56: secret-scanning gate at `/qor-substantiate` Step 4.6.5. Closes OWASP LLM Top 10 (2025) **LLM06 Sensitive Information Disclosure** + **NIST AI 600-1 §2.10** at the substantiate-time enforcement layer. Drives the long-dormant Cedar `has_hardcoded_secrets` attribute (rule on books since Phase 23 with no scanner). Final phase of the five-phase compliance sprint; all six framework gaps from `docs/research-brief-prompt-logic-frameworks-2026-04-30.md` now closed (5/5 + LLM06 extension).
+
+### Added
+- **Secret-scanner module** (`qor/scripts/secret_scanner.py`, 248 LOC, zero new deps): frozen `Pattern` and `Finding` dataclasses; 11-pattern catalog (aws-access-key, github-pat-classic/finegrained/oauth, private-key-header, stripe-live, slack-token, google-api-key, anthropic-key, generic-high-entropy-assignment, private-key-url); 15-entry `_ALLOWLIST` frozenset (Cedar/schema attribute names + AWS docs sample + redaction sentinels + per-line `noqa: secret-scan` opt-out); `scan(path)` with auto-mask for `.md` suffix; `scan_paths`, `scan_staged`, `scan_text`, `to_gitleaks_json`, `mask_code_blocks`. CLI exits 0 (clean) / 1 (BLOCK) / 2 (input invalid). Findings JSON in gitleaks v8 schema; redacted Match/Secret form prevents leakage in the findings file itself.
+- **Substantiate Step 4.6.5 wiring** (`qor/skills/governance/qor-substantiate/SKILL.md`): new substep between Step 4.6 (reliability sweep) and Step 4.7 (doc integrity). Single `python -m qor.scripts.secret_scanner --staged --out dist/secrets.findings.json || ABORT` invocation with fail-closed semantics.
+- **`compute_production_attributes`** in `qor/policy/resource_attributes.py`: symmetric to Phase 53 `compute_governance_attributes` and Phase 55 `compute_skill_admission_attributes`. Drives the Cedar `has_hardcoded_secrets` boolean from scanner output.
+- **Doctrine** (`qor/references/doctrine-eu-ai-act.md` `## Secret-scanning gate (Phase 56)` section): applicability + pattern catalog summary + allowlist semantics + gitleaks-v8 output format + operator workflow + limitations.
+- **Shadow-genome countermeasure** `SG-SecretLeakAtSeal-A` (`qor/references/doctrine-shadow-genome-countermeasures.md`): codifies the historical risk of dormant Cedar attribute without scanner driving the boolean.
+- **Glossary terms**: `secret-scanning gate`, `gitleaks-compatible findings`.
+- **37 new tests** including frozen-catalog invariants, CLI exit-code matrix, Phase 50 co-occurrence behavior invariant for substantiate-skill wiring, doctrine round-trip integrity, self-application against own plan/doctrine/test files.
+
+### Changed
+- `pyproject.toml` → 0.42.0.
+- `README.md` → Tests 1142, Ledger 185.
+- META_LEDGER entries #183 (audit PASS), #184 (implementation), #185 (session seal). Merkle seal `dbec764642de264a1d53e93ed66c5ab1ed54e562e1bc77d23617c8cb44e99e93`.
+
+Post-Phase-56 the five-phase compliance sprint surface is fully closed: Phase 53 (v0.39.0) closes LLM01 + DRIFT-1/2 + OWASP LOW-4; Phase 54 (v0.40.0) closes EU AI Act Art. 13/14/50 + AI RMF + LLM08; Phase 55 (v0.41.0) closes LLM05 + LLM07 + AI RMF GV-6.1/MG-3.1; Phase 56 (this release v0.42.0) closes LLM06 + AI 600-1 §2.10.
+
 ## [0.41.0] - 2026-05-01
 
 _Built via [Qor-logic SDLC](https://github.com/MythologIQ-Labs-LLC/qor-logic)._
