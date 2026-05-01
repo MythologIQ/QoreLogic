@@ -12,6 +12,8 @@ phase: research
 tone_aware: false
 gate_reads: ""
 gate_writes: research
+permitted_tools: [Read, Grep, Glob, Bash]
+permitted_subagents: [Explore, general-purpose]
 ---
 # /qor-research — Deep Research Phase
 
@@ -19,7 +21,7 @@ gate_writes: research
   <trigger>/qor-research</trigger>
   <phase>research</phase>
   <persona>Analyst</persona>
-  <output>.failsafe/governance/RESEARCH_BRIEF.md with findings + META_LEDGER entry</output>
+  <output>docs/research-brief-<slug>.md with findings + META_LEDGER entry</output>
 </skill>
 
 ## Purpose
@@ -110,7 +112,7 @@ Map actual runtime dependencies:
 
 ### Step 5: Cross-Reference with Blueprint
 
-Compare every finding against `.failsafe/governance/ARCHITECTURE_PLAN.md`:
+Compare every finding against `docs/ARCHITECTURE_PLAN.md`:
 
 ```markdown
 ## Blueprint Alignment Check
@@ -124,7 +126,7 @@ Compare every finding against `.failsafe/governance/ARCHITECTURE_PLAN.md`:
 
 ### Step 6: Generate Research Brief
 
-Create `.failsafe/governance/RESEARCH_BRIEF.md`:
+Create `docs/research-brief-<slug>-<YYYY-MM-DD>.md` (canonical naming per existing convention; see `docs/research-brief-*` examples):
 
 ```markdown
 # Research Brief
@@ -161,7 +163,7 @@ Create `.failsafe/governance/RESEARCH_BRIEF.md`:
 
 ## Updated Knowledge
 
-[New information that should be added to memory/failsafe-bridge.md]
+[New information that should be added to docs/SHADOW_GENOME.md or the relevant doctrine under qor/references/]
 
 ---
 
@@ -170,11 +172,11 @@ _Research complete. Findings are advisory — implementation decisions remain wi
 
 ### Step 7: Update Memory
 
-Update `memory/failsafe-bridge.md` with any new or corrected information discovered during research.
+Update `docs/SHADOW_GENOME.md` (narrative archaeology) or the relevant doctrine under `qor/references/` with any new or corrected information discovered during research.
 
 ### Step 8: Update Ledger
 
-Edit: `.failsafe/governance/META_LEDGER.md`
+Edit: `docs/META_LEDGER.md`
 
 Add new entry:
 
@@ -205,6 +207,28 @@ SHA256(content_hash + previous_hash)
 **Decision**: [Summary of key findings and any drift detected]
 ```
 
+### Step 8.5: Write Gate Artifact (Phase 54 wiring)
+
+Persist the structured gate artifact at `.qor/gates/<session_id>/research.json` so downstream phases can read it via `gate_chain.check_prior_artifact`. Provenance manifest embedded per Phase 54 (closes EU AI Act Art. 13/50 transparency surface).
+
+```python
+from qor.scripts import gate_chain, shadow_process, ai_provenance
+
+payload = {
+    "ts": shadow_process.now_iso(),
+    "questions": questions,        # research questions investigated
+    "findings": findings,          # structured findings list
+    "sources": sources,            # cited file paths and references
+    "brief_path": brief_path,      # path to RESEARCH_BRIEF.md
+}
+manifest = ai_provenance.build_manifest(
+    "research", human_oversight=ai_provenance.HumanOversight.ABSENT
+)
+gate_chain.write_gate_artifact(
+    phase="research", payload=payload, session_id=sid, ai_provenance=manifest,
+)
+```
+
 ### Step 9: Final Report
 
 ```markdown
@@ -212,13 +236,13 @@ SHA256(content_hash + previous_hash)
 
 **Target**: [what was researched]
 **Findings**: [count] verified, [count] drifts detected
-**Brief Location**: .failsafe/governance/RESEARCH_BRIEF.md
+**Brief Location**: docs/research-brief-<slug>-<YYYY-MM-DD>.md
 
 ### Critical Findings
 [List any DRIFT items or breaking changes]
 
 ### Memory Updated
-[What was added/changed in failsafe-bridge.md]
+[What was added/changed in docs/SHADOW_GENOME.md or qor/references/]
 
 ---
 
@@ -249,7 +273,7 @@ Research succeeds when:
 - [ ] Recent changes audited for bridge impact
 - [ ] Blueprint cross-referenced for drift
 - [ ] RESEARCH_BRIEF.md created with all findings
-- [ ] memory/failsafe-bridge.md updated
+- [ ] docs/SHADOW_GENOME.md or relevant doctrine under qor/references/ updated
 - [ ] META_LEDGER.md updated with research entry
 - [ ] All findings include file:line citations
 

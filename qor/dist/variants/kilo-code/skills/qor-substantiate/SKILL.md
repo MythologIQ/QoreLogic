@@ -13,6 +13,8 @@ tone_aware: false
 autonomy: interactive
 gate_reads: implement
 gate_writes: substantiate
+permitted_tools: [Read, Grep, Glob, Bash, Edit, Write]
+permitted_subagents: []
 ---
 # /qor-substantiate - Session Seal
 
@@ -57,6 +59,8 @@ elif not result.valid:
 
 Override is permitted (advisory gate) but logged as severity-1 `gate_override` event in the Process Shadow Genome.
 
+**Phase 54 wiring**: when `gate_chain.emit_gate_override` raises `OverrideFrictionRequired`, prompt the operator for a written justification (>=50 chars) and re-call `emit_gate_override` with `justification=<text>`. Per `qor/references/doctrine-ai-rmf.md` §MANAGE-1.1 + `qor/references/doctrine-eu-ai-act.md` Art. 14.
+
 ### Step 1: Identity Activation
 You are now operating as **The Qor-logic Judge** in substantiation mode.
 
@@ -67,7 +71,7 @@ Your role is to prove, not to improve. Verify what was built matches what was pr
 ```
 Read: docs/META_LEDGER.md
 Read: docs/ARCHITECTURE_PLAN.md
-Read: .failsafe/governance/AUDIT_REPORT.md
+Read: .agent/staging/AUDIT_REPORT.md
 ```
 
 **INTERDICTION**: If no PASS verdict exists:
@@ -158,17 +162,26 @@ If any skill files (`.claude/commands/qor-*.md`) were modified during this sessi
 Persist the structured gate artifact at `.qor/gates/<session_id>/substantiate.json` so downstream phases can read it via `gate_chain.check_prior_artifact`.
 
 ```python
-from qor.scripts import gate_chain, shadow_process
+from qor.scripts import gate_chain, shadow_process, ai_provenance
 
 # Build payload conforming to qor/gates/schema/substantiate.schema.json
 payload = {
     "ts": shadow_process.now_iso(),
     # ... phase-specific required fields (see schema)
 }
-gate_chain.write_gate_artifact(phase="substantiate", payload=payload, session_id=sid)
+manifest = ai_provenance.build_manifest(
+    "substantiate",
+    human_oversight=(
+        ai_provenance.HumanOversight.PASS if payload.get("verdict") == "PASS"
+        else ai_provenance.HumanOversight.VETO
+    ),
+)
+gate_chain.write_gate_artifact(
+    phase="substantiate", payload=payload, session_id=sid, ai_provenance=manifest,
+)
 ```
 
-Schema lives at `qor/gates/schema/substantiate.schema.json`; the helper validates before write.
+Schema lives at `qor/gates/schema/substantiate.schema.json`; the helper validates before write. Per Phase 54: substantiate calls `ai_provenance.build_manifest` with the seal verdict mapped to `HumanOversight`; closes EU AI Act Art. 14 oversight-signal surface.
 
 After writing, rotate the session so the next `/qor-plan` starts with a clean gate directory (Phase 30 wiring; closes the session-carry-over gap that let Phase 28/29 share a single session dir):
 
@@ -360,7 +373,7 @@ Argv-form invocation; no shell-variable interpolation into `python -c` literals 
 
 ### Step 8: Cleanup Staging
 
-Clear: .failsafe/governance/
+Clear: `.agent/staging/` (transient working directory).
 
 Preserve only the final AUDIT_REPORT.md (or archive it).
 

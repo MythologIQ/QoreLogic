@@ -116,6 +116,8 @@ referenced_by:
   - qor/skills/meta/qor-repo-release/SKILL.md
   - qor/skills/meta/qor-repo-scaffold/SKILL.md
   - qor/skills/memory/qor-document/SKILL.md
+  - qor/skills/meta/qor-ab-run/SKILL.md
+  - qor/skills/sdlc/qor-research/SKILL.md
   - qor/skills/governance/qor-audit/references/qor-audit-templates.md
   - qor/references/doctrine-nist-ssdf-alignment.md
   - qor/references/patterns-devops.md
@@ -339,3 +341,84 @@ referenced_by:
 introduced_in_plan: phase33-seal-tag-timing
 ```
 
+
+
+```yaml
+term: prompt-injection canary
+definition: "A regex pattern (six classes: instruction-redirect, role-redefinition, pass-coercion, meta-override, unicode-directionality, hidden-html) that detects attempts to embed LLM-subverting instructions inside operator-authored governance markdown. Frozen catalog at qor/scripts/prompt_injection_canaries.py CANARIES. Production audit scans without code-block masking; documentation scanning uses --mask-code-blocks. Closes OWASP LLM Top 10 (2025) LLM01 at the audit-prose layer."
+home: qor/references/doctrine-prompt-injection.md
+referenced_by:
+  - qor/scripts/prompt_injection_canaries.py
+  - qor/policies/owasp_enforcement.cedar
+  - qor/policy/resource_attributes.py
+  - qor/skills/governance/qor-audit/SKILL.md
+  - qor/references/doctrine-shadow-genome-countermeasures.md
+introduced_in_plan: phase53-prompt-injection-defense
+```
+
+```yaml
+term: untrusted-data quarantine
+definition: "The discipline of treating operator-authored governance markdown (plan files, ledger, concept) as untrusted data when the trust boundary spans multiple authors. Realized at runtime via the canary scan invoked from /qor-audit Step 3 Prompt Injection Pass. The quarantine boundary is the canary scanner; content that passes the scan is admitted into LLM context."
+home: qor/references/doctrine-prompt-injection.md
+referenced_by:
+  - qor/skills/governance/qor-audit/SKILL.md
+  - qor/scripts/prompt_injection_canaries.py
+introduced_in_plan: phase53-prompt-injection-defense
+```
+
+```yaml
+term: instruction-anchor regex
+definition: 'A multiline-anchored regex form (caret-Verdict-colon-whitespace-PASS-dollar with markdown-bold + colon/dash separator tolerance) used by qor.reliability.intent_lock._audit_has_pass to recognize a canonical PASS verdict line in an audit report. Replaces the pre-Phase-53 substring match (re.search VERDICT.*PASS) which admitted any audit body containing both substrings on the same line, including narrative prose. Closes OWASP (2021) LOW-4.'
+home: qor/references/doctrine-prompt-injection.md
+referenced_by:
+  - qor/reliability/intent_lock.py
+introduced_in_plan: phase53-prompt-injection-defense
+```
+
+
+```yaml
+term: AI provenance manifest
+definition: 'Phase 54 metadata embedded in each gate artifact JSON declaring system, version, host, model_family, human_oversight, and ts. Computed by qor.scripts.ai_provenance.build_manifest. Aggregated across a session via qor-logic compliance ai-provenance. Maps to EU AI Act Art. 13/50 transparency and NIST AI RMF MEASURE-2.1 / MANAGE-1.1 evidence-collection.'
+home: qor/references/doctrine-eu-ai-act.md
+referenced_by:
+  - qor/scripts/ai_provenance.py
+  - qor/gates/schema/_provenance.schema.json
+  - qor/cli_handlers/compliance.py
+introduced_in_plan: phase54-ai-provenance-and-act-alignment
+```
+
+```yaml
+term: human-oversight signal
+definition: 'The human_oversight enum field on the AI provenance manifest, valued pass / veto / override / absent. Records the operator decision at the gate this artifact represents. Maps to EU AI Act Art. 14 (human oversight) by giving each gate a machine-readable verdict-or-absence marker.'
+home: qor/references/doctrine-eu-ai-act.md
+referenced_by:
+  - qor/scripts/ai_provenance.py
+  - qor/gates/schema/_provenance.schema.json
+introduced_in_plan: phase54-ai-provenance-and-act-alignment
+```
+
+```yaml
+term: subagent tool scope
+definition: 'Advisory frontmatter keys permitted_tools and permitted_subagents on each gate-checking SKILL.md declaring which Tools and which subagent types the skill is intended to invoke. Phase 54 is declarative-only; Phase 55 candidate wires Cedar-based admission enforcement. Maps to NIST AI RMF GV-6.1 / MG-3.1 third-party AI risk and OWASP LLM Top 10 LLM07 (Insecure Plugin Design).'
+home: qor/references/doctrine-ai-rmf.md
+referenced_by:
+  - qor/skills/sdlc/qor-plan/SKILL.md
+  - qor/skills/sdlc/qor-implement/SKILL.md
+  - qor/skills/sdlc/qor-research/SKILL.md
+  - qor/skills/governance/qor-audit/SKILL.md
+  - qor/skills/governance/qor-substantiate/SKILL.md
+  - qor/skills/governance/qor-validate/SKILL.md
+introduced_in_plan: phase54-ai-provenance-and-act-alignment
+```
+
+```yaml
+term: override-friction escalator
+definition: 'Per-session count-based escalator at qor.scripts.override_friction. Threshold = 3 (symmetric with cycle-count escalator). When the gate_override count for a session reaches the threshold, qor.scripts.gate_chain.emit_gate_override raises OverrideFrictionRequired unless the caller passes justification of at least 50 chars. Closes OWASP LLM Top 10 LLM08 (Excessive Agency) strengthening and EU AI Act Art. 14 oversight.'
+home: qor/references/doctrine-ai-rmf.md
+referenced_by:
+  - qor/scripts/override_friction.py
+  - qor/scripts/gate_chain.py
+  - qor/gates/schema/shadow_event.schema.json
+  - qor/references/doctrine-governance-enforcement.md
+introduced_in_plan: phase54-ai-provenance-and-act-alignment
+```
