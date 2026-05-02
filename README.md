@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Skills-30-blue" alt="Skills: 30">
   <img src="https://img.shields.io/badge/Agents-13-blue" alt="Agents: 13">
   <img src="https://img.shields.io/badge/Doctrines-23-blue" alt="Doctrines: 23">
-  <img src="https://img.shields.io/badge/Ledger-194%20entries%20sealed-green" alt="Ledger: 194 entries sealed">
+  <img src="https://img.shields.io/badge/Ledger-195%20entries%20sealed-green" alt="Ledger: 195 entries sealed">
   <img src="https://img.shields.io/badge/Doc%20Tier-system-green" alt="Doc Tier: system">
 </p>
 

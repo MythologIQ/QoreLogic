@@ -7219,3 +7219,54 @@ SHA256(content_hash + "|" + previous_hash)
 **Content Hash**: `9249b829cc126a5280e18d9c8bf623f3a2c3984a7f58d5504c0243fffd6b7df6`
 **Previous Hash**: `7089e58889107b929269fc9ace6bca91fab939f234d512cbad419ee7f057058e`
 **Chain Hash**: `c526e7f3580a928a7f659f07121f009a42028799b81b384f2a722bd112bd6b4a`
+
+---
+
+### Entry #195: SESSION SEAL -- Phase 59 feature substantiated
+
+**Timestamp**: 2026-05-02T04:00:00Z
+
+**Plan**: `docs/plan-qor-phase59-ideation-readiness-phase.md`
+
+**Session**: `2026-05-02T0330-phase59`
+
+**Content Hash (session seal)**: `d1403911a9aa0fe00658bbed1d8792c9ccd50b5795d4f457cc6297c34198925e`
+**Previous Hash**: `c526e7f3580a928a7f659f07121f009a42028799b81b384f2a722bd112bd6b4a`
+**Chain Hash (Merkle seal)**: `3ae2b9f89b21206d1fe220f32cdf1ef94a73de7871617683b197cbd5ccca85f1`
+
+**SSDF Practices**: PO.1.3, PO.5.1, PS.1.1, PS.3.1, PW.4.1, PW.5.1, PW.7.1, RV.1.1, RV.1.2
+
+**Scope**: Phase 59 closes **Issue #20** (governed ideation readiness phase) by introducing `/qor-ideate` as an optional pre-research SDLC phase. Captures intent and assumptions before they become inferred by downstream agents. Codifies `SG-PrematureSolutioning-A` countermeasure. Advisory-gate posture matching Phase 8: hotfixes MAY skip ideation; `/qor-research` and `/qor-plan` accept either ideation OR research as their prior artifact via `gate_chain.check_prior_artifact` extension.
+
+**Reality = Promise**: 26/26 planned files exist. No missing. No unplanned orphans.
+
+**Phase 1 — Ideation gate-artifact schema**: `qor/gates/schema/ideation.schema.json` (NEW) with required envelope + 6 required content sections + 3 optional sections + closed enums. `validate_gate_artifact.PHASES` extended with `"ideation"`. 14 phase-1 tests including required-field rejection per field, enum-rejection, optional-field acceptance, doctrine ↔ schema round-trip integrity.
+
+**Phase 2 — `/qor-ideate` skill + gate-chain integration**: `qor/skills/sdlc/qor-ideate/SKILL.md` (NEW, ~120 LOC) + `references/dialogue-protocol.md` (NEW, ~150 LOC). `gate_chain._check_ideation_predecessor` (NEW, 14 LOC) recognizes `ideation.json` as a valid prior for `/qor-research` and `/qor-plan`. Backward-compatible. Delegation table 5 new rows for qor-ideate routing. Chain visualization extended. qor-help catalog row added. 8 phase-2 tests including admission, frontmatter, dialogue-protocol 10-section heading-tree integrity, handoff matrix, gate-skill-matrix enumeration with zero broken handoffs, predecessor recognition (research + plan), end-to-end gate artifact write with schema validation.
+
+**Phase 3 — doctrine + glossary + SG + CHANGELOG**: `qor/references/doctrine-ideation-readiness.md` (NEW, ~140 LOC) with applicability + 10-section catalog + readiness scoring model + routing decision matrix + 8-failure-mode catalog (Premature Solutioning / Language Drift / Assumption Laundering / Scope Seepage / Research Asymmetry / Failure Blindness / Premature Decomposition / Validation Collapse) + hotfix exemption + relationship to qor-research/qor-plan/qor-remediate + Phase 59 changes vs ad-hoc operator review. `SG-PrematureSolutioning-A` codified in shadow-genome countermeasures with Section 2 + Section 7 structural guards. 6 new glossary terms. 13 phase-3 tests including doctrine round-trip, skill registry inclusion, self-application meta-coherence.
+
+**Substantiate-time meta-coherence enforcement**: Step 4.6.5 (Phase 56 secret-scan) and Step 4.6.6 (Phase 58 procedural-fidelity) both ran against the seal commit's `files_touched` set. Step 4.6.5 → `dist/secrets.findings.json` empty, EXIT 0. Step 4.6.6 → `dist/procedural-fidelity.findings.json` empty, EXIT 0 (doc-surface coverage satisfied because seal commit includes `docs/SYSTEM_STATE.md` Phase 59 entry). Phase 58's drift-prevention test passes (Phase 59 entry present in SYSTEM_STATE.md).
+
+**Reliability sweep**:
+- `python -m qor.reliability.intent_lock verify --session 2026-05-02T0330-phase59` → VERIFIED.
+- `python -m qor.reliability.skill_admission qor-substantiate` → ADMITTED.
+- `python -m qor.reliability.gate_skill_matrix` → 30 skills, 115 handoffs, 0 broken (was 29/112 pre-Phase-59; +1 skill `qor-ideate`, +3 handoffs from qor-ideate routes).
+- `python -m qor.scripts.secret_scanner --staged --out dist/secrets.findings.json` → EXIT 0.
+- `python -m qor.scripts.procedural_fidelity --session 2026-05-02T0330-phase59 --out dist/procedural-fidelity.findings.json` → EXIT 0.
+- `python -m qor.scripts.dist_compile` → 4 variants emitted (243 files, was 236; +7 for qor-ideate across variants).
+- `python -m qor.scripts.check_variant_drift` → OK 243 files, no drift.
+- `python -m qor.scripts.badge_currency` → OK (Tests 1238, Doctrines 23, Skills 30, Ledger 195).
+
+**Test results**: 1237 passing twice in a row (deterministic). +35 new Phase 59 tests including AST-anchored co-occurrence behavior invariants and meta-coherence self-application.
+
+**Razor compliance**: Phase 59 introduces no new `.py` modules — only schema + skill prose + doctrine prose + gate-chain helper extension (`_check_ideation_predecessor` 14 LOC). Within bounds.
+
+**Decision**: Phase 59 sealed at v0.45.0. Issue #20 fully closed at the structural level. Ideation is now a first-class auditable SDLC phase with structural guards against the 8 canonical unraveling points. Advisory-gate posture preserves backward compatibility; existing flows continue to work without ideation. The five-phase compliance sprint surface is complete; tech-debt wrap-up is complete; future-concept (Issue #20) is complete. No imminent open work items remaining.
+
+---
+
+*Chain integrity: VALID*
+*Session: SEALED* (Phase 59 feature substantiated)
+*Merkle seal: 3ae2b9f8...* (Phase 59 seal on top of Phase 58's 7089e588; Entries #194-#195 chained; closes Issue #20 governed ideation readiness)
+*Open items at this seal: NONE — five-phase compliance sprint, B23 tech-debt wrap-up, and Issue #20 ideation phase all closed*
