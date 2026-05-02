@@ -48,6 +48,7 @@ LOAD_BEARING_PENDING_EVIDENCE = {
     "qor-onboard-codebase",      # onboarding specialist
     "qor-repo-audit",            # repo-level auditor
     "qor-repo-release",          # release engineer
+    "qor-ideate",                # Phase 59: ideation Analyst stance
 }
 
 
