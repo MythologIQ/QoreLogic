@@ -230,6 +230,54 @@ Supersedes the v0.29.0 anthropic-SDK approach. Ships:
 
 **Naming note**: branch `phase/39b-*` + plan `plan-qor-phase39b-*.md` use letter-suffix convention not supported by `governance_helpers._BRANCH_PHASE_RE` + `_PHASE_FILENAME_RE` (digit-only). Version bump performed manually (0.29.0 → 0.30.0). Future sub-phases should use next digit (e.g., phase/41) to remain compatible with automated bump.
 
+## Phase 41 (v0.31.0): build-and-publish workflow + Phase 40 doctrine
+
+Ledger Entry #143. Annotated tags created LOCAL ONLY until PR merge per Phase 40 doctrine to prevent stale-tag publishing. Build-and-publish workflow refuses to publish tags not reachable from main (Phase 40 guard).
+
+## Phase 45 (v0.32.0): attribution-trailer convention
+
+Ledger Entry #149. Canonical full trailer for seal commits + compact `Co-Authored-By:` for plan/audit/implement commits. `qor/scripts/attribution.py` `commit_trailer()` / `commit_trailer_compact()` / `pr_footer()` / `changelog_attribution_line()` helpers. Locked by `tests/test_attribution_tiered_usage.py`.
+
+## Phase 46 (v0.33.0): test-functionality doctrine
+
+Ledger Entry #152. Doctrine `qor/references/doctrine-test-functionality.md` requires unit tests to invoke the unit and assert on output, not artifact existence. SG-035 ("doctrine-content test unanchored") codified. /qor-audit Test Functionality Pass added.
+
+## Phase 47 (v0.34.0): seal-entry-check at substantiate
+
+Ledger Entry #157. New reliability gate at substantiate Step 7.7 verifies SESSION SEAL entry was actually written (closes SG-AdjacentState-A bookkeeping-gap subclass). Substantiate cycles cannot complete without writing the SESSION SEAL ledger entry.
+
+## Phase 48 (v0.35.0): governance-enforcement doctrine §10 expansions
+
+Ledger Entry #160. Doctrine `qor/references/doctrine-governance-enforcement.md` extended with §10.1 (two-stage remediation flip), §10.2 (SG narrative closure protocol), §10.3-10.5 (cycle-count escalation + orchestration-override + gate-loop classifier). Subagent invocation rule clarified.
+
+## Phase 49 (v0.36.0): Phase 11D + Phase 28 documentation integrity strict mode
+
+Ledger Entry #163. /qor-substantiate Step 4.7 runs `doc_integrity.run_all_checks_from_plan` strict mode; ABORTs on `ValueError`. `legacy` doc_tier bypasses checks. Topology + glossary + orphan checks enforced at seal time.
+
+## Phase 50 (v0.37.0): co-occurrence behavior invariant model
+
+Ledger Entry #166. Test pattern: instead of substring grep for "test K invokes M", parse the AST/frontmatter and assert "for every SKILL.md whose phase: X, body MUST contain invocation Y". Anchored to actual frontmatter-declaration set; not single-skill substring. Phase 50 model used by all subsequent phases.
+
+## Phase 52 (v0.38.0): provenance binding for write_gate_artifact
+
+Ledger Entry #169. `gate_chain.write_gate_artifact` refuses writes from contexts that have not declared `QOR_SKILL_ACTIVE=<phase>` env var. Closes the bypass surface that allowed Phases 46/48/49/50 to silently land defective work. `QOR_GATE_PROVENANCE_OPTIONAL=1` test-only bypass; autouse fixture in conftest.py sets it.
+
+## Phase 53 (v0.39.0): OWASP LLM01 prompt-injection canary scanner
+
+Ledger Entry #174. `qor/scripts/prompt_injection_canaries.py` (~155 LOC) scans operator-authored governance markdown (docs/, qor/references/) for canary patterns before any other audit pass. /qor-audit Step 3 Prompt Injection Pass invokes; canary hit → VETO with `prompt-injection` category. New `compute_governance_attributes` driver for Cedar `forbid has_prompt_injection_canary` rule. SG-PromptInjection-A codified.
+
+## Phase 54 (v0.40.0): EU AI Act + AI RMF alignment
+
+Ledger Entry #178. `ai_provenance` field on every gate artifact (system, version, host, model_family, human_oversight, ts). `qor/scripts/ai_provenance.py` (~140 LOC) builds manifests; `qor/scripts/override_friction.py` requires ≥50-char justification on third consecutive override. New `qor/references/doctrine-eu-ai-act.md` + `doctrine-ai-rmf.md`. `qor-logic compliance ai-provenance` aggregator. Closes EU AI Act Art. 13/14/50 + NIST AI RMF MEASURE-2.1 / MANAGE-1.1.
+
+## Phase 55 (v0.41.0): Cedar admission + model-pinning + CycloneDX SBOM + pre-audit lints + deliver schema
+
+Ledger Entry #182. Two new `forbid` rules in `qor/policies/skill_admission.cedar` over `actual_tool_invocations_exceed_scope` + `actual_subagent_invocations_exceed_scope`. New `compute_skill_admission_attributes` + `_CANONICAL_TOOLS` frozenset. 8 scoped skills declare `model_compatibility:` + `min_model_capability:`. New `qor/scripts/sbom_emit.py` (~145 LOC, hand-rolled CycloneDX v1.5, zero new deps). New `qor/cli_handlers/release.py` `do_sbom`. New `qor/gates/schema/deliver.schema.json` closes pre-existing surface gap. New `qor/scripts/plan_test_lint.py` + `plan_grep_lint.py` pre-audit lints at /qor-audit Step 0.6. SG-PreAuditLintGap-A codified. Closes OWASP LLM05 + LLM07 + AI RMF GV-6.1 + MG-3.1.
+
+## Phase 56 (v0.42.0): secret-scanning gate at /qor-substantiate Step 4.6.5
+
+Ledger Entry #185. `qor/scripts/secret_scanner.py` (~248 LOC, 11-pattern frozen catalog, 15-entry `_ALLOWLIST`, gitleaks v8 schema findings JSON, redacted match form). New `compute_production_attributes` drives long-dormant Cedar `has_hardcoded_secrets` attribute (rule on books since Phase 23). /qor-substantiate Step 4.6.5 invokes `python -m qor.scripts.secret_scanner --staged --out dist/secrets.findings.json || ABORT`. SG-SecretLeakAtSeal-A codified. Closes OWASP LLM06 + NIST AI 600-1 §2.10. Five-phase compliance sprint complete.
+
 ## Phase 57 (v0.43.0 — 2026-05-01): `gate_written` observer channel (PR #12 + B24 reintegration)
 
 Reintegrates PR #12 `feat/b24-gate-written-hooks` (FailSafe-Pro B24 contribution, opened 2026-04-20) on top of current main with the OWASP A04 SIGINT-swallow VETO ground from Entry #186 explicitly resolved. Net-new public-API surface for downstream governance-ledger bridges to observe gate writes without filesystem polling. Aligns with OWASP LLM Top 10 (2025) **LLM07 Insecure Plugin Design** at the contract layer.
